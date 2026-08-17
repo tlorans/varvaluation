@@ -34,8 +34,11 @@ longest histories. A single-series spec omits `group` and may name
 `g` in place of `roe`.
 
 `cashflow` is the most important argument. It tells both recursions
-which row of $\Phi$ is the growth (or profitability) variable. At the
-firm that name is `roe`. That `roe` is
+which row of $\Phi$ is the cash-flow variable. That variable is
+either **growth** of cash or a **profitability** level — two
+different objects, set out in
+[The VAR](system.md#two-ways-to-write-the-cash-flow-side). At the
+firm the name is `roe`. That `roe` is
 $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$: a profitability
 *level*, built only when $\mathrm{NI}>0$. It is not log dividend
 growth, and it is not [Vuolteenaho’s](../references.md#vuolteenaho-2002)

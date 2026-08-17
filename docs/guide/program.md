@@ -26,16 +26,23 @@ historical sort.
 
 ## One system, two forecasts
 
-If the rate you require next year can differ from the rate you
-require in year ten, you cannot take a cash-flow forecast from one
-model, a required-return forecast from another, and divide. The two
-can move together, and that joint movement is part of the price
-([Ang and Liu, 2004](../references.md#ang-liu-2004)). The practical
-response is to put both forecasts in one small system of
-regressions: each variable is explained by yesterday’s value of
-every variable. [Part 03](system.md) writes that system down. What
-follows here is not that algebra. It is the evidence on *which
-variables* should sit in it.
+The framework in [Part 03](system.md) models cash flows and the
+discount rate together. If the rate you require next year can
+differ from the rate you require in year ten, you cannot take a
+cash-flow forecast from one model, a required-return forecast from
+another, and divide. The two can move together, and that joint
+movement is part of the price
+([Ang and Liu, 2004](../references.md#ang-liu-2004)).
+
+Cash flow itself can be written two ways, and they are not
+interchangeable. **Growth** is how fast cash changes from one date
+to the next. That path *is* the cash you are pricing.
+**Profitability** is how much the firm earns this year on the book
+it already has. That level is forecastable
+([Fama and French, 2000](../references.md#ff-2000)), but it is not
+a growth rate of cash paid to owners. The literature below is
+evidence on which observed variables belong on each side. The
+algebra of the joint system is [Part 03](system.md).
 
 That evidence has two literatures. One asks what we can say today
 about future cash (dividends, earnings, earnings above a charge on

@@ -2,17 +2,60 @@
 
 # The VAR
 
-<p class="you-will"><strong>You will.</strong> Write the joint system that makes the research program askable: both sides of the product from one law of motion.</p>
+<p class="you-will"><strong>You will.</strong> Write one system that models cash flows and the discount rate together.</p>
 
-You cannot price the product from two separate forecasts. The
-expectation of a product is a property of the joint distribution
-([Ang and Liu, 2004](../references.md#ang-liu-2004)). A vector
-autoregression is the smallest statistical object that produces both
-forecasts, and how they move together, from one state $X_t$. Separate
-models of cash flows and of expected returns omit that co-movement,
-need not share a horizon structure, and can contradict each other.
-The two forecasts then do not determine a unique price. That is a
-failure of **identification**, not of taste.
+The framework models two things.
+
+**Cash flows.** What cash arrives at each future date. That is the
+path you are pricing.
+
+**The discount rate.** The return investors require over each
+coming year. When that required return is allowed to change, year
+one and year ten do not share a rate, and the price is the
+expectation of a product: each cash flow times the sequence of
+one-period required returns along the way
+([Ang and Liu, 2004](../references.md#ang-liu-2004)).
+
+Those two objects have to be modeled *together*. If you forecast
+cash in one model and the required return in another, you miss how
+they move together, the two forecasts need not share a horizon, and
+they can contradict each other. The price is then not determined.
+
+The smallest system that produces both forecasts, and how they move
+together, from one list of variables $X_t$ is a **vector
+autoregression**: several ordinary regressions run at the same
+time. That is the rest of this page.
+
+## Two ways to write the cash-flow side
+
+They are not the same object.
+
+A **growth** story tracks how fast cash itself changes:
+$g_t=\log(C_t/C_{t-1})$. The forecast of future $g$ *is* the
+forecast of the cash-flow path. Multiplying that path by the
+discount curve is a present value of the claim. In the library that
+name is `g`, and `value` is the right call.
+
+A **profitability** story tracks how much the firm earns on the
+book it already has: $\mathit{roe}_t=\log(\mathrm{NI}_t/\mathrm{BE}_{t-1})$.
+That is a *level* (earnings this year over last year’s book), not a
+growth rate of cash paid to owners. Fama and French (2000) show
+that this level is forecastable and falls back toward the
+economy-wide average. That is useful, and it is a different
+mapping. Feeding it to `value` treats a twelve-percent return on
+book as if cash grew twelve percent. It did not.
+
+To go from profitability to cash you still need payout (how much
+of earnings is paid out) and how book evolves. Residual income —
+earnings above a charge on book — is the accounting route to a
+price of book ([Ohlson, 1995](../references.md#ohlson-1995)). This
+handbook cites that route; it does not compute it. Until the
+cash-flow name is growth, or residual income, the framework still
+models both sides, but the object it reports on the cash-flow side
+is a forecast of profitability, not a present value of the equity.
+
+The firm illustration uses profitability. The landing snippet uses
+growth. Keep the two names apart.
 
 ## What a VAR is
 

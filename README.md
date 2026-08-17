@@ -1,12 +1,12 @@
 # varvaluation
 
-Which variables drive what a claim is worth? When expected returns
-are allowed to change, present value is the expectation of a product:
-each future cash flow multiplied by the sequence of one-period
-expected returns along the way. A joint system of regressions is the
-framework that estimates both sides together. The research program is
-the contents of the state — which named variables move the value —
-not which characteristics line up average returns. The formulas are
+The framework models cash flows and the discount rate together.
+When the required return is allowed to change, present value is the
+expectation of a product: each future cash flow multiplied by the
+sequence of one-period required returns along the way. Growth of
+cash is the cash-flow path you can price. Profitability is a level
+(earnings on book), not that path. The research program is which
+observed variables belong in the joint forecast. The formulas are
 Ang and Liu (2004). The cash-flow piece of a return surprise is read
 from the cash-flow equation, not from a leftover.
 

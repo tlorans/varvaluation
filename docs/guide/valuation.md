@@ -2,14 +2,15 @@
 
 # Present value
 
-<p class="you-will"><strong>You will.</strong> Evaluate the closed form for the product and the spot curve it implies.</p>
+<p class="you-will"><strong>You will.</strong> Turn the joint model of cash flows and the discount rate into a present value, or into the discount curve alone.</p>
 
-Given the VAR of [The VAR](system.md) and a one-period expected return
-$\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
-$\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are exact
+Given the system of [The VAR](system.md) and a one-period required
+return $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, both sides are exact
 functions of $X_t$
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions I.1
-and II.1). Three library calls use those objects differently.
+and II.1): the cash-flow path $\mathbb{E}_t[C_{t+n}]/C_t$ when the
+cash-flow name is growth, and the discount curve $\mu_t(n)$. Three
+library calls use those objects differently.
 
 - `value` multiplies the VAR numerator by the curve. That product *is*
   the present value of the [Introduction](introduction.md) **when**

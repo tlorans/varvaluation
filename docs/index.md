@@ -4,7 +4,7 @@
 
 # Explain asset values from data
 
-<p class="hero-lead">Which variables drive what a claim is worth? When expected returns are allowed to change, present value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period expected returns along the way. The joint system that estimates both sides together is the <strong>framework</strong> — background you need. The <strong>research program</strong> is the contents of the state: which named variables move the value, not which characteristics line up average returns.</p>
+<p class="hero-lead">The framework models cash flows and the discount rate together. When the required return is allowed to change, present value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period required returns along the way. The <strong>research program</strong> is which observed variables belong in that joint forecast.</p>
 
 [The research program](guide/program.md){ .md-button .md-button--primary }
 [Install](install.md){ .md-button }
@@ -45,7 +45,7 @@ flat PV vs curve +8.0%
 <div class="topic-cards">
 <a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>What we know about future cash and future required returns, and what is still open.</span></a>
 <a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why one rate is the wrong tool, then learn the words you will carry.</span></a>
-<a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>The joint system is background: both sides of the product must come from one law of motion.</span></a>
+<a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>Model cash flows and the discount rate in one system. Growth of cash is not the same object as profitability.</span></a>
 <a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>
 <a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Ask what part of last period's surprise came from cash flows, and what part from discount rates.</span></a>
 <a href="guide/walkthrough/"><span class="part">Part 06</span><strong>Firms</strong><span>Repeat the same steps on individual firms and draw three curves.</span></a>
