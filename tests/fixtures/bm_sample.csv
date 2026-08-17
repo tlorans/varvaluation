@@ -1,0 +1,10 @@
+Value-weighted BE/ME portfolios (test fixture).
+
+  Value Weight Returns -- Monthly
+,<= 0,Lo 30,Med 40,Hi 30,Lo 20,Qnt 2,Qnt 3,Qnt 4,Hi 20,Lo 10,2-Dec,3-Dec,4-Dec,5-Dec,6-Dec,7-Dec,8-Dec,9-Dec,Hi 10
+192607,   12.07,    5.42,    1.87,    1.52,    3.07,    5.41,    1.79,    2.42,    0.58,    4.38,    1.21,   11.38,    1.68,    1.51,    2.13,    2.40,    2.45,    0.59,    0.56
+192608,    1.00,    2.00,    3.00,    4.00,    1.10,    2.10,    3.10,    4.10,    5.10,    1.01,    2.02,    3.03,    4.04,    5.05,    6.06,    7.07,    8.08,    9.09,   10.10
+
+  Equal Weight Returns -- Monthly
+,<= 0,Lo 30
+192607, 1.00, 2.00

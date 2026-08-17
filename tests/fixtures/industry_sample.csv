@@ -1,0 +1,10 @@
+49 industry portfolios (test fixture).
+
+  Average Value Weighted Returns -- Monthly
+,Agric,Food ,Oil  ,Softw
+192607,   2.36,   0.09,  -1.35, -99.99
+192608,   2.23,   2.71,   3.64,   1.50
+
+  Average Equal Weighted Returns -- Monthly
+,Agric
+192607, 1.00

@@ -10,9 +10,11 @@ This is the public library. The teaching course lives at [tlorans/var_valuation]
 
 ```text
 uv add varvaluation
-uv add "varvaluation[data]"          # Ken French / FRED / cay  (coming next)
+uv add "varvaluation[data]"          # Ken French / FRED / cay / GISTEMP
 uv add "varvaluation[wrds,climate]"  # paper stack              (coming next)
 ```
+
+`[data]` loaders cache downloads under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the network — that is what the tests do.
 
 Python 3.11+. Managed with `uv`.
 
@@ -43,6 +45,23 @@ news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 
 `news.frame["cf"]` is the cash-flow-equation series. The identity leftover is `news.frame["residual"]`, never the definition of cash-flow news. `treasury_test()` is the Chen check: known cash flows, direct CF news ≈ 0.
 
+## Public data (`[data]`)
+
+```python
+from varvaluation import StateSpec, estimate_var
+from varvaluation.data import load_bm_deciles, load_macro, prepare_portfolio_state
+
+total, capgains = load_bm_deciles()
+macro = load_macro()
+spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
+state = prepare_portfolio_state(
+    total, capgains, macro, spec, portfolio="D10", start="1965-07"
+)
+fit = estimate_var(state, spec)
+```
+
+`g`, `beta`, and `dpo` are built when those names are in the spec. Everything else is joined from `macro` by column name.
+
 ## What is in 0.1
 
 | Layer | Status |
@@ -50,7 +69,7 @@ news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 | `StateSpec`, Pandera schemas, Newey–West VAR(1) / panel VAR | shipped |
 | Ang–Liu spot curve, PV, named channel isolation | shipped |
 | Chen-aware news + Treasury diagnostic | shipped |
-| `[data]` Ken French / FRED / cay | extra stub (loaders next) |
+| `[data]` Ken French / FRED / cay / GISTEMP | shipped (cached downloads; tests use fixtures) |
 | `[wrds]` firm panel | extra stub |
 | `[climate]` scenarios | extra stub |
 
