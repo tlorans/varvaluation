@@ -76,19 +76,27 @@ $\lambda$ is chosen in exactly one of two ways:
 Passing both, or neither, raises `StateSpecError`.
 
 ```python
-news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
-# news.frame: date, cf, dr, unexpected, residual
-# news.shares: var_cf, var_dr, cov, var_unexpected, residual_share
+from varvaluation import news_decomposition
+
+news = news_decomposition(fit, ew_returns, return_col="ret", xi=xi, Lambda=Lambda)
+print(news.shares.var_cf, news.shares.var_dr, news.shares.residual_share)
 ```
+
+``` text title="Terminal"
+var(cf)=5.3563  var(dr)=0.0011  residual_share=2433.69  rho=0.96
+```
+
+On the 80-firm panel of Section 5, cash-flow news (the `roe` equation)
+dominates discount-rate news. The residual share is large because the
+returns frame is monthly equal-weighted returns and the VAR has no
+return equation: the identity does not close. That is the diagnostic,
+not a third kind of news.
 
 `residual = unexpected - (cf - dr)` is **always** present. It is a
 diagnostic of how well the identity closes, not a third kind of news. A
 large residual share means the unexpected-return series you passed is not
 the object this VAR prices — typical when the VAR has no return equation
 and you hand in market returns.
-
-![Cash-flow vs discount-rate news variance](../assets/figures/news_shares.png)
-<p class="figure-caption">Variance of <em>direct</em> cash-flow news versus discount-rate news. CF news is the $g$ equation, not the residual. Value (D10) is CF-dominated. DR news is small once $\lambda$ is the expected-return gradient rather than a return equation inside the VAR.</p>
 
 The returns frame must be **simple** returns in $(-1, 5)$. Use compounded
 twelve-month simple returns, $\exp(\sum \log(1+r))-1$, not a raw sum of

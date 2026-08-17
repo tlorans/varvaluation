@@ -37,8 +37,7 @@ state = prepare_portfolio_state(
 - **`dpo`** — log payout when both dividends and a positive earnings
   proxy exist.
 
-The five-stage pipeline that consumes this frame is
-[Estimation](estimate.md). The same loaders run end to end, with the
-terminal at each step, are [Section 5](walkthrough.md).
-Why these names rather than dividend yield is
-[StateSpec](spec.md#where-the-names-come-from).
+The five-stage pipeline is [Estimation](estimate.md). Section 5
+illustrates it on firms (`load_macro` plus WRDS), not on these
+portfolio loaders. Why the names in $X_t$ are these, rather than
+dividend yield, is [Section 2.3](spec.md#where-the-names-come-from).

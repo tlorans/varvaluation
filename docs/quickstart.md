@@ -1,6 +1,6 @@
 # Synthetic check
 
-Section 5 uses Ken French, FRED, and WRDS. The two-state draw below
+Section 5 uses a CRSP–Compustat firm panel. The two-state draw below
 reproduces both sides of the present value with no downloads. It is a
 check on the implementation, not a substitute for the illustration.
 [`examples/quickstart.py`](https://github.com/tlorans/varvaluation/blob/main/examples/quickstart.py):

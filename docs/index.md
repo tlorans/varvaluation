@@ -19,9 +19,9 @@ A joint VAR framework, implemented in `varvaluation`
     ([Campbell, 1991](references.md#campbell-1991);
     [Chen, Da, and Zhao, 2013](references.md#chen-da-zhao-2013)).
     The Python library `varvaluation` is the operational form of the
-    same argument. Section 5 runs it on Ken French book-to-market
-    deciles, FRED macro series, and a CRSP–Compustat firm window, so
-    that each object defined in the text appears as a number.
+    same argument. Section 5 runs it on a CRSP–Compustat firm panel,
+    so that each object defined in the text appears as a number at
+    named permnos.
 
 **Keywords.** discount rates; cash-flow news; vector autoregression;
 quadratic-Gaussian valuation; time-varying expected returns; present
@@ -40,10 +40,10 @@ illustration, not the subject.
 | [2. Framework](guide/system.md) | The joint VAR, the two recursions, and the content of $X_t$ |
 | [3. Estimation](guide/estimate.md) | How $(\Phi,c,\Sigma,\xi,\Lambda)$ are measured |
 | [4. Return news](guide/news.md) | The same VAR, a different question |
-| [5. Illustration](guide/walkthrough.md) | The framework computed in `varvaluation` on public and WRDS data |
+| [5. Illustration](guide/walkthrough.md) | The framework computed in `varvaluation` on CRSP–Compustat firms |
 | [6. Discussion](guide/practice.md) | What changes relative to a textbook DCF, and what remains fragile |
 | [Software](install.md) | Installation, API, and data extras |
 | [References](references.md) | Bibliography |
 
-![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
-<p class="figure-caption"><strong>Figure 1.</strong> Spot discount rates $\mu_t(n)$ at the last sample state for Ken French book-to-market deciles, July 1965–December 2024. The curve is the denominator of the present value. Source: Section 5.</p>
+![Firm spot curves](assets/figures/firm_spot_curves.png)
+<p class="figure-caption"><strong>Figure 1.</strong> Spot discount rates $\mu_t(n)$ at 30 September 2019 for three CRSP permnos. The low-beta name slopes up; the high-beta names start high and fade. The curve is the denominator of the present value. Source: Section 5.</p>

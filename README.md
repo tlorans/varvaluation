@@ -7,7 +7,7 @@ product. One named-state VAR identifies both sides and their covariance.
 the residual.
 
 **Paper:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-Section 5 runs the framework on Ken French, FRED, and WRDS.
+Section 5 runs the framework on a CRSP–Compustat firm panel.
 
 ## Install
 

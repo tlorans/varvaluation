@@ -39,8 +39,8 @@ wrong model produces the smaller present value. The error scales with
 duration — worst exactly for the growth names where a DCF is already
 most fragile.
 
-![Spot discount curves](../assets/figures/spot_curves.png)
-<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. A single WACC is a flat line through this picture.</p>
+![Firm spot curves](../assets/figures/firm_spot_curves.png)
+<p class="figure-caption"><strong>Figure 2.</strong> $\mu_t(n)$ at three CRSP permnos, 30 September 2019. A single WACC is a flat line through this picture. Source: Section 5.</p>
 
 ### 2. Cash-flow forecasts get a distribution, not a path
 
@@ -61,20 +61,15 @@ same question: shut a named state on one side and revalue.
 
 ## What the fitted curve looks like
 
-On Ken French book-to-market deciles the short end of $\mu_t(n)$ moves
-with the premium; the long end is pulled back by mean reversion. When
-the premium is unusually low, the curve slopes **up** and sits below a
-historical-average WACC. A DCF that used that WACC at such a date was
-discounting every horizon too hard.
+On the firm panel of Section 5 the short end of $\mu_t(n)$ moves with
+$\beta_t$. The low-beta name (permno 10026) slopes up from 5.5% to
+9.5%. The high-beta names start above 11% and fade. A flat WACC at
+either end is the wrong rate at the other.
 
-A variance decomposition of $\mu_t(n)$ (not of returns) typically
-gives the short rate and $\mathit{cay}$ most of the discount-curve
-variation. $g$ is negligible *for the curve*. That does not mean cash
-flows do not matter for prices — they drive the numerator, which this
-decomposition does not show.
-
-![Variance decomposition, D10](../assets/figures/variance_decomp_d10.png)
-<p class="figure-caption">Share of spot-rate variance by state, value decile. $\mathit{cay}$ and $\beta$ dominate the curve. The numerator is a different object.</p>
+A variance decomposition of $\mu_t(10)$ on that window puts 57% on
+$\beta$ and 48% on $\mathit{bm}$. $\mathit{roe}$ is negligible *for
+the curve*. That does not mean cash flows do not matter for prices.
+They drive the numerator, which this decomposition does not show.
 
 ## Price-explaining, not price-watching
 

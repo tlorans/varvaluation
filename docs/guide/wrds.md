@@ -1,5 +1,6 @@
 # WRDS / firms
 
+The data extra that Section 5 actually uses.
 Extra: `uv add "varvaluation[wrds]"`.
 
 Credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`, in the environment or a `.env` file. Queries cache as parquet under `~/.cache/varvaluation/wrds`.
@@ -20,10 +21,11 @@ fit = estimate_var_panel(state, spec)
 
 `prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped.
 
-Firm-level `roe` mean-reverts more reliably than portfolio `g`. That is
-why a full `value` is often usable at the firm when the same recursion
-is not yet trustworthy on a Ken French value decile. Inspect
-`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` either way.
+Firm-level `roe` mean-reverts ($\Phi_{\mathit{roe},\mathit{roe}}=0.46$
+in Section 5). Inspect
+`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` before any
+present value. Do not feed `roe` into `value` as if it were log
+dividend growth.
 
 ## Sample overlap
 

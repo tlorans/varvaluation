@@ -12,11 +12,23 @@ numerator at $1$ and isolates the curve.
 ```python
 from varvaluation import ValuationModel
 
-model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-rates = model.spot_rates(X, n=30)            # μ_t(1), …, μ_t(30)
-cf    = model.cashflow_expectation(X, n=30)  # E_t[C_{t+n}] / C_t
-value = model.value(X, C=1.0, n=80)          # both from X
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+X = state.filter(pl.col("permno") == 10026).select(list(spec.names)).to_numpy()[-1]
+rates = model.spot_rates(X, n=10)
+perp = model.perpetuity(X, n=40)
 ```
+
+``` text title="Terminal"
+spot mu(n) %   n=1, 5, 10: 5.51, 9.31, 9.47
+perpetuity=24.70  tail_rate=2.84%
+```
+
+At permno 10026 on 30 September 2019 the curve slopes up. The
+denominator is finite. At the firm the cash-flow state is
+$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$;
+`cashflow_expectation` would treat that series as log growth and
+should not be published as a price. The path
+$\mathbb{E}_t[\mathit{roe}_{t+n}]$ is in Section 5.
 
 `from_var` refuses a companion with spectral radius $\ge 1$
 (`NonStationaryVARError`). Negative *short* rates are allowed. A
@@ -266,17 +278,15 @@ hand-set $(r,g)$ bolted on at year ten.
 
 ## 7. When the growth forecast is not yet usable
 
-On some Ken French **value** portfolios, $\Phi_{g,g}$ is near one. Then
-$\bar b(n)$ keeps stacking growth that barely mean-reverts,
-$\mathbb{E}_t[C_{t+n}]/C_t$ grows without bound, and `value` is not a
-price you should publish. That is not a bug in the recursion. It is the
-recursion telling you the $g$ equation is not a usable cash-flow model at
-that aggregation.
-
-Check $\Phi[\texttt{cashflow},\texttt{cashflow}]$ first. If the own-lag is
-near a unit root, either improve the cash-flow specification (firm-level
-ROE mean-reverts more reliably) or use `perpetuity` as a
-**denominator-only** diagnostic until the numerator is trustworthy.
+If $\Phi[\texttt{cashflow},\texttt{cashflow}]$ is near one,
+$\bar b(n)$ stacks a series that barely mean-reverts and
+`cashflow_expectation` (hence `value`) is not a price. At the firm,
+$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$ is a
+*level* of profitability, not log dividend growth. Treating it as
+growth in `value` is the same mistake. Section 5 reports
+$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ and reads
+$\mathbb{E}_t[\mathit{roe}_{t+n}]$ instead. Use `perpetuity` when
+only the curve is identified.
 
 !!! warning "Inspect the own-lag"
     Before you report a full PV, print
@@ -305,11 +315,8 @@ expected cash flows, because they do not enter.
 
 ## 9. The curve, in pictures
 
-![Spot discount curves](../assets/figures/spot_curves.png)
-<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. The present value multiplies each strip by $\mathbb{E}_t[C_{t+n}]/C_t$.</p>
-
-![Variance decomposition, D10](../assets/figures/variance_decomp_d10.png)
-<p class="figure-caption">Share of <em>spot-rate</em> variance by state, value decile. $\mathit{cay}$ and $\beta$ dominate the <em>discount curve</em>. That $g$ is negligible here does <em>not</em> mean cash flows do not matter for prices — it means they do not drive $\mu_t(n)$. They drive the numerator, which this figure does not show.</p>
+![Firm spot curves](../assets/figures/firm_spot_curves.png)
+<p class="figure-caption"><strong>Figure 2.</strong> Term structure of $\mu_t(n)$ at three CRSP permnos, 30 September 2019. These curves are the denominator. Source: Section 5.</p>
 
 ---
 

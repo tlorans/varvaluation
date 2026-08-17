@@ -43,6 +43,30 @@ computable in closed form — the same architecture as affine
 term-structure models, applied to equity
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1).
 
+In the library the companion is a `VARFit`. On a firm panel the call
+is `estimate_var_panel`; lag pairs are formed only inside
+`spec.group`. Section 5 reports
+
+```python
+from varvaluation import StateSpec, estimate_var_panel
+
+spec = StateSpec(
+    names=("roe", "beta", "bm", "r", "cay", "pi"),
+    cashflow="roe",
+    group="permno",
+)
+fit = estimate_var_panel(state, spec)
+print(fit.nobs, fit.spectral_radius, fit.Phi[spec.cashflow_index(), spec.cashflow_index()])
+```
+
+``` text title="Terminal"
+2240  0.995  0.458
+```
+
+$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ is mean reversion of firm
+profitability. `fit.spectral_radius` is the largest absolute
+eigenvalue of $\Phi$.
+
 ### Forecasting is recursive bookkeeping
 
 One step ahead: $\mathbb{E}_t[X_{t+1}] = c + \Phi X_t$. Two steps: plug

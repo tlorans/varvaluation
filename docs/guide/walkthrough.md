@@ -1,98 +1,85 @@
 # 5. Illustration
 
-This section computes the objects of Sections 2–4 on Ken French
-book-to-market deciles, FRED macro series, and a CRSP–Compustat firm
-window. The computations use `varvaluation`. Each subsection states
-the object, shows the call that produces it, and reports the number
-the data return. The script is
+This section computes the objects of Sections 2–4 on a CRSP–Compustat
+firm panel, joined to a FRED macro state. There is no portfolio
+aggregation. The cash-flow variable is firm
+$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$, the
+object of [Vuolteenaho (2002)](../references.md#vuolteenaho-2002).
+Each subsection names the library call, then reports the number it
+returns. The script is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
 
 ```text
-uv add "varvaluation[data]"
+uv add "varvaluation[data,wrds]"
 uv run python examples/walkthrough.py
 ```
 
-Steps 1–6 require the `[data]` extra. Step 7 requires `[wrds]` and
-WRDS credentials in `.env`. Downloads cache under
-`~/.cache/varvaluation`. The portfolio sample is July 1965–December
-2024. The firm sample is March 2015–September 2019, the overlap that
-survives a twelve-month beta window and cay.
+WRDS credentials live in `.env`. Queries cache under
+`~/.cache/varvaluation`. The firm window after a twelve-month beta
+burn-in is March 2015–September 2019.
 
-The subsections that follow reuse the step labels of the script so
-that the terminal blocks remain one-to-one with the source.
+## 5.1 Macro and the firm panel
 
-## Step 1 — Load the public data
-
-Ken French BE/ME deciles (with and without dividends) plus the macro
-state: FF3, the one-year rate, inflation, and cay.
+`load_macro` and `load_firm_panel` (or the cached CRSP / Compustat /
+CCM pieces) are the inbound objects of Section 3.
 
 ```python
-from varvaluation.data import load_bm_deciles, load_macro
+from varvaluation.data import load_macro
+from varvaluation.wrds import load_firm_panel
 
-total, capgains = load_bm_deciles()
 macro = load_macro()
-print(f"BE/ME deciles  {total['date'][0]} → {total['date'][-1]}  n={total.height}")
-print(f"macro          {macro['date'][0]} → {macro['date'][-1]}  n={macro.height}")
-print("macro columns:", list(macro.columns))
+panel = load_firm_panel(start="2014-01", end="2019-12-31")
 ```
 
 ``` text title="Terminal"
-BE/ME deciles  1926-07-31 → 2026-06-30  n=1200
-macro          1926-07-31 → 2026-06-30  n=1200
+macro  1926-07-31 → 2026-06-30  n=1200
 macro columns: ['mkt_rf', 'smb', 'hml', 'rf', 'date', 'mkt', 'r', 'pi', 'cay']
-cay            1959-01-31 → 2026-01-31
+CRSP–Compustat  2014-01-31 → 2019-12-31  rows=356620  permno=6790
 ```
 
-Cay here is reconstructed from FRED (PCEC, household net worth,
-wages) when the published file of
+Cay is reconstructed from FRED when the published file of
 [Lettau and Ludvigson (2001)](../references.md#lettau-ludvigson-2001)
-is missing, and then extended through the latest quarter. That is why
-it starts in 1959, not 1952.
+is missing.
 
----
+## 5.2 The named state
 
-## Step 2 — Build the portfolio state
-
-Name the system. `cashflow="g"` tells both recursions that the
-numerator is Hodrick trailing dividend growth.
+`StateSpec` binds names. `cashflow="roe"` tells both recursions which
+row of $\Phi$ is profitability.
+`prepare_firm_state` builds `roe`, `bm`, and `beta` when those names
+are present, joins `r`, `cay`, `pi` from `macro`, and drops
+financials and utilities.
 
 ```python
 from varvaluation import StateSpec
-from varvaluation.data import prepare_portfolio_state
+from varvaluation.wrds import prepare_firm_state
 
-spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
-state = prepare_portfolio_state(
-    total, capgains, macro, spec, portfolio="D1", start="1965-07", end="2024-12"
+spec = StateSpec(
+    names=("roe", "beta", "bm", "r", "cay", "pi"),
+    cashflow="roe",
+    group="permno",
+    horizon=12,
+    nw_lags=12,
 )
+state = prepare_firm_state(
+    panel, macro, spec, start="2015-01", end="2019-09", beta_window=12
+)
+print(spec.cashflow_index(), state.height, state["permno"].n_unique())
 ```
-
-`prepare_portfolio_state` builds `g`, `beta`, and `dpo` from the
-decile returns, and joins `r`, `cay`, `pi` from `macro`. Same call
-with `portfolio="D10"` is the value decile. Last observed state:
 
 ``` text title="Terminal"
-D1  1965-07-31 → 2024-12-31  months=714
-  last X: g=+0.101, beta=+1.059, dpo=-0.188, r=+0.041, cay=-0.069, pi=+0.028
-D10  1965-07-31 → 2024-12-31  months=714
-  last X: g=-0.071, beta=+1.319, dpo=-0.230, r=+0.041, cay=-0.069, pi=+0.028
+names=('roe', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=roe  cashflow_index=0  group=permno
+state  67884 firm-months  2673 firms  2015-03-31 → 2019-09-30
 ```
 
-Growth (D1) is paying more (`g = +0.10`) with a market-like beta.
-Value (D10) has shrinking dividends (`g = −0.07`) and a higher beta.
-The macro piece — `r`, `cay`, `pi` — is shared.
+## 5.3 The premium, as $(\xi,\Lambda)$
 
----
-
-## Step 3 — Estimate the risk premium
-
-One overlapping annual regression of market excess returns on the short
-rate and cay. The fitted value is $\lambda_t$.
+The one-period expected return is still a market premium applied to
+the firm’s $\beta_t$. `ExpectedReturnSpec.xi_lambda` turns
+$(b_0,b_r,b_{\mathit{cay}})$ into the arrays of Section 2.2.
 
 ```python
 from varvaluation import ExpectedReturnSpec
 
-# y^m_{t+1} - r_t = b0 + br r_t + bcay cay_t + e
-# (HAC, 12 lags; see examples/walkthrough.py)
 xi, Lambda = ExpectedReturnSpec(premium=("cay",)).xi_lambda(
     spec, {"b0": 0.095, "br": -0.737, "bcay": 0.708}
 )
@@ -101,183 +88,145 @@ xi, Lambda = ExpectedReturnSpec(premium=("cay",)).xi_lambda(
 ``` text title="Terminal"
 sample 1965-07-31 → 2024-12-31  n=714  R2=0.053
 b0=+0.095 (t=+3.41)  br=-0.737 (t=-1.49)  bcay=+0.708 (t=+1.72)
+xi[r]=+1.000  xi[beta]=+0.095  Lambda[beta,cay]=+0.354
 ```
 
-The intercept is the only precise coefficient. `br` has the expected
-negative sign (a high short rate forecasts low excess returns) and
-`bcay` the expected positive sign, but neither *t*-stat would survive
-a referee. That is the fragile link: $\lambda_t$ is measured, and
-measured noisily. The VAR will still glue it to cash-flow growth.
+$b_0$ is precise. $b_r$ has the expected negative sign and
+$b_{\mathit{cay}}$ the expected positive sign; neither $t$-statistic
+would survive a referee. $\xi[r]=1$ is the identity that puts the
+short rate into $\mu_t$ one-for-one.
 
----
+## 5.4 The panel VAR
 
-## Step 4 — Estimate the VAR
+`estimate_var_panel` forms lag pairs only inside `permno`. The
+companion below is pooled on the 80 firms with the longest histories.
 
 ```python
-from varvaluation import estimate_var
+from varvaluation import estimate_var_panel
 
-fit = estimate_var(state, spec)
+fit = estimate_var_panel(slim, spec)
 print(fit.nobs, fit.spectral_radius)
 print(fit.Phi[spec.cashflow_index()])
 ```
 
 ``` text title="Terminal"
-D1  nobs=702  spectral radius=0.890  Phi[g,g]=-0.128
-  Phi[g, ·]  g=-0.128  beta=-0.113  dpo=+0.136  r=-0.647  cay=+0.585  pi=-0.287
-D10  nobs=702  spectral radius=0.864  Phi[g,g]=+0.821
-  Phi[g, ·]  g=+0.821  beta=+0.151  dpo=-0.735  r=+0.248  cay=+0.087  pi=+0.708
+nobs=2240  spectral_radius=0.995  Phi[roe,roe]=+0.458
+Phi[roe, ·]  roe=+0.458  beta=-0.019  bm=-0.205  r=-7.207  cay=-0.640  pi=+4.205
 ```
 
-Both companions are stationary. The cash-flow rows are not the same
-object. On D1, $\Phi_{g,g}=-0.13$: growth is noisy and mean-reverts
-immediately. On D10, $\Phi_{g,g}=+0.82$: a high-dividend year is still
-mostly there next year. That single number decides whether `value` is
-a price you can publish.
+$\Phi_{\mathit{roe},\mathit{roe}}=0.46$: firm profitability
+mean-reverts. That is the cash-flow fact the framework needs
+([Fama and French, 2000](../references.md#ff-2000);
+[Vuolteenaho, 2002](../references.md#vuolteenaho-2002)). The
+companion is barely stationary (`spectral_radius = 0.995`). The
+short-rate and inflation loadings on the `roe` row are large: a short
+panel plus persistent macro columns. Trust the own-lag.
 
----
+## 5.5 The curve and the profitability path
 
-## Step 5 — Both sides from $X$
+`ValuationModel.from_var` refuses a companion with spectral radius
+$\ge 1$. At each firm’s last state the model returns the spot curve
+(Section 2.2) and the VAR path of $\mathit{roe}$. `roe = -2.08` is
+an ROE of $e^{-2.08}\approx 12.5\%$, not a growth rate of $-208\%$.
+The object to read on the cash-flow side is
+$\mathbb{E}_t[\mathit{roe}_{t+n}]$, not
+`cashflow_expectation` treated as if $\mathit{roe}$ were log dividend
+growth. `perpetuity` isolates the denominator.
 
 ```python
 from varvaluation import ValuationModel
 
-model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-X = state.select(list(spec.names)).to_numpy()[-1]
-rates = model.spot_rates(X, n=30)
-cf = model.cashflow_expectation(X, n=30)
-val = model.value(X, C=1.0, n=80)
-perp = model.perpetuity(X, n=80)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+X = state.filter(pl.col("permno") == 10026).select(list(spec.names)).to_numpy()[-1]
+rates = model.spot_rates(X, n=10)
+perp = model.perpetuity(X, n=40)
 ```
-
-`alpha` is a CAPM intercept, annualized, so each portfolio matches its
-average excess return.
 
 ``` text title="Terminal"
-D1  alpha=-0.009
-  spot mu(n) %   n=1, 5, 10, 30: 4.90, 6.38, 7.64, 8.80
-  E[C]/C         n=1, 5, 10, 30: 1.009, 1.193, 1.562, 5.878
-  value=33.51  perpetuity=11.77  n_used=80
-D10  alpha=-0.008
-  spot mu(n) %   n=1, 5, 10, 30: 5.35, 6.66, 7.76, 8.92
-  E[C]/C         n=1, 5, 10, 30: 1.181, 1.963, 3.932, 60.842
-  value=1082.51  perpetuity=11.58  n_used=80
+permno=10026  2019-09-30  roe=-2.080  NI/BE=0.125  beta=+0.39  bm=-1.470
+  spot mu(n) %   n=1, 5, 10: 5.51, 9.31, 9.47
+  E[roe]         n=1, 5, 10: -1.940, -1.975, -2.158   (implied NI/BE 0.144, 0.139, 0.116)
+  perpetuity=24.70  tail_rate=2.84%
+permno=11707  2019-09-30  roe=-1.774  NI/BE=0.170  beta=+1.83  bm=-1.121
+  spot mu(n) %   n=1, 5, 10: 11.79, 11.00, 10.39
+  E[roe]         n=1, 5, 10: -1.899, -2.118, -2.288   (implied NI/BE 0.150, 0.120, 0.101)
+  perpetuity=21.27  tail_rate=3.13%
+permno=13046  2019-09-30  roe=+0.022  NI/BE=1.022  beta=+2.11  bm=-4.404
+  spot mu(n) %   n=1, 5, 10: 13.03, 10.47, 9.59
+  E[roe]         n=1, 5, 10: -0.408, -1.005, -1.355   (implied NI/BE 0.665, 0.366, 0.258)
+  perpetuity=28.65  tail_rate=2.47%
 ```
 
-Read it as two columns.
+Three facts.
 
-**The denominator** slopes up on both deciles. A single WACC is the
-wrong rate at $n=30$. `perpetuity` (numerator frozen at $1$) is about
-12 on D1 and 12 on D10: the *curve* is well behaved.
+The low-beta name (10026) has an *upward* curve: 5.5% at one year,
+9.5% at ten. The high-beta names start higher and mean-revert down.
+A single WACC is the wrong rate at every firm.
 
-**The numerator** is where they part. On D1, expected cash flow grows
-to 1.56 at ten years and `value = 33.5` is a number you can discuss.
-On D10, $\Phi_{g,g}=0.82$ stacks growth that barely mean-reverts:
-$\mathbb{E}_t[C_{t+30}]/C_t = 61$ and `value = 1083` is not a price.
-The recursion is telling you the $g$ equation is not a usable
-cash-flow model at that aggregation. Keep the curve; do not publish
-the full PV.
+Profitability mean-reverts. Even permno 13046, sitting at
+$\mathrm{NI}/\mathrm{BE}\approx 1$, is forecast to fade toward 26%
+by year ten. That fade *is* the numerator of a residual-income
+reading of the model
+([Ang and Liu, 2001](../references.md#ang-liu-2001)).
 
-![Spot discount curves](../assets/figures/spot_curves.png)
-<p class="figure-caption">The same recipe on D1, D6, and D10. These curves are the denominator. The terminal above is the last-state slice of D1 and D10.</p>
+`perpetuity` is finite at all three names (21–29). The denominator
+is well behaved. `isolate_channels(..., on="discount")` on this
+short panel hits `PerpetuityDivergesError`: shutting $\mathit{cay}$
+in $\Phi$ and $\Lambda$ drives the terminal rate negative. The
+exception is the framework reporting that the counterfactual curve
+does not exist.
 
----
+![Firm spot curves](../assets/figures/firm_spot_curves.png)
+<p class="figure-caption"><strong>Figure 2.</strong> $\mu_t(n)$ at 30 September 2019 for three CRSP permnos. The low-beta name slopes up; the high-beta names start high and fade. Source: this section.</p>
 
-## Step 6 — News from the same VAR
+A variance decomposition of $\mu_t(10)$ on this window puts most of
+the curve on $\beta$ and $\mathit{bm}$, not on $g$-style cash flow:
+
+``` text title="Terminal"
+var share of mu(n=10): roe=-5.1%  beta=57.4%  bm=47.5%  r=0.1%  cay=0.0%  pi=-0.0%
+```
+
+Shares need not sum to 100 (covariances are double-counted). That
+$\mathit{roe}$ is negligible *for the curve* does not mean cash flows
+do not matter for prices. They drive the numerator, which this
+decomposition does not show.
+
+## 5.6 News from the same VAR
+
+`news_decomposition` takes the fitted panel VAR and a returns frame.
+Cash-flow news is the `roe` equation. Here the returns are the
+equal-weighted monthly mean of the 80 firms.
 
 ```python
 from varvaluation import news_decomposition
 
-news = news_decomposition(fit, annual_returns, return_col="ret", xi=xi, Lambda=Lambda)
+news = news_decomposition(fit, ew_returns, return_col="ret", xi=xi, Lambda=Lambda)
 print(news.shares.var_cf, news.shares.var_dr, news.shares.residual_share)
 ```
 
 ``` text title="Terminal"
-D1  var(cf)=0.0276  var(dr)=0.0034  residual_share=1.82
-D10  var(cf)=0.1118  var(dr)=0.0038  residual_share=2.00
+var(cf)=5.3563  var(dr)=0.0011  residual_share=2433.69  rho=0.96
+news.frame columns: ['date', 'cf', 'dr', 'unexpected', 'residual']
 ```
 
-Cash-flow news is the $g$ equation, not the leftover. Value (D10) is
-CF-dominated, an order of magnitude above D1. Discount-rate news is
-small once $\lambda$ is the expected-return gradient rather than a
-return equation inside the VAR.
-
-`residual_share` is above one because this VAR contains no equity
-return: the unexpected-return series you handed in (trailing
-twelve-month decile returns) is not the object the VAR prices. That
-is a diagnostic, not a third kind of news. See [News](news.md).
-
-![Cash-flow vs discount-rate news](../assets/figures/news_shares.png)
-<p class="figure-caption">Direct CF news versus DR news on the same three deciles.</p>
-
----
-
-## Step 7 — Firms from WRDS
-
-Credentials in `.env`. The public call is `load_firm_panel`; the
-script uses the cached CRSP / Compustat / CCM pieces so a second run
-does not hit WRDS again.
-
-```python
-from varvaluation import estimate_var_panel
-from varvaluation.wrds import load_firm_panel, prepare_firm_state
-
-panel = load_firm_panel(start="2014-01", end="2019-12-31")
-spec_f = StateSpec(
-    names=("roe", "beta", "bm", "r", "cay", "pi"),
-    cashflow="roe",
-    group="permno",
-)
-state_f = prepare_firm_state(
-    panel, macro, spec_f, start="2015-01", end="2019-09", beta_window=12
-)
-fit_f = estimate_var_panel(state_f, spec_f)
-```
-
-On this machine the window after the beta burn-in is 2,673 firms,
-67,884 firm-months. The VAR below is pooled on the 80 firms with the
-longest histories.
-
-``` text title="Terminal"
-panel  67884 firm-months  2673 firms  2015-03-31 → 2019-09-30
-VAR on 80 longest firms  nobs=2240  spectral radius=0.995  Phi[roe,roe]=+0.458
-  Phi[roe, ·]  roe=+0.458  beta=-0.019  bm=-0.205  r=-7.207  cay=-0.640  pi=+4.205
-one firm at 2019-09-30  permno=10026  roe=-2.080  NI/BE=0.125  bm=-1.470
-  spot mu(n) %   n=1, 5, 10: 5.51, 9.31, 9.47
-```
-
-Three things to take from that block.
-
-1. **`roe` is $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$**, the
-   firm-level cash-flow state of
-   [Vuolteenaho (2002)](../references.md#vuolteenaho-2002), not a
-   net-return. `roe = −2.08` is an ROE of $e^{-2.08}\approx 12.5\%$, a
-   normal profitable firm. Do not feed it into `value` as if it were
-   log dividend growth of −208%.
-2. **$\Phi_{\mathit{roe},\mathit{roe}}=0.46$.** Firm profitability
-   mean-reverts. That is why a cash-flow recursion is more trustworthy
-   here than on D10, where $\Phi_{g,g}=0.82$.
-3. **The companion is barely stationary** (`spectral radius = 0.995`).
-   The short-rate and inflation loadings on the `roe` row are huge:
-   a short panel plus persistent macro columns. Trust the own-lag;
-   do not lean on the third decimal of a 30-year strip.
-
-The discount curve at that firm still slopes up — 5.5% at one year,
-9.5% at ten — the same qualitative object as the portfolio curve.
-
----
+Direct CF news dominates DR news, as
+[Vuolteenaho (2002)](../references.md#vuolteenaho-2002) leads one to
+expect at the firm. `residual_share` is enormous because the
+unexpected-return series is monthly equal-weighted returns and the
+VAR is an overlapping annual companion with no return equation. The
+identity does not close. That is a diagnostic
+([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)), not
+a third kind of news.
 
 ## Results in brief
 
-| Step | Object | What the data said |
+| Call | Object | What the firms said |
 |---|---|---|
-| 1 | Raw series | 1,200 months of deciles and macro, cay from 1959 |
-| 2 | $X_t$ | 714 months of a named six-state system |
-| 3 | $\lambda_t$ | $b_0$ is precise; $b_r$ and $b_{\mathit{cay}}$ have the right sign and wide standard errors |
-| 4 | $(\Phi,c,\Sigma)$ | Stationary; D1 growth mean-reverts, D10 growth does not |
-| 5 | Curve and value | Both curves slope up; D1 `value` is usable; D10 `value` is not |
-| 6 | News | Direct CF news dominates, especially on D10 |
-| 7 | Firms | 2,673 names; $\Phi_{\mathit{roe},\mathit{roe}}=0.46$ |
+| `load_firm_panel` | CRSP–Compustat | 6,790 permnos, 2014–2019 |
+| `StateSpec` / `prepare_firm_state` | $X_t$ | 2,673 firms, 67,884 months |
+| `ExpectedReturnSpec` | $(\xi,\Lambda)$ | $b_0$ precise; $b_r$, $b_{\mathit{cay}}$ correctly signed |
+| `estimate_var_panel` | $(\Phi,c,\Sigma)$ | $\Phi_{\mathit{roe},\mathit{roe}}=0.46$; $\rho(\Phi)=0.995$ |
+| `spot_rates` / `perpetuity` | curve | upward at low $\beta$, downward at high $\beta$; PV 21–29 |
+| `news_decomposition` | $N_{\mathrm{CF}}, N_{\mathrm{DR}}$ | CF dominates; residual share flags the return mismatch |
 
-Section 6 interprets these results against a constant-rate DCF. A
-two-state synthetic check, with no downloads, is in
-[Software](../quickstart.md).
+Section 6 interprets these results against a constant-rate DCF.

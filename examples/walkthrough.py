@@ -1,4 +1,4 @@
-"""Step-by-step walkthrough on Ken French / FRED / WRDS. No fiction.
+"""Firm illustration of the joint VAR. Ken French is not used.
 
 Run from the package root::
 
@@ -20,13 +20,14 @@ warnings.filterwarnings("ignore", message="Sortedness of columns")
 
 from varvaluation import (
     ExpectedReturnSpec,
+    PerpetuityDivergesError,
     StateSpec,
     ValuationModel,
-    estimate_var,
     estimate_var_panel,
+    isolate_channels,
     news_decomposition,
 )
-from varvaluation.data import load_bm_deciles, load_macro, prepare_portfolio_state
+from varvaluation.data import load_macro
 
 START, END = "1965-07", "2024-12"
 
@@ -65,61 +66,66 @@ def risk_premium(macro: pl.DataFrame) -> dict:
     }
 
 
-def capm_alpha(total: pl.DataFrame, macro: pl.DataFrame, col: str) -> float:
-    frame = (
-        total.select(["date", col])
-        .join(macro.select(["date", "rf", "mkt"]), on="date", how="inner")
-        .drop_nulls()
-    )
-    y = np.log(1 + frame[col].to_numpy()) - np.log(1 + frame["rf"].to_numpy())
-    x = np.log(1 + frame["mkt"].to_numpy()) - np.log(1 + frame["rf"].to_numpy())
-    ok = np.isfinite(y) & np.isfinite(x)
-    X = np.column_stack([np.ones(ok.sum()), x[ok]])
-    coeffs, *_ = np.linalg.lstsq(X, y[ok], rcond=None)
-    return float(coeffs[0] * 12)
-
-
-def annual_returns(total: pl.DataFrame, col: str) -> pl.DataFrame:
-    frame = total.select(["date", col]).sort("date")
-    lr = np.log(1 + frame[col].to_numpy())
-    return (
-        pl.DataFrame({"date": frame["date"], "lr": lr})
-        .with_columns((pl.col("lr").rolling_sum(12).exp() - 1).alias("ret"))
-        .select(["date", "ret"])
-        .drop_nulls()
-    )
+def expected_roe(fit, X, n: int) -> np.ndarray:
+    """E_t[roe_{t+k}] for k = 1..n from the VAR companion."""
+    e = fit.spec.e_vec(fit.spec.cashflow)
+    out = np.zeros(n)
+    mean = X.copy()
+    for k in range(n):
+        mean = fit.c + fit.Phi @ mean
+        out[k] = float(e @ mean)
+    return out
 
 
 def main() -> int:
-    _print("Step 1 — public data")
-    total, capgains = load_bm_deciles()
+    _print("Step 1 — macro and the firm panel")
     macro = load_macro()
-    print(f"BE/ME deciles  {total['date'][0]} → {total['date'][-1]}  n={total.height}")
-    print(f"macro          {macro['date'][0]} → {macro['date'][-1]}  n={macro.height}")
+    print(f"macro  {macro['date'][0]} → {macro['date'][-1]}  n={macro.height}")
     print("macro columns:", list(macro.columns))
-    cay = macro.filter(pl.col("cay").is_not_null()) if "cay" in macro.columns else None
-    if cay is not None:
-        print(f"cay            {cay['date'][0]} → {cay['date'][-1]}")
 
-    _print("Step 2 — portfolio state (D1 growth, D10 value)")
-    spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
-    states = {}
-    for name in ("D1", "D10"):
-        state = prepare_portfolio_state(
-            total, capgains, macro, spec, portfolio=name, start=START, end=END
-        )
-        states[name] = state
-        last = state.row(-1, named=True)
-        print(
-            f"{name}  {state['date'][0]} → {state['date'][-1]}  "
-            f"months={state.height}"
-        )
-        print(
-            "  last X: "
-            + ", ".join(f"{k}={last[k]:+.3f}" for k in spec.names)
-        )
+    try:
+        from dotenv import load_dotenv
 
-    _print("Step 3 — risk premium")
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+        from varvaluation.wrds import merge_firm_panel, prepare_firm_state
+        from varvaluation.wrds.load import (
+            load_ccm_link,
+            load_compustat_annual,
+            load_crsp_monthly,
+        )
+    except Exception as exc:
+        print(f"WRDS extra missing: {type(exc).__name__}: {exc}")
+        return 1
+
+    crsp = load_crsp_monthly(start="2014-01", end="2019-12-31", use_cache=True)
+    comp = load_compustat_annual(start="2012-01", end="2019-12-31", use_cache=True)
+    link = load_ccm_link(use_cache=True)
+    panel = merge_firm_panel(crsp, comp, link)
+    print(
+        f"CRSP–Compustat  {panel['date'].min()} → {panel['date'].max()}  "
+        f"rows={panel.height}  permno={panel['permno'].n_unique()}"
+    )
+
+    _print("Step 2 — StateSpec and prepare_firm_state")
+    spec = StateSpec(
+        names=("roe", "beta", "bm", "r", "cay", "pi"),
+        cashflow="roe",
+        group="permno",
+        horizon=12,
+        nw_lags=12,
+    )
+    print(f"names={spec.names}  cashflow={spec.cashflow}  "
+          f"cashflow_index={spec.cashflow_index()}  group={spec.group}")
+    state = prepare_firm_state(
+        panel, macro, spec, start="2015-01", end="2019-09", beta_window=12
+    )
+    print(
+        f"state  {state.height} firm-months  "
+        f"{state['permno'].n_unique()} firms  "
+        f"{state['date'].min()} → {state['date'].max()}"
+    )
+
+    _print("Step 3 — ExpectedReturnSpec (market premium)")
     rp = risk_premium(macro)
     print(f"sample {rp['start']} → {rp['end']}  n={rp['nobs']}  R2={rp['r2']:.3f}")
     print(
@@ -130,137 +136,98 @@ def main() -> int:
     xi, Lambda = ExpectedReturnSpec(premium=("cay",)).xi_lambda(
         spec, {"b0": rp["b0"], "br": rp["br"], "bcay": rp["bcay"]}
     )
+    print(f"xi[r]={xi[spec.index('r')]:+.3f}  "
+          f"xi[beta]={xi[spec.index('beta')]:+.3f}  "
+          f"Lambda[beta,cay]={Lambda[spec.index('beta'), spec.index('cay')]:+.3f}")
 
-    _print("Step 4 — VAR")
-    fits = {}
-    for name, state in states.items():
-        fit = estimate_var(state, spec)
-        fits[name] = fit
-        g_i = spec.cashflow_index()
-        print(
-            f"{name}  nobs={fit.nobs}  spectral radius={fit.spectral_radius:.3f}  "
-            f"Phi[g,g]={fit.Phi[g_i, g_i]:+.3f}"
-        )
-        print(
-            "  Phi[g, ·]  "
-            + "  ".join(
-                f"{n}={fit.Phi[g_i, spec.index(n)]:+.3f}" for n in spec.names
-            )
-        )
+    _print("Step 4 — estimate_var_panel")
+    top = (
+        state.group_by("permno")
+        .len()
+        .sort("len", descending=True)
+        .head(80)["permno"]
+        .to_list()
+    )
+    slim = state.filter(pl.col("permno").is_in(top))
+    fit = estimate_var_panel(slim, spec)
+    roe_i = spec.cashflow_index()
+    print(
+        f"nobs={fit.nobs}  spectral_radius={fit.spectral_radius:.3f}  "
+        f"Phi[roe,roe]={fit.Phi[roe_i, roe_i]:+.3f}"
+    )
+    print(
+        "Phi[roe, ·]  "
+        + "  ".join(f"{n}={fit.Phi[roe_i, spec.index(n)]:+.3f}" for n in spec.names)
+    )
 
-    _print("Step 5 — both sides from X")
-    for name, state in states.items():
-        fit = fits[name]
-        alpha = capm_alpha(total, macro, name)
-        model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-        X = state.select(list(spec.names)).to_numpy()[-1]
-        rates = model.spot_rates(X, n=30)
-        cf = model.cashflow_expectation(X, n=30)
-        perp = model.perpetuity(X, n=80)
-        val = model.value(X, C=1.0, n=80)
-        print(f"{name}  alpha={alpha:.3f}")
+    _print("Step 5 — ValuationModel at three firms")
+    model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+    last_date = slim["date"].max()
+    last = slim.filter(pl.col("date") == last_date).sort("permno")
+    # three names spread across the roe distribution
+    picks = [
+        last.row(0, named=True),
+        last.row(last.height // 2, named=True),
+        last.row(last.height - 1, named=True),
+    ]
+    for row in picks:
+        X = np.array([row[n] for n in spec.names], dtype=float)
+        roe = float(row["roe"])
+        rates = model.spot_rates(X, n=10)
+        perp = model.perpetuity(X, n=40)
+        eroe = expected_roe(fit, X, 10)
         print(
-            "  spot mu(n) %   n=1, 5, 10, 30: "
-            + ", ".join(f"{100 * rates[k]:.2f}" for k in (0, 4, 9, 29))
+            f"permno={row['permno']}  {last_date}  "
+            f"roe={roe:+.3f}  NI/BE={np.exp(roe):.3f}  "
+            f"beta={row['beta']:+.2f}  bm={row['bm']:+.3f}"
         )
         print(
-            "  E[C]/C         n=1, 5, 10, 30: "
-            + ", ".join(f"{cf[k]:.3f}" for k in (0, 4, 9, 29))
+            "  spot mu(n) %   n=1, 5, 10: "
+            + ", ".join(f"{100 * rates[k]:.2f}" for k in (0, 4, 9))
         )
         print(
-            f"  value={val.pv:.2f}  perpetuity={perp.pv:.2f}  "
-            f"n_used={val.n_used}"
+            "  E[roe]         n=1, 5, 10: "
+            + ", ".join(f"{eroe[k]:+.3f}" for k in (0, 4, 9))
+            + "   (implied NI/BE "
+            + ", ".join(f"{np.exp(eroe[k]):.3f}" for k in (0, 4, 9))
+            + ")"
         )
+        print(f"  perpetuity={perp.pv:.2f}  tail_rate={100 * perp.tail_rate:.2f}%")
 
-    _print("Step 6 — news (same VAR)")
-    for name in ("D1", "D10"):
-        news = news_decomposition(
-            fits[name],
-            annual_returns(total, name),
-            return_col="ret",
-            xi=xi,
-            Lambda=Lambda,
-        )
-        s = news.shares
-        print(
-            f"{name}  var(cf)={s.var_cf:.4f}  var(dr)={s.var_dr:.4f}  "
-            f"residual_share={s.residual_share:.2f}"
-        )
-
-    _print("Step 7 — firms from WRDS")
+    X0 = np.array([picks[0][n] for n in spec.names], dtype=float)
+    decomp, total_var = model.variance_decomposition(10)
+    share = decomp / np.maximum(total_var[:, None], 1e-16)
+    print(
+        "var share of mu(n=10): "
+        + "  ".join(f"{n}={100 * share[9, spec.index(n)]:.1f}%" for n in spec.names)
+    )
     try:
-        from dotenv import load_dotenv
+        iso = isolate_channels(model, X0, shut=("cay",), on="discount", n=40)
+        print(f"isolate_channels shut=cay on=discount  pv={iso.pv:.3f}")
+    except PerpetuityDivergesError as exc:
+        print(f"isolate_channels shut=cay on=discount  {exc}")
 
-        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-        from varvaluation.wrds import merge_firm_panel, prepare_firm_state
-        from varvaluation.wrds.load import load_ccm_link, load_compustat_annual, load_crsp_monthly
-
-        crsp = load_crsp_monthly(start="2014-01", end="2019-12-31", use_cache=True)
-        comp = load_compustat_annual(start="2012-01", end="2019-12-31", use_cache=True)
-        link = load_ccm_link(use_cache=True)
-        panel = merge_firm_panel(crsp, comp, link)
-        spec_f = StateSpec(
-            names=("roe", "beta", "bm", "r", "cay", "pi"),
-            cashflow="roe",
-            group="permno",
-        )
-        state_f = prepare_firm_state(
-            panel, macro, spec_f, start="2015-01", end="2019-09", beta_window=12
-        )
-        print(
-            f"panel  {state_f.height} firm-months  "
-            f"{state_f['permno'].n_unique()} firms  "
-            f"{state_f['date'].min()} → {state_f['date'].max()}"
-        )
-        top = (
-            state_f.group_by("permno")
-            .len()
-            .sort("len", descending=True)
-            .head(80)["permno"]
-            .to_list()
-        )
-        slim = state_f.filter(pl.col("permno").is_in(top))
-        fit_f = estimate_var_panel(slim, spec_f)
-        roe_i = spec_f.cashflow_index()
-        print(
-            f"VAR on 80 longest firms  nobs={fit_f.nobs}  "
-            f"spectral radius={fit_f.spectral_radius:.3f}  "
-            f"Phi[roe,roe]={fit_f.Phi[roe_i, roe_i]:+.3f}"
-        )
-        print(
-            "  Phi[roe, ·]  "
-            + "  ".join(
-                f"{n}={fit_f.Phi[roe_i, spec_f.index(n)]:+.3f}"
-                for n in spec_f.names
-            )
-        )
-        last_date = state_f["date"].max()
-        one = (
-            slim.filter(pl.col("date") == last_date)
-            .sort("permno")
-            .head(1)
-        )
-        if one.height:
-            Xf = one.select(list(spec_f.names)).to_numpy()[0]
-            xi_f, Lambda_f = ExpectedReturnSpec(premium=("cay",)).xi_lambda(
-                spec_f, {"b0": rp["b0"], "br": rp["br"], "bcay": rp["bcay"]}
-            )
-            model_f = ValuationModel.from_var(
-                fit_f, xi=xi_f, Lambda=Lambda_f, alpha=0.02
-            )
-            rates_f = model_f.spot_rates(Xf, n=10)
-            roe = float(one["roe"][0])
-            print(
-                f"one firm at {last_date}  permno={one['permno'][0]}  "
-                f"roe={roe:+.3f}  NI/BE={np.exp(roe):.3f}  "
-                f"bm={one['bm'][0]:+.3f}"
-            )
-            print(
-                "  spot mu(n) %   n=1, 5, 10: "
-                + ", ".join(f"{100 * rates_f[k]:.2f}" for k in (0, 4, 9))
-            )
-    except Exception as exc:
-        print(f"skipped: {type(exc).__name__}: {exc}")
+    _print("Step 6 — news_decomposition")
+    # firm simple returns from the CRSP panel, aligned to residual dates
+    rets = (
+        panel.select(["permno", "date", "ret"])
+        .filter(pl.col("permno").is_in(top))
+        .drop_nulls()
+    )
+    # news_decomposition wants a single returns series; use equal-weight
+    # mean of the 80 firms
+    ew = (
+        rets.group_by("date")
+        .agg(pl.col("ret").mean().alias("ret"))
+        .sort("date")
+    )
+    news = news_decomposition(fit, ew, return_col="ret", xi=xi, Lambda=Lambda)
+    s = news.shares
+    print(
+        f"var(cf)={s.var_cf:.4f}  var(dr)={s.var_dr:.4f}  "
+        f"residual_share={s.residual_share:.2f}  rho={news.rho}"
+    )
+    print("news.frame columns:", news.frame.columns)
 
     print()
     print("Done.")

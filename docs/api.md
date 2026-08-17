@@ -90,6 +90,6 @@ Not re-exported at top level.
   `prepare_portfolio_state`
 - `varvaluation.wrds` — `load_firm_panel`, `prepare_firm_state`
 - `varvaluation.news.simulate_return_var` — two-state synthetic panel
-  used by the homepage snippet and `treasury_test`
+  used by `treasury_test` and the software check
 
 Docstrings on the objects are the contract.

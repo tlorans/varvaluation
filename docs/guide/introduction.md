@@ -76,13 +76,13 @@ framework as a single argument: definition, VAR, two recursions, news,
 and the limits of the construction. Second, it makes the argument
 computable. The library `varvaluation` binds names to positions
 (`StateSpec`), estimates the companion with overlapping Newey–West
-pairs, and returns `value`, `spot_rates`, `cashflow_expectation`, and
+pairs, and returns `spot_rates`, `perpetuity`, and
 `news_decomposition` from one fitted object. Section 5 is not a
 tutorial appended to a theory note. It is the illustration of
-Sections 2–4 on Ken French book-to-market deciles (July 1965–December
-2024) and on a CRSP–Compustat window. Growth-decile $g$ mean-reverts;
-value-decile $g$ does not; firm $\mathit{roe}$ does. Those numbers
-are the framework speaking.
+Sections 2–4 on a CRSP–Compustat panel: 2,673 firms,
+$\Phi_{\mathit{roe},\mathit{roe}}=0.46$, and firm-level discount
+curves that slope with $\beta_t$. Those numbers are the framework
+speaking.
 
 Section 2 states the joint system and the closed forms. Section 3
 records how the parameters are measured. Section 4 treats news.

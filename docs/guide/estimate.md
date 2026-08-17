@@ -12,11 +12,11 @@ stages. Section 5 reports the numbers they produce.
 
 ## 1. Build the observables
 
-Name a state and put one column per name in a frame. On Ken French
-portfolios a typical layout is
+Name a state and put one column per name in a frame. At the firm the
+layout of Section 5 is
 
 $$
-X_t = (g_t,\ \beta_t,\ \mathit{dpo}_t,\ r_t,\ \mathit{cay}_t,\ \pi_t)'.
+X_t = (\mathit{roe}_t,\ \beta_t,\ \mathit{bm}_t,\ r_t,\ \mathit{cay}_t,\ \pi_t)'.
 $$
 
 | Name | What it is | How this library builds it |
@@ -30,22 +30,36 @@ $$
 | `cay` | consumption–wealth gap | Lettau–Ludvigson, or a FRED reconstruction |
 | `pi` | inflation | 12-month log CPI |
 
-`g`, `beta`, and `dpo` are built only when those names sit in
+`roe`, `bm`, and `beta` are built only when those names sit in
 `spec.names`. Everything else is joined from the macro frame by column.
-See [Public data](data.md) and [WRDS](wrds.md).
+
+```python
+from varvaluation.data import load_macro
+from varvaluation.wrds import load_firm_panel, prepare_firm_state
+
+macro = load_macro()
+panel = load_firm_panel(start="2014-01", end="2019-12-31")
+state = prepare_firm_state(panel, macro, spec, start="2015-01", end="2019-09")
+```
+
+``` text title="Terminal"
+state  67884 firm-months  2673 firms  2015-03-31 → 2019-09-30
+```
+
+See [WRDS](wrds.md).
 
 Why *these* names, and not dividend yield? That judgment comes from two
 literatures and is the subject of [StateSpec](spec.md#where-the-names-come-from).
 
 ## 2. Estimate time-varying betas
 
-A rolling 60-month regression of the portfolio’s (or firm’s) log excess
-return on the market’s log excess return. The slope in each window *is*
-$\beta_t$ — a data series, not an assumption. The window is
-`BETA_WINDOW = 60` in `varvaluation.betas`.
+A rolling regression of the firm’s log excess return on the market’s
+log excess return. The slope in each window *is* $\beta_t$ — a data
+series, not an assumption. Section 5 uses a twelve-month window
+because the CRSP sample is short; `BETA_WINDOW = 60` in
+`varvaluation.betas` is the longer convention.
 
-Rolling betas are noisy. Annual volatility of $10$–$19\%$ across
-portfolios is typical. They genuinely move; they are also estimated
+Rolling betas are noisy. They genuinely move; they are also estimated
 with a short window. Treat them as a measured input, not a fact.
 
 ## 3. Estimate the risk premium
@@ -66,10 +80,11 @@ $$
       = \alpha + \xi' X_t + X_t'\Lambda X_t.
 $$
 
-`examples/run_application.py` runs this regression with Newey–West
-(12-lag) standard errors on overlapping annual market returns. $\alpha$
-is then set so the model matches each portfolio’s average excess return
-(a CAPM intercept, annualized).
+Section 5 runs this regression with Newey–West (12-lag) standard
+errors on overlapping annual market returns. The fitted coefficients
+become $(\xi,\Lambda)$ through `ExpectedReturnSpec`. In the firm
+illustration, $b_0=+0.095$ ($t=3.41$), $b_r=-0.737$ ($t=-1.49$),
+$b_{\mathit{cay}}=+0.708$ ($t=1.72$).
 
 The premium regression is the fragile link. Coefficients at an annual
 horizon are imprecise; $\mathit{cay}$’s predictive power weakens
@@ -98,17 +113,15 @@ lag pairs **only inside** `spec.group`. A firm needs more months than
 `horizon` or it contributes no pairs.
 
 ```python
-from varvaluation import StateSpec, estimate_var
+from varvaluation import estimate_var_panel
 
-spec = StateSpec(
-    names=("g", "beta", "dpo", "r", "cay", "pi"),
-    cashflow="g",
-    horizon=12,
-    nw_lags=12,
-)
-fit = estimate_var(state, spec)
+fit = estimate_var_panel(state, spec)
 print(fit.nobs, fit.spectral_radius)
 print(fit.Phi[spec.cashflow_index()])
+```
+
+``` text title="Terminal"
+nobs=2240  spectral_radius=0.995  Phi[roe,roe]=+0.458
 ```
 
 `VARFit` holds $\Phi$, $c$, $\Sigma$, Newey–West `se`, residuals, the
@@ -120,21 +133,18 @@ validated by `state_schema(spec)` before any regression runs.
 ```python
 from varvaluation import ValuationModel
 
-model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-X = fit.X_lag[-1]
-rates = model.spot_rates(X, n=30)
-cf = model.cashflow_expectation(X, n=30)
-val = model.value(X, C=1.0, n=80)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+rates = model.spot_rates(X, n=10)
+perp = model.perpetuity(X, n=40)
 ```
 
 `from_var` refuses a companion with spectral radius $\ge 1$
 (`NonStationaryVARError`). That is the same stationarity condition as
-in [The VAR](system.md): without it the unconditional mean does not
+in [Section 2.1](system.md): without it the unconditional mean does not
 exist and the tail of the sum has nowhere to settle.
 
-The two recursions, and what to do when $\Phi_{g,g}$ is near one, are
-in [Section 2.2](valuation.md). The same stages computed on Ken French,
-FRED, and WRDS are [Section 5](walkthrough.md).
+The two recursions are [Section 2.2](valuation.md). The numbers at
+named permnos are [Section 5](walkthrough.md).
 
 ## The division of labor
 

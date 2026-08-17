@@ -11,29 +11,26 @@ column 0 is dividend growth.
 from varvaluation import StateSpec
 
 spec = StateSpec(
-    names=("g", "beta", "dpo", "r", "cay", "pi"),
-    cashflow="g",      # this row is the numerator's growth variable
-    date="date",
-    group=None,        # "permno" for a panel
-    horizon=12,        # annual VAR on monthly rows
-    nw_lags=12,
-)
-spec.index("cay")        # 4
-spec.cashflow_index()    # 0
-```
-
-`cashflow` is the most important argument. It tells both recursions which
-row of $\Phi$ is log cash-flow growth. On Ken French portfolios that is
-usually `g` (Hodrick trailing dividend growth). At the firm it is `roe`.
-A firm-level spec is the same type:
-
-```python
-StateSpec(
     names=("roe", "beta", "bm", "r", "cay", "pi"),
     cashflow="roe",
     group="permno",
+    horizon=12,
+    nw_lags=12,
 )
+spec.index("cay")         # 4
+spec.cashflow_index()     # 0
 ```
+
+``` text title="Terminal"
+names=('roe', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=roe  cashflow_index=0  group=permno
+```
+
+Section 5 builds this spec on 2,673 firms. A single-series spec omits
+`group` and may name `g` in place of `roe`.
+
+`cashflow` is the most important argument. It tells both recursions
+which row of $\Phi$ is the growth (or profitability) variable. At the
+firm that name is `roe`.
 
 Unknown, duplicate, or empty names raise `StateSpecError`. There is no
 integer index in the public API.
