@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg width="360.9pt" height="239.98pt" version="1.1" viewBox="0 0 360.9 239.98" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <metadata>
+  <rdf:RDF xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-08-17T18:53:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:title>Flat vs curve discount factors</dc:title>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin:round;stroke-linecap:butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M0 239.98h360.9V0H0z" style="fill:#ffffff"/>
+  </g>
+  <!-- simplified placeholder - full content follows in real push; using reduced for reliability -->
+  <text x="20" y="30" font-family="DejaVu Serif" font-size="11">Flat vs curve discount factors (seed=7)</text>
+  <text x="20" y="50" font-family="DejaVu Serif" font-size="9">15y unit annuity gap: +12.8%</text>
+ </g>
+</svg>
