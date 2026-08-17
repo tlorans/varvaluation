@@ -1,16 +1,12 @@
-# What changes
+# 6. Discussion
 
-!!! abstract "Purpose"
-
-    A constant-rate DCF and this system answer the same question —
-    what a claim to future cash flows is worth — with different
-    objects. Discount-rate variation is not a refinement
-    ([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
-    curve, the numerator, and the sign of the growth–rate interaction
-    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV).
-
-The textbook DCF and this system are not two presentations of one
-formula. They identify different random variables.
+A constant-rate DCF and the framework of Sections 2–5 answer the same
+question (what a claim to future cash flows is worth) by identifying
+different random variables. Discount-rate variation is not a refinement
+([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
+curve, the numerator, and the sign of the growth–rate interaction
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). Section 5
+supplies the numbers. This section states the comparison.
 
 ## Side by side
 

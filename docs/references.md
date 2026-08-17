@@ -1,6 +1,6 @@
 # References
 
-In-text citations on these pages use author–year and link here.
+In-text citations use author–year and link here.
 
 The recursions are those of Ang and Liu (2004, 2001). This library
 implements the **quadratic-Gaussian** case: both $\beta_t$ and

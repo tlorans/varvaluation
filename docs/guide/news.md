@@ -1,18 +1,12 @@
-# News
+# 4. Return news
 
-!!! abstract "Purpose"
-
-    [Valuation](valuation.md) asks what a claim is worth at $X_t$. News
-    asks a different question of the **same** fitted VAR: what moved
-    last period’s unexpected return
-    ([Campbell, 1991](../references.md#campbell-1991))? Cash-flow news
-    is the revision in the cash-flow *equation*, never the leftover of
-    a discount-rate model
-    ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
-
-[Valuation](valuation.md) asks: *what is it worth at $X_t$?* News asks a
-different question from the **same** VAR: *what moved last period’s
-unexpected return?*
+Section 2 asks what a claim is worth at $X_t$. This section asks a
+different question of the same fitted VAR: what moved last period’s
+unexpected return ([Campbell, 1991](../references.md#campbell-1991)).
+Cash-flow news is the revision in the cash-flow equation, never the
+leftover of a discount-rate model
+([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
+The library function `news_decomposition` is that construction.
 
 [Campbell (1991)](../references.md#campbell-1991) writes the unexpected
 return as cash-flow news minus discount-rate news,

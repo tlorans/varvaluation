@@ -1,5 +1,6 @@
 # API
 
+The public surface of the library that implements Sections 2–4.
 Top-level imports (`import varvaluation as v`).
 
 ## Types

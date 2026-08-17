@@ -1,5 +1,5 @@
-site_name: varvaluation
-site_description: Joint cash-flow and discount-rate valuation from one VAR
+site_name: Discounting cash flows when expected returns move
+site_description: A joint VAR framework, illustrated in varvaluation
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -31,21 +31,22 @@ theme:
     - toc.follow
 
 nav:
-  - Home: index.md
-  - Install: install.md
-  - Worked application: guide/walkthrough.md
-  - Understand:
-      - The VAR: guide/system.md
-      - StateSpec: guide/spec.md
-      - Estimation: guide/estimate.md
-      - Valuation: guide/valuation.md
-      - News: guide/news.md
-      - What changes: guide/practice.md
-      - Synthetic (no download): quickstart.md
-  - Data:
+  - Abstract: index.md
+  - 1. Introduction: guide/introduction.md
+  - 2. Framework:
+      - The joint system: guide/system.md
+      - Present value: guide/valuation.md
+      - The state: guide/spec.md
+  - 3. Estimation: guide/estimate.md
+  - 4. Return news: guide/news.md
+  - 5. Illustration: guide/walkthrough.md
+  - 6. Discussion: guide/practice.md
+  - Software:
+      - Install: install.md
+      - API: api.md
       - Public data: guide/data.md
       - WRDS / firms: guide/wrds.md
-  - API: api.md
+      - Synthetic: quickstart.md
   - References: references.md
 
 exclude_docs: |

@@ -1,17 +1,14 @@
-# Estimation
+# 3. Estimation
 
-!!! abstract "Purpose"
-
-    The closed form is useful only if every object in it can be
-    measured. The stages below are ordinary linear regressions —
-    overlapping annual pairs with
-    [Newey and West (1987)](../references.md#newey-west-1987) standard
-    errors. The innovation is refusing to keep cash flows and expected
-    returns in separate drawers
-    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III).
-
-Every object in the priced recursions is measured. The pipeline runs
-from raw series to a discount curve in five stages.
+The closed forms of Section 2 are useful only if every coefficient
+can be measured. The stages below are ordinary linear regressions on
+overlapping annual pairs, with
+[Newey and West (1987)](../references.md#newey-west-1987) standard
+errors. What is not ordinary is the refusal to keep cash flows and
+expected returns in separate drawers
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §III). The
+library calls `estimate_var` and `ExpectedReturnSpec` implement those
+stages. Section 5 reports the numbers they produce.
 
 ## 1. Build the observables
 
@@ -136,9 +133,8 @@ in [The VAR](system.md): without it the unconditional mean does not
 exist and the tail of the sum has nowhere to settle.
 
 The two recursions, and what to do when $\Phi_{g,g}$ is near one, are
-on [Valuation](valuation.md). The same five stages run on Ken French,
-FRED, and WRDS — with the terminal at each step — are the
-[worked application](walkthrough.md).
+in [Section 2.2](valuation.md). The same stages computed on Ken French,
+FRED, and WRDS are [Section 5](walkthrough.md).
 
 ## The division of labor
 

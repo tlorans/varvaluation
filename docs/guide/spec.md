@@ -1,15 +1,11 @@
-# StateSpec
+# 2.3 The state
 
-!!! abstract "Purpose"
-
-    The VAR is only a grammar. Which names sit in $X_t$ is a judgment
-    inherited from two literatures: what forecasts profitability, and
-    what forecasts expected returns
-    ([Cochrane, 2011](../references.md#cochrane-2011)). `StateSpec` is
-    the only place those names are bound to positions.
-
-`StateSpec` never assumes that column 0 is dividend growth, or that any
-particular name is present.
+The VAR is a grammar. Which names sit in $X_t$ is a judgment inherited
+from two literatures: what forecasts profitability, and what forecasts
+expected returns ([Cochrane, 2011](../references.md#cochrane-2011)).
+In the library, `StateSpec` is the only place those names are bound to
+positions. No integer index is public. The engine does not assume that
+column 0 is dividend growth.
 
 ```python
 from varvaluation import StateSpec

@@ -1,6 +1,8 @@
-# Install
+# Software
 
-Python 3.11 or 3.12. The project is managed with [uv](https://docs.astral.sh/uv/).
+The library `varvaluation` is the computational form of Sections 2–4.
+Python 3.11 or 3.12. The project is managed with
+[uv](https://docs.astral.sh/uv/).
 
 ```text
 uv add varvaluation
@@ -42,7 +44,6 @@ uv run mkdocs serve
 
 Figures in the guide are produced by `uv run python examples/build_docs_figures.py` and committed under `docs/assets/figures/`.
 
-After install, run the [worked application](guide/walkthrough.md).
-That is the next page: seven steps on Ken French, FRED, and WRDS.
-Understand (why the VAR, the two recursions) comes after you have seen
-the numbers.
+Section 5 is the illustration:
+[`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
+The argument begins at the [Introduction](guide/introduction.md).

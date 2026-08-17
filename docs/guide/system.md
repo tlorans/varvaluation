@@ -1,20 +1,13 @@
-# The VAR
+# 2.1 The joint system
 
-If you have not run the numbers yet, start at the
-[worked application](walkthrough.md). This page is the why.
-
-!!! abstract "Purpose"
-
-    Value is $\mathbb{E}_t$ of a *product* — cash flow times a discount
-    factor ([Ang and Liu, 2004](../references.md#ang-liu-2004)). The
-    expectation of a product is a property of the joint distribution.
-    A VAR is the smallest statistical object that produces both
-    forecasts, and their covariance, from one state $X_t$.
-
-If you forecast cash flows in one model and expected returns in
-another, you have no covariance, no consistent horizon dynamics, and
-the two forecasts can contradict each other. That is not a modelling
-preference. It is a failure to identify the price.
+Value is the conditional expectation of a product
+([Ang and Liu, 2004](../references.md#ang-liu-2004)). The expectation
+of a product is a property of the joint distribution. A vector
+autoregression is the smallest statistical object that produces both
+forecasts, and their covariance, from one state $X_t$. Separate
+models of cash flows and of expected returns omit that covariance,
+need not share a horizon structure, and can contradict each other.
+The failure is one of identification, not of taste.
 
 ## What a VAR is
 

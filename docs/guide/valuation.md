@@ -1,27 +1,13 @@
-# Valuation
+# 2.2 Present value
 
-!!! abstract "Purpose"
-
-    This page is the closed form. Given a fitted VAR and
-    $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
-    $\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are
-    exact functions of $X_t$
-    ([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions
-    I.1 and II.1). `value` multiplies them. That is the definition of
-    present value when expected returns move.
-
-**Both** sides of every strip come from the same state $X_t$. [The
-VAR](system.md) page is why that has to be one system. The special
-case that freezes the numerator is `perpetuity`.
-
-Given a fitted VAR and a one-period expected return
-
-$$
-\mu_t = \alpha + \xi' X_t + X_t' \Lambda X_t,
-$$
-
-every object below is exact. The cash-flow basis vector is
-`spec.cashflow`, not “whatever happens to sit in column 0.”
+Given the VAR of Section 2.1 and a one-period expected return
+$\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
+$\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are exact
+functions of $X_t$
+([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions I.1
+and II.1). The library call `value` multiplies them. That product *is* the present value defined in the
+[Introduction](introduction.md). The call `perpetuity` freezes the
+numerator at $1$ and isolates the curve.
 
 ```python
 from varvaluation import ValuationModel

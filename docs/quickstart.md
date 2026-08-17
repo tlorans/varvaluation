@@ -1,8 +1,8 @@
-# Synthetic (no download)
+# Synthetic check
 
-The real recipe is the [worked application](guide/walkthrough.md).
-This page is only the two-state toy, if you want to see both sides
-print without Ken French or WRDS.
+Section 5 uses Ken French, FRED, and WRDS. The two-state draw below
+reproduces both sides of the present value with no downloads. It is a
+check on the implementation, not a substitute for the illustration.
 [`examples/quickstart.py`](https://github.com/tlorans/varvaluation/blob/main/examples/quickstart.py):
 
 ```python
@@ -63,6 +63,6 @@ cash-flow news.
 `treasury_test()` runs the known-cash-flow check: coupons known ⇒ direct
 CF news ≈ 0.
 
-## On real data
+## Illustration on market data
 
-Go to the [worked application](guide/walkthrough.md).
+[Section 5](guide/walkthrough.md).

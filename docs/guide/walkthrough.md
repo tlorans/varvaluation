@@ -1,34 +1,25 @@
-# Worked application
+# 5. Illustration
 
-!!! abstract "Purpose"
-
-    This page is the empirical counterpart of the claim on the
-    homepage. On Ken French book-to-market deciles, FRED macro, and a
-    CRSP–Compustat window from WRDS it identifies both sides of the
-    present value from one VAR
-    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III), then
-    reads the curve, the numerator, and the news from that same object.
-    You do not need the derivation first. The seven steps *are* the
-    system.
-
-The numbers below are the captured output of
+This section computes the objects of Sections 2–4 on Ken French
+book-to-market deciles, FRED macro series, and a CRSP–Compustat firm
+window. The computations use `varvaluation`. Each subsection states
+the object, shows the call that produces it, and reports the number
+the data return. The script is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
-Re-run it:
 
 ```text
 uv add "varvaluation[data]"
 uv run python examples/walkthrough.py
 ```
 
-Steps 1–6 need only `[data]`. Step 7 needs `[wrds]` and a `.env` with
-`WRDS_USERNAME` / `WRDS_PASSWORD`. Downloads cache under
-`~/.cache/varvaluation`.
+Steps 1–6 require the `[data]` extra. Step 7 requires `[wrds]` and
+WRDS credentials in `.env`. Downloads cache under
+`~/.cache/varvaluation`. The portfolio sample is July 1965–December
+2024. The firm sample is March 2015–September 2019, the overlap that
+survives a twelve-month beta window and cay.
 
-The sample is July 1965 – December 2024 at the portfolio, and March
-2015 – September 2019 at the firm (the overlap that survives a
-twelve-month beta window and cay).
-
----
+The subsections that follow reuse the step labels of the script so
+that the terminal blocks remain one-to-one with the source.
 
 ## Step 1 — Load the public data
 
@@ -275,7 +266,7 @@ The discount curve at that firm still slopes up — 5.5% at one year,
 
 ---
 
-## What the seven steps bought
+## Results in brief
 
 | Step | Object | What the data said |
 |---|---|---|
@@ -287,18 +278,6 @@ The discount curve at that firm still slopes up — 5.5% at one year,
 | 6 | News | Direct CF news dominates, especially on D10 |
 | 7 | Firms | 2,673 names; $\Phi_{\mathit{roe},\mathit{roe}}=0.46$ |
 
-## Then understand
-
-You have now seen both sides of every strip, a curve that slopes up, a
-growth equation that works on D1 and fails on D10, and a firm `roe`
-that mean-reverts. The why is under **Understand**:
-
-| Page | The question it answers |
-|---|---|
-| [The VAR](system.md) | Why one system, and how the joint distribution enters the price |
-| [Estimation](estimate.md) | What each of the seven steps was measuring |
-| [Valuation](valuation.md) | The two recursions, line by line |
-| [News](news.md) | Why `cf` is the cash-flow equation, not the residual |
-| [What changes](practice.md) | Side-by-side with a textbook DCF |
-
-No download, just the two-state toy: [Synthetic](../quickstart.md).
+Section 6 interprets these results against a constant-rate DCF. A
+two-state synthetic check, with no downloads, is in
+[Software](../quickstart.md).

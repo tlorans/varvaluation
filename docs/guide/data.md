@@ -39,6 +39,6 @@ state = prepare_portfolio_state(
 
 The five-stage pipeline that consumes this frame is
 [Estimation](estimate.md). The same loaders run end to end, with the
-terminal at each step, on the [worked application](walkthrough.md).
+terminal at each step, are [Section 5](walkthrough.md).
 Why these names rather than dividend yield is
 [StateSpec](spec.md#where-the-names-come-from).

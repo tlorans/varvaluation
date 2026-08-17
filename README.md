@@ -1,15 +1,13 @@
 # varvaluation
 
-When expected returns move, value is the expectation of a product —
-cash flows times a path of discount rates. This library identifies both
-sides, and their covariance, from one named-state VAR. `value`
-multiplies them. Unexpected returns split into cash-flow news and
-discount-rate news; cash-flow news is the cash-flow equation, not the
-residual.
+The documentation is a paper on the framework. The package is the
+illustration. When expected returns move, value is the expectation of a
+product. One named-state VAR identifies both sides and their covariance.
+`value` multiplies them. Cash-flow news is the cash-flow equation, not
+the residual.
 
-**Docs:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-The [worked application](https://tlorans.github.io/varvaluation/guide/walkthrough/)
-runs the same recipe on Ken French, FRED, and WRDS and prints each step.
+**Paper:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
+Section 5 runs the framework on Ken French, FRED, and WRDS.
 
 ## Install
 
@@ -28,9 +26,9 @@ reconstructs cay from FRED. WRDS credentials: `WRDS_USERNAME` or
 
 Python 3.11+. Managed with `uv`.
 
-The real-data recipe is `uv run python examples/walkthrough.py`
-([worked application](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
-The snippet below is the no-download toy.
+The illustration is `uv run python examples/walkthrough.py`
+([Section 5](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
+The snippet below is the no-download check.
 
 ## Ten-line path
 
