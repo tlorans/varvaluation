@@ -1,6 +1,6 @@
 # Offline check
 
-No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$.
+No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve \(\mu_t(n)\).
 
 ```text
 python examples/quickstart.py
@@ -40,6 +40,6 @@ Step 5 — Present value
   flat PV vs curve            : +12.8%
 ```
 
-Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the definition of the spot curve.
+Identity to watch: \(\mu_t(1)\) equals the one-period \(\mu_t\). That is the definition of the spot curve.
 
-The full annotated sprint lives on the [worked example](guide/reproduce.md) page. The same path on live data is `examples/reproduce_glz2020.py --wrds`.
+The full annotated sprint — with figures for the simulated paths, residual covariance, multi-step expectations, and the flat-vs-curve gap — lives on the [worked example](guide/reproduce.md) page.
