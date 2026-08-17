@@ -23,11 +23,13 @@ window cannot show is collected at the end of this chapter.
 The cash-flow slot is `g`: log growth of trailing twelve-month
 dividends implied by CRSP returns with and without dividends. That
 is growth of cash paid to owners, so `value(X, C=div)` is a present
-value of the equity. The sample is firms that pay; a firm with no
-trailing dividends has no growth rate. The window is still short
-(the extract below is 2014–2019). Treat the number as the object
-the framework identifies, not as a published valuation of those
-three names.
+value of the equity. Compare it to market equity on the same date
+(`pricing_errors`). A median PV/ME far from one is a level error
+(often the discount intercept). After choosing that intercept so
+the median ratio is one, the remaining question is the
+cross-section: do expensive model names have expensive market
+prices? The extract is 2000–2019 payers. Treat the dollars as a
+fit diagnostic, not as a claim that a name is cheap.
 
 The script is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).

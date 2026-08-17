@@ -12,6 +12,7 @@ from varvaluation.exceptions import (
     VarValuationError,
 )
 from varvaluation.model import AngLiuModel
+from varvaluation.pricing import PricingFit, calibrate_alpha, pricing_errors
 from varvaluation.news import (
     NewsResult,
     NewsShares,
@@ -36,6 +37,7 @@ __all__ = [
     "NewsShares",
     "NonStationaryVARError",
     "PerpetuityDivergesError",
+    "PricingFit",
     "RecursionDivergedError",
     "SchemaError",
     "StateSpec",
@@ -43,8 +45,10 @@ __all__ = [
     "VARFit",
     "ValuationResult",
     "VarValuationError",
+    "calibrate_alpha",
     "estimate_var",
     "estimate_var_panel",
+    "pricing_errors",
     "isolate_channels",
     "news_decomposition",
     "returns_schema",

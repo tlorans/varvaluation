@@ -24,10 +24,13 @@ from varvaluation import (
     PerpetuityDivergesError,
     StateSpec,
     ValuationModel,
+    calibrate_alpha,
     estimate_var_panel,
     isolate_channels,
     news_decomposition,
+    pricing_errors,
 )
+from varvaluation.pricing import as_of
 from varvaluation.data import load_macro
 
 START, END = "1965-07", "2024-12"
@@ -180,6 +183,19 @@ def main() -> int:
         .select(["permno", "me"])
     )
     last = last.join(me, on="permno", how="left")
+    raw = pricing_errors(model, last)
+    print(
+        f"pricing  n={raw.n}  med PV/ME={raw.median_pv_me:.3f}  "
+        f"rmse log={raw.rmse_log_pv_me:.3f}  corr={raw.corr_log:.3f}  "
+        f"within 2x={100 * raw.share_within_2x:.1f}%"
+    )
+    alpha_star, cal = calibrate_alpha(fit, xi, Lambda, last, alpha0=0.02)
+    print(
+        f"calibrated alpha={alpha_star:.3f}  n={cal.n}  "
+        f"med PV/ME={cal.median_pv_me:.3f}  rmse log={cal.rmse_log_pv_me:.3f}  "
+        f"corr={cal.corr_log:.3f}  within 2x={100 * cal.share_within_2x:.1f}%"
+    )
+    model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha_star)
     picks = [
         last.row(0, named=True),
         last.row(last.height // 2, named=True),
