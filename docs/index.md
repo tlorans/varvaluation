@@ -5,14 +5,12 @@
 # How to discount cash flows when expected returns move
 
 <p class="hero-lead">
-A present value is the expectation of a <strong>product</strong>:
-each future cash flow times the path of one-period required returns.
-Those two paths have to come from the <strong>same</strong> forecast.
-A vector autoregression is the smallest system that does that.
+Value is the expectation of a <strong>product</strong>.
+A product has a <strong>covariance</strong>.
+Cash flows and discount rates must therefore come from the
+<strong>same</strong> system — a VAR for the state $X_t$.
 This package implements the closed-form recursions of
-<a href="references.md#ang-liu-2004">Ang and Liu (2004)</a>:
-a cash-flow recursion, a priced recursion, and the term structure of
-spot discount rates $\mu_t(n)$ that sits between them.
+<a href="references.md#ang-liu-2004">Ang and Liu (2004)</a>.
 </p>
 
 [The problem](guide/problem.md){ .md-button .md-button--primary }
@@ -20,19 +18,30 @@ spot discount rates $\mu_t(n)$ that sits between them.
 
 </div>
 
-## The idea in one minute
+## The mental map
 
-Standard DCF uses **one** discount rate for every horizon:
+Three claims, in order. Everything else is bookkeeping.
+
+<div class="topic-cards">
+<a href="guide/problem/"><span class="part">1</span><strong>Product</strong><span>Value is $E[\text{discount path}\times\text{cash flow}]$, not a ratio of separate forecasts.</span></a>
+<a href="guide/problem/#the-covariance-term"><span class="part">2</span><strong>Covariance</strong><span>$E[XY]=E[X]E[Y]+\mathrm{Cov}(X,Y)$. That covariance enters the <em>price level</em>.</span></a>
+<a href="guide/system/"><span class="part">3</span><strong>One VAR</strong><span>Cash-flow growth and expected returns must share one law of motion, or the covariance is missing.</span></a>
+</div>
+
+From that joint system Ang and Liu give two recursions (expected cash,
+priced strip) and the spot curve $\mu_t(n)$ that makes the usual
+two-step workflow exact inside the model.
+
+## From the flat DCF you know
+
+Standard practice writes
 
 $$
 V_t = \sum_{j=1}^{\infty} \frac{E_t[C_{t+j}]}{(1+r)^j}.
 $$
 
-That formula assumes (1) the rate does not move with maturity, and
-(2) cash flows and discount rates can be treated separately.
-Both are false once expected returns move.
-
-The correct object is Ang and Liu’s equation (2):
+One rate, all horizons; discount factor pulled out of the expectation.
+The correct identity keeps the product inside:
 
 $$
 V_t = \sum_{s=1}^{\infty}
@@ -41,50 +50,35 @@ V_t = \sum_{s=1}^{\infty}
   \Bigr].
 $$
 
-Value is the expectation of a product. A VAR for the state $X_t$
-supplies the joint law. From that VAR the package evaluates two
-recursions — expected cash flows horizon by horizon, and the priced
-strip at each horizon — and reads off the **spot discount rates**
-$\mu_t(n)$ that make the usual two-step workflow (forecast, then
-discount) exact inside the model.
+Expand the lognormal strip and the covariance between cumulated growth
+and cumulated expected returns appears with a minus sign. Positive
+comovement lowers value. Separate models of the two sides set that term
+to zero by construction.
 
 ## Four calls
 
 ```python
-from varvaluation import (
-    AngLiuModel,
-    estimate_var,
-    paper_state_spec,
-    simulate_paper_state,
-)
+from varvaluation import AngLiuModel, estimate_var, simulate_paper_state
 
 state, spec = simulate_paper_state(nobs=160, seed=11)
 fit = estimate_var(state, spec)
-model = AngLiuModel.from_var(fit)   # or ValuationModel.from_var(...)
-X = fit.unconditional_mean() if hasattr(fit, "unconditional_mean") else state
-# preferred path: build model with expected-return loadings, then
-#   spots = model.spot_rates(X, n=30)
-#   cf    = model.cashflow_expectation(X, n=30)
-#   V     = model.value(X, C0)
+model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
+# spots = model.spot_rates(X, n=30)
+# cf    = model.cashflow_expectation(X, n=30)
+# V     = model.value(X, C0)
 ```
-
-The handbook walks the objects in order: the problem, the joint system,
-the two recursions, the spot curve $\mu_t(n)$, and how to build $X_t$
-from data.
 
 ## Roadmap
 
 <div class="topic-cards">
-<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Why a flat rate is the wrong rate at every horizon but one.</span></a>
-<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Cash-flow growth and expected returns share one VAR for $X_t$.</span></a>
+<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, why a flat rate fails.</span></a>
+<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Why the VAR is the minimum object that carries the covariance.</span></a>
 <a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, priced recursion, spot rates $\mu_t(n)$.</span></a>
-<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$: growth, beta, premium, rates.</span></a>
+<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$.</span></a>
 <a href="guide/reproduce/"><span class="part">05</span><strong>Worked example</strong><span>Estimate, recurse, read the curve.</span></a>
-<a href="guide/industries/"><span class="part">06</span><strong>Other portfolios</strong><span>Same state names, different universe.</span></a>
+<a href="guide/industries/"><span class="part">06</span><strong>Other portfolios</strong><span>Same map, different universe.</span></a>
 </div>
 
-The formulas are [Ang and Liu (2004)](references.md#ang-liu-2004).
-The residual-income map of [Ang and Liu (2001)](references.md#ang-liu-2001)
-and [Feltham and Ohlson (1995)](references.md#feltham-ohlson-1995) is
-an optional numerator. The package is the bench that runs the
-recursions.
+Formulas: [Ang and Liu (2004)](references.md#ang-liu-2004).
+Optional residual-income numerator: [Ang and Liu (2001)](references.md#ang-liu-2001),
+[Feltham and Ohlson (1995)](references.md#feltham-ohlson-1995).

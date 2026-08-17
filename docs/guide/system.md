@@ -1,5 +1,44 @@
 # One system
 
+## The mental map, step 3
+
+1. Value is $E[\text{product}]$.
+2. The product expands to a covariance term that moves the price level.
+3. **Cash-flow growth and expected returns must share one law of
+   motion** — or that covariance has nowhere to come from.
+
+This page is step 3.
+
+---
+
+## Why separate models fail
+
+Suppose you estimate a growth equation in one place and a return-
+prediction equation in another. You can still form $E_t[\sum g]$ and
+$E_t[\sum \mu]$. You cannot form
+
+$$
+\mathrm{Cov}_t\Bigl[\sum g,\;\sum \mu\Bigr]
+$$
+
+from those two objects. The covariance is a property of the **joint**
+distribution. Without it, the lognormal strip
+
+$$
+E_t[e^{S_n}]
+  = \exp\!\bigl(E_t[S_n] + \tfrac12\mathrm{Var}_t[S_n]\bigr)
+$$
+
+is missing the $-2\,\mathrm{Cov}$ piece of the variance. The price you
+compute is the price of an economy in which growth shocks and discount-
+rate shocks never move together.
+
+A single VAR closes the gap by construction.
+
+---
+
+## The VAR
+
 [Ang and Liu (2004)](../references.md#ang-liu-2004) summarise cash flows
 and expected returns by a state vector $X_t$. In the leading case
 
@@ -9,9 +48,9 @@ $$
 
 where $g_t$ is cash-flow growth, $\beta_t$ is the conditional beta, and
 $z_t$ holds instruments that predict growth, betas, or the market
-premium (short rate, $\mathit{cay}$, inflation, …).
+premium.
 
-A VAR(1) is the law of motion:
+The law of motion is a VAR(1):
 
 $$
 X_{t+1} = c + \Phi X_t + u_{t+1},
@@ -19,14 +58,8 @@ X_{t+1} = c + \Phi X_t + u_{t+1},
 u \sim N(0,\Sigma).
 $$
 
-Nothing in that system is labelled “numerator” or “denominator”.
-The two readings come from **which coordinates you ask about**, and
-from how the one-period expected return is written as a function of
-$X_t$.
-
-## What a VAR is, concretely
-
-With two variables $x$ and $y$, a VAR(1) is literally two regressions:
+Concretely, with two variables this is two ordinary regressions run at
+the same time:
 
 $$
 \begin{aligned}
@@ -35,101 +68,89 @@ y_{t+1} &= a_2 + b_{21}x_t + b_{22}y_t + v_{t+1}.
 \end{aligned}
 $$
 
-Stacked into matrices: $X_{t+1} = c + \Phi X_t + \varepsilon_{t+1}$.
-Three named objects, each with a job:
-
 | Object | Job |
 |---|---|
-| $c$ | Pulls everything toward long-run averages |
-| $\Phi$ | Persistence: diagonal = own memory; off-diagonal = cross-forecasts |
-| $\Sigma$ | Shock covariance: which variables get hit together |
+| $c$ | Pulls the system toward long-run averages |
+| $\Phi$ | Persistence (diagonal) and cross-forecasts (off-diagonal) |
+| $\Sigma$ | **Shock covariance** — which variables are hit together |
 
-Forecasting is recursive bookkeeping. One step ahead:
-$E_t[X_{t+1}] = c + \Phi X_t$. By $j$ steps, today's state dies out at
-the speed of $\Phi^j$. The unconditional mean is $(I-\Phi)^{-1}c$,
-provided every eigenvalue of $\Phi$ lies inside the unit circle.
+The off-diagonal cells of $\Phi$ and of $\Sigma$ *are* the covariance
+structure the product identity requires. Estimate the system once; both
+recursions on the next page read from the same matrices.
 
-!!! note "Why a VAR is the right tool here"
-    1. **Jointness by construction.** One $\Sigma$ generates shocks to
-       cash flows *and* expected returns together. The covariance the
-       price needs cannot be set to zero by accident.
-    2. **Mean reversion for free.** A stable $\Phi$ delivers rates that
-       glide back to their long-run mean. The flat-forever discount rate
-       is the special case $\Phi = 0$.
-    3. **Predictability is testable.** Coefficients of $\Phi$ have
-       standard errors; cross-forecasts can be rejected.
-    4. **Gaussian linearity makes the price closed-form.** Linear
-       dynamics + normal shocks ⇒ every cumulated sum is conditionally
-       normal ⇒ $E[e^{\cdot}]$ is analytic.
+!!! note "Four reasons the VAR is the minimum object"
+    1. **Jointness.** One $\Sigma$ generates growth and discount-rate
+       shocks together. The covariance cannot be zeroed by accident.
+    2. **Mean reversion.** A stable $\Phi$ delivers rates that glide
+       back to their long-run mean. Flat-forever is the corner
+       $\Phi=0$.
+    3. **Testable cross-forecasts.** Does the premium forecast growth?
+       Coefficients of $\Phi$, with standard errors.
+    4. **Closed form.** Linear dynamics + Gaussian shocks ⇒ every
+       cumulated sum is conditionally normal ⇒ $E[e^{\cdot}]$ is
+       analytic.
 
-## Cash-flow growth
+---
 
-Write cash flows in growth form:
+## Reading the state two ways
+
+Nothing in the VAR is labelled “numerator” or “denominator”. The two
+readings come from which coordinates you ask about.
+
+**Cash-flow growth.** Write
 
 $$
-g_{t+i} = \log\frac{C_{t+i}}{C_{t+i-1}},
-\qquad
 C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
 $$
 
-Then
+$g_t$ is one coordinate of $X_t$ (or affine in $X_t$). Every other
+coordinate can forecast it through $\Phi$. The cash-flow recursion on
+the next page turns that row into $E_t[C_{t+n}]/C_t$.
 
-$$
-\frac{E_t[C_{t+n}]}{C_t}
-  = E_t\!\left[\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr)\right].
-$$
-
-This is **not** $\exp(E_t[\sum g])$. Because $g$ is random, Jensen
-adds a variance term. Under the Gaussian VAR that expectation is
-exponential-affine in today’s state — the **cash-flow recursion** of
-the next page.
-
-$g_t$ is one coordinate of $X_t$ (or an affine function of $X_t$).
-Every other coordinate can forecast it through $\Phi$.
-
-## Expected returns
-
-The one-period expected return is a conditional CAPM:
+**Expected returns.** A conditional CAPM,
 
 $$
 \mu_t = \alpha + r_t + \beta_t\,\lambda_t.
 $$
 
-When $\beta_t$ and $\lambda_t$ both move with $X_t$, the product
-$\beta_t\lambda_t$ is **quadratic** in the state:
+When both $\beta_t$ and $\lambda_t$ move with $X_t$, the product is
+quadratic:
 
 $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t.
 $$
 
-If either beta or the premium is constant, $\Lambda = 0$ and $\mu_t$
-is affine — the earlier affine present-value class. Letting **both**
-move at once is what the $H(n)$ recursion in the next page is for.
+If either factor is constant, $\Lambda=0$ and $\mu_t$ is affine. Letting
+**both** move is what the $H(n)$ recursion is for.
 
-$r_t$ (the short rate) may sit inside $X_t$, or a full Treasury curve
-may be kept outside the VAR and supplied as data. The package supports
-both.
+The short rate may sit inside $X_t$, or a Treasury curve may be kept
+outside the VAR and supplied as data. The package supports both.
 
-## Why they share the VAR
+---
 
-The cash-flow reading uses the $g$ row of $\Phi$. The discount-rate
-reading uses the rows that drive $\beta$ and $\lambda$. Off-diagonal
-cells are the covariances: how a shock to the premium changes expected
-growth, how a shock to growth changes expected beta. Those cells are
-identified only if the regressions are estimated **together**.
+## The covariance lives in $\Phi$ and $\Sigma$
 
-Estimate cash in one model and the rate in another, and those cells are
-gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance.
+| Cell | What it carries into the product |
+|---|---|
+| $\Phi[g,\lambda]$ | premium today forecasts growth tomorrow |
+| $\Phi[\beta,g]$ | growth today forecasts beta tomorrow |
+| $\Sigma_{g,\mu}$ | growth shocks and discount-rate shocks arrive together |
+
+Estimate cash in one model and the rate in another, and these cells are
+gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance —
+which was the whole point of keeping the product inside the expectation.
+
+---
 
 ## In code
 
 ```python
 from varvaluation import StateSpec, estimate_var
 
-# name the coordinates of X_t; mark which row is cash-flow growth
 spec = StateSpec(names=("g", "beta", "mrp", ...), cashflow="g", horizon=1)
-fit = estimate_var(state, spec)   # → Φ, c, Σ
+fit = estimate_var(state, spec)   # → Φ, c, Σ  (one system)
 ```
 
-The next page turns $(\Phi, c, \Sigma)$ and $(\alpha, \xi, \Lambda)$ into
-the two Ang–Liu recursions and the spot curve $\mu_t(n)$.
+The next page turns $(\Phi,c,\Sigma)$ and $(\alpha,\xi,\Lambda)$ into
+the cash-flow recursion, the priced recursion, and the spot curve
+$\mu_t(n)$ — all reading from the same matrices.
