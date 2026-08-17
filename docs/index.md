@@ -111,6 +111,7 @@ model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
 ## Roadmap
 
 <div class="topic-cards">
+<a href="guide/literature/"><span class="part">00</span><strong>Literature</strong><span>State variables, VAR specifications, and other asset classes.</span></a>
 <a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, why a flat rate fails.</span></a>
 <a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Why the VAR is the minimum object that carries the covariance.</span></a>
 <a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, priced recursion, spot rates $\mu_t(n)$.</span></a>
