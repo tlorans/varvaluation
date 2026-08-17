@@ -40,8 +40,8 @@ raises `NonStationaryVARError` if the spectral radius is $\ge 1$.
 | `price_recursion(n)` | $a(n), b(n), H(n)$ — priced quadratic-Gaussian strips |
 | `spot_discount_coefficients(n)` | $A(n), B(n), G(n)$ of $\mu_t(n)$ |
 | `spot_rates(X, n)` | $\mu_t(1),\ldots,\mu_t(n)$ |
-| `value(X, C=1.0, n=100)` | present value: both sides from $X$ |
-| `perpetuity(X, n=100)` | unit cash flow, curve only |
+| `value(X, C=1.0, n=100)` | present value when `cashflow` is log growth; both sides from $X$ |
+| `perpetuity(X, n=100)` | unit cash flow, curve only (`unit_curve_pv` in Section 5) |
 | `unconditional_mean()` | $(I-\Phi)^{-1}c$ |
 | `unconditional_covariance()` | vec-solved $\mathrm{Var}(X)$ |
 | `variance_exact(n)` | $\mathrm{Var}(\mu_t(k))$ for $k=1,\ldots,n$ |

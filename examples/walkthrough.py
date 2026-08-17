@@ -178,7 +178,7 @@ def main() -> int:
         eroe = expected_roe(fit, X, 10)
         print(
             f"permno={row['permno']}  {last_date}  "
-            f"roe={roe:+.3f}  NI/BE={np.exp(roe):.3f}  "
+            f"log_roe={roe:+.3f}  implied_NI/BE={np.exp(roe):.3f}  "
             f"beta={row['beta']:+.2f}  bm={row['bm']:+.3f}"
         )
         print(
@@ -186,13 +186,16 @@ def main() -> int:
             + ", ".join(f"{100 * rates[k]:.2f}" for k in (0, 4, 9))
         )
         print(
-            "  E[roe]         n=1, 5, 10: "
+            "  E[log_roe]     n=1, 5, 10: "
             + ", ".join(f"{eroe[k]:+.3f}" for k in (0, 4, 9))
             + "   (implied NI/BE "
             + ", ".join(f"{np.exp(eroe[k]):.3f}" for k in (0, 4, 9))
             + ")"
         )
-        print(f"  perpetuity={perp.pv:.2f}  tail_rate={100 * perp.tail_rate:.2f}%")
+        print(
+            f"  unit_curve_pv={perp.pv:.2f}  "
+            f"terminal_spot={100 * perp.tail_rate:.2f}%"
+        )
 
     X0 = np.array([picks[0][n] for n in spec.names], dtype=float)
     decomp, total_var = model.variance_decomposition(10)

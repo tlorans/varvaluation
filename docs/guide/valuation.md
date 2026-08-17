@@ -5,9 +5,19 @@ $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
 $\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are exact
 functions of $X_t$
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions I.1
-and II.1). The library call `value` multiplies them. That product *is* the present value defined in the
-[Introduction](introduction.md). The call `perpetuity` freezes the
-numerator at $1$ and isolates the curve.
+and II.1). Three library calls use those objects differently.
+
+- `value` multiplies the VAR numerator by the curve. That product *is*
+  the present value of the [Introduction](introduction.md) **when**
+  `spec.cashflow` is log cash-flow growth.
+- `perpetuity` freezes the numerator at $1$ and isolates the curve.
+- A path you already have — analyst forecasts, a residual-income
+  schedule, an internal model — is discounted at `spot_rates`. The VAR
+  is then required only for the denominator
+  ([Brennan, 1997](../references.md#brennan-1997)).
+
+Section 5 reports the second object. The cash-flow slot there is a
+profitability *level*, so `value` is the wrong call.
 
 ```python
 from varvaluation import ValuationModel
@@ -20,12 +30,13 @@ perp = model.perpetuity(X, n=40)
 
 ``` text title="Terminal"
 spot mu(n) %   n=1, 5, 10: 5.51, 9.31, 9.47
-perpetuity=24.70  tail_rate=2.84%
+unit_curve_pv=24.70  terminal_spot=2.84%
 ```
 
 At permno 10026 on 30 September 2019 the curve slopes up. The
-denominator is finite. At the firm the cash-flow state is
-$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$;
+denominator is finite. $24.70$ is the present value of a **unit** cash
+flow under that curve, not an equity value. At the firm the cash-flow
+state is $\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$;
 `cashflow_expectation` would treat that series as log growth and
 should not be published as a price. The path
 $\mathbb{E}_t[\mathit{roe}_{t+n}]$ is in Section 5.
@@ -53,10 +64,12 @@ A constant-rate DCF writes the denominator as $(1+r)^n$ with one $r$ for
 all $n$, and takes the numerator from a spreadsheet. Here both objects are
 forecasts from the VAR of $X_t$. `value` multiplies them.
 
-!!! note "Value versus a frozen numerator"
+!!! note "Three numerators"
     `value(X, C)` takes expected cash flows *and* the discount curve from
     $X_t$. `perpetuity(X)` freezes the numerator at $1$ so only the curve
-    can move. Use that when you want to isolate the denominator.
+    can move. A list of cash flows you already have is discounted at
+    `spot_rates(X)` — the two-step workflow with the VAR supplying only
+    the denominator.
 
 ---
 
@@ -247,7 +260,8 @@ rate, or the rate but not cash flows, is a half-valuation.
 | `spot_rates(X, n)` | — | $\mu_t(1),\ldots,\mu_t(n)$ |
 | `cashflow_expectation(X, n)` | $\mathbb{E}_t[C_{t+k}]/C_t$ | — |
 | **`value(X, C)`** | $C$ times the recursion | the curve |
-| `perpetuity(X)` | $1$ (diagnostic) | the curve |
+| `sum C_n e^{-n\mu_t(n)}` | a path you already have | the curve |
+| `perpetuity(X)` | $1$ (unit-curve diagnostic) | the curve |
 | `isolate_channels(..., on="cashflow")` | $\Phi[\texttt{cf},s]$ zeroed | unchanged |
 | `isolate_channels(..., on="discount")` | unchanged | those names zeroed in $\Phi$ and $\Lambda$ except the cf row |
 
@@ -255,8 +269,9 @@ rate, or the rate but not cash flows, is a half-valuation.
 
 ## 6. What replaces the terminal value
 
-Gordon growth is the **degenerate case**. Set $\Phi=0$ and $\Sigma=0$.
-Then $b(n)=0$, $H(n)=0$, $a(n)=n(g-\mu)$, and
+Gordon growth is Ang and Liu’s **special case 1**: constant expected
+return and constant expected cash-flow growth. Then $b(n)=0$,
+$H(n)=0$, $a(n)=n(g-\mu)$, and
 
 $$
 \frac{V_t}{C_t}
@@ -265,14 +280,17 @@ $$
   \;\approx\; \frac{1+g}{\mu-g}.
 $$
 
-Gordon is this system with **zero persistence, zero volatility, zero
-correlation** ([Ang and Liu, 2004](../references.md#ang-liu-2004),
-special case 1). Convergence in the general case requires the eigenvalues
-of $\Phi$ inside the unit circle *and* the priced strip eventually
-declining — the analogue of $\mu>g$, but now a condition on the
-**dynamics** rather than on two point estimates. The tail of
-`value` / `perpetuity` is a geometric remainder at $\mu_t(N)$, not a
-hand-set $(r,g)$ bolted on at year ten.
+That case does **not** require $\Phi=\Sigma=0$. Other states may still
+persist; they simply do not enter $g$ or $\mu$. Setting
+$\Phi=\Sigma=0$ is a further degeneracy that delivers the same closed
+form — zero persistence, zero volatility, zero correlation — but it is
+not the statement of special case 1
+([Ang and Liu, 2004](../references.md#ang-liu-2004)). Convergence in
+the general case requires the eigenvalues of $\Phi$ inside the unit
+circle *and* the priced strip eventually declining — the analogue of
+$\mu>g$, but now a condition on the **dynamics** rather than on two
+point estimates. The tail of `value` / `perpetuity` is a geometric
+remainder at $\mu_t(N)$, not a hand-set $(r,g)$ bolted on at year ten.
 
 ---
 
@@ -282,21 +300,54 @@ If $\Phi[\texttt{cashflow},\texttt{cashflow}]$ is near one,
 $\bar b(n)$ stacks a series that barely mean-reverts and
 `cashflow_expectation` (hence `value`) is not a price. At the firm,
 $\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$ is a
-*level* of profitability, not log dividend growth. Treating it as
-growth in `value` is the same mistake. Section 5 reports
-$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ and reads
-$\mathbb{E}_t[\mathit{roe}_{t+n}]$ instead. Use `perpetuity` when
-only the curve is identified.
+*level* of profitability, not log dividend growth, and not
+[Vuolteenaho’s](../references.md#vuolteenaho-2002)
+$e_t=\log(1+X_t/B_{t-1})$. Treating it as growth in `value` is the
+same mistake. Section 5 reports $\Phi_{\mathit{roe},\mathit{roe}}=0.46$
+and reads $\mathbb{E}_t[\mathit{roe}_{t+n}]$ instead.
 
-!!! warning "Inspect the own-lag"
-    Before you report a full PV, print
-    `fit.Phi[spec.cashflow_index(), spec.cashflow_index()]`.
-    Near $1$: do not trust `value` yet. Comfortably inside the unit
-    circle: `value` is the object you came for.
+Two honest objects remain. `perpetuity` isolates the curve. The next
+section discounts a cash-flow path you already have.
+
+!!! warning "Inspect the own-lag before `value`"
+    Print `fit.Phi[spec.cashflow_index(), spec.cashflow_index()]`.
+    Near $1$, or when the cash-flow name is a *level*: do not call
+    `value`. The curve is still defined. Discount a path you trust,
+    or report `perpetuity`.
 
 ---
 
-## 8. Freezing the numerator (optional)
+## 8. Discounting a path you already have
+
+The two-step workflow
+([Brennan, 1997](../references.md#brennan-1997);
+[Ang and Liu, 2004](../references.md#ang-liu-2004)) is: forecast cash
+flows however you forecast them, then discount at $\mu_t(n)$. The VAR
+is required for the curve. It is not required for the numerator if you
+already have $C_{t+1},\ldots,C_{t+N}$ — an analyst schedule, a
+residual-income path
+([Ohlson, 1995](../references.md#ohlson-1995);
+[Ang and Liu, 2001](../references.md#ang-liu-2001)), or an internal
+model.
+
+```python
+import numpy as np
+
+spots = model.spot_rates(X, n=len(cashflows))
+user_pv = float(sum(
+    C * np.exp(-(k + 1) * spots[k]) for k, C in enumerate(cashflows)
+))
+```
+
+That sum is a present value of *those* cash flows under this curve. It
+is not `value(X, C)`, which takes the numerator from the cash-flow
+equation. Use it when `spec.cashflow` is a profitability level, when
+the own-lag is not yet usable, or when the cash-flow model you trust
+is not the VAR.
+
+---
+
+## 9. Freezing the numerator
 
 Sometimes you want only the curve: “what is a dollar a year worth under
 this $\mu_t(n)$?” Then set $\mathbb{E}_t[C_{t+n}] = 1$ and sum
@@ -308,19 +359,20 @@ V_t^{\text{perp}}
 $$
 
 That is `model.perpetuity(X)`. It is a special case of `value` with the
-cash-flow recursion switched off. It cannot tell you anything about
-expected cash flows, because they do not enter.
+cash-flow recursion switched off. Section 5 prints it as
+`unit_curve_pv`. It cannot tell you anything about expected cash
+flows, because they do not enter.
 
 ---
 
-## 9. The curve, in pictures
+## 10. The curve, in pictures
 
 ![Firm spot curves](../assets/figures/firm_spot_curves.png)
-<p class="figure-caption"><strong>Figure 2.</strong> Term structure of $\mu_t(n)$ at three CRSP permnos, 30 September 2019. These curves are the denominator. Source: Section 5.</p>
+<p class="figure-caption"><strong>Figure 1</strong> (reprised). Term structure of $\mu_t(n)$ at three CRSP permnos, 30 September 2019. These curves are the denominator. Source: Section 5.</p>
 
 ---
 
-## 10. Channel isolation
+## 11. Channel isolation
 
 Isolation is a **counterfactual**, not news. You shut a named state on one
 side, revalue with `value`, and compare.

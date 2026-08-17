@@ -7,6 +7,8 @@ Cash-flow news is the revision in the cash-flow equation, never the
 leftover of a discount-rate model
 ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
 The library function `news_decomposition` is that construction.
+Section 5 calls it so the diagnostic is visible. On that companion
+the identity does not close; the printed shares are not a result.
 
 [Campbell (1991)](../references.md#campbell-1991) writes the unexpected
 return as cash-flow news minus discount-rate news,
@@ -86,17 +88,26 @@ print(news.shares.var_cf, news.shares.var_dr, news.shares.residual_share)
 var(cf)=5.3563  var(dr)=0.0011  residual_share=2433.69  rho=0.96
 ```
 
-On the 80-firm panel of Section 5, cash-flow news (the `roe` equation)
-dominates discount-rate news. The residual share is large because the
-returns frame is monthly equal-weighted returns and the VAR has no
-return equation: the identity does not close. That is the diagnostic,
-not a third kind of news.
+On the 80-firm companion of Section 5 the call does **not** produce a
+return decomposition. `residual_share` is
+$\mathrm{var}(\text{residual})/\mathrm{var}(\text{unexpected})$. A
+value of $2434$ means the unexpected-return series (monthly
+equal-weighted simple returns of the 80 firms) is not the object this
+overlapping annual VAR prices. There is no return equation.
+$\rho=0.96$ is the Campbell–Shiller dividend-price constant, not a
+book-to-market linearization. $\mathrm{var}(\mathrm{dr})=0.0011$ is
+an unidentified premium, not evidence that discount-rate news is
+small. Do not read $\mathrm{var}(\mathrm{cf})>\mathrm{var}(\mathrm{dr})$
+as a confirmation of
+[Vuolteenaho (2002)](../references.md#vuolteenaho-2002). The
+cash-flow slot is not his $e_t$, and the identity does not close.
 
 `residual = unexpected - (cf - dr)` is **always** present. It is a
-diagnostic of how well the identity closes, not a third kind of news. A
-large residual share means the unexpected-return series you passed is not
-the object this VAR prices — typical when the VAR has no return equation
-and you hand in market returns.
+diagnostic of how well the identity closes, not a third kind of news.
+A large residual share means the unexpected-return series you passed
+is not the object this VAR prices — typical when the VAR has no
+return equation and you hand in a return series the companion does
+not price.
 
 The returns frame must be **simple** returns in $(-1, 5)$. Use compounded
 twelve-month simple returns, $\exp(\sum \log(1+r))-1$, not a raw sum of

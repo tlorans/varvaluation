@@ -1,13 +1,15 @@
 # varvaluation
 
-The documentation is a paper on the framework. The package is the
-illustration. When expected returns move, value is the expectation of a
-product. One named-state VAR identifies both sides and their covariance.
-`value` multiplies them. Cash-flow news is the cash-flow equation, not
-the residual.
+The documentation is an exposition of Ang and Liu (2004) and a named-state
+implementation. When expected returns move, value is the expectation of a
+product. One VAR identifies both sides and their covariance. `value`
+multiplies them when the cash-flow name is log growth. Cash-flow news is
+the cash-flow equation, not the residual.
 
-**Paper:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-Section 5 runs the framework on a CRSP–Compustat firm panel.
+**Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
+Section 5 is a software demonstration on a short CRSP–Compustat window
+(2,673 prepared firms; a pooled companion on the 80 longest histories).
+It reports the discount curve, not firm present values.
 
 ## Install
 

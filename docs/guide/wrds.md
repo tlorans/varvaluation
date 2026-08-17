@@ -19,13 +19,14 @@ state = prepare_firm_state(panel, macro, spec, start="1965-07")
 fit = estimate_var_panel(state, spec)
 ```
 
-`prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped.
+`prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped. `roe` is built only when $\mathrm{NI}>0$. It is a profitability *level*, not log dividend growth and not Vuolteenaho’s $e_t=\log(1+X_t/B_{t-1})$.
 
 Firm-level `roe` mean-reverts ($\Phi_{\mathit{roe},\mathit{roe}}=0.46$
-in Section 5). Inspect
-`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` before any
-present value. Do not feed `roe` into `value` as if it were log
-dividend growth.
+on the 80-firm companion in Section 5). Inspect
+`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` before calling
+`value`. Do not feed `roe` into `value` as if it were log
+dividend growth. Discount a cash-flow path you already have at
+`spot_rates`, or report `perpetuity`.
 
 ## Sample overlap
 

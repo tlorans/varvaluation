@@ -1,4 +1,8 @@
-"""Vuolteenaho / Lyle–Wang firm-level state construction."""
+"""Firm-level state construction (roe, bm, rolling beta).
+
+``roe`` is log(NI / lagged book equity), not Vuolteenaho's
+``e_t = log(1 + X/B)``.
+"""
 
 from __future__ import annotations
 

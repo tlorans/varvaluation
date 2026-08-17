@@ -44,6 +44,6 @@ uv run mkdocs serve
 
 Figures in the guide are produced by `uv run python examples/build_docs_figures.py` and committed under `docs/assets/figures/`.
 
-Section 5 is the illustration:
+Section 5 is the software demonstration:
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
 The argument begins at the [Introduction](guide/introduction.md).

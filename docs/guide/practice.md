@@ -5,110 +5,110 @@ question (what a claim to future cash flows is worth) by identifying
 different random variables. Discount-rate variation is not a refinement
 ([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
 curve, the numerator, and the sign of the growth–rate interaction
-([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). Section 5
-supplies the numbers. This section states the comparison.
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). This section
+states what a valuator can take from the *curve*, and what the sample
+of Section 5 cannot show.
 
-## Side by side
+## What a valuator can take
 
-|  | Textbook DCF | This system |
-|---|---|---|
-| Discount rate | One WACC, all horizons | A curve $\mu_t(n)$ that mean-reverts with $X_t$ |
-| Cash flows | A point-forecast path you typed in | $\mathbb{E}_t[C_{t+n}]/C_t$ from the $g$ equation, mean *and* variance |
-| $g$–$\mu$ interaction | None | $-2\,\mathrm{Cov}_t(\sum g,\sum\mu)$ sits inside the price |
-| Uncertainty | Folded into a risk premium by hand | $\tfrac12\mathrm{Var}_t[S_n]$, signed by convexity |
-| Terminal value | Gordon, a separate hand-set $(r,g)$ | The tail of the same recursion |
-| Beta | A single number | A state, so loadings $b(n)$, $H(n)$ vary with horizon |
-| Price | An input you sanity-check against | An output of $(\Phi,c,\Sigma,\xi,\Lambda)$ |
+The object Section 5 identifies is $\mu_t(n)$, a maturity-specific
+spot curve
+([Brennan, 1997](../references.md#brennan-1997);
+[Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1).
+It is usable without taking the VAR’s cash-flow equation. Discount a
+path you already have — an analyst schedule, a residual-income path
+([Ohlson, 1995](../references.md#ohlson-1995);
+[Feltham and Ohlson, 1995](../references.md#feltham-ohlson-1995);
+[Ang and Liu, 2001](../references.md#ang-liu-2001)), or an internal
+model — at `spot_rates`. That construction is in
+[Section 2.2](valuation.md#8-discounting-a-path-you-already-have).
 
-## Three things that concretely change
-
-### 1. The discount curve tilts
-
-If expected returns sit above their long-run mean and mean-revert, then
-$\mu_t(10)$ is already close to the unconditional mean while $\mu_t(1)$
-is high. A flat WACC at *today’s* high rate discounts every horizon too
-hard and **undervalues**. The reverse, a flat WACC at today’s *low*
-rate, overvalues the long strip.
-
-A different mistake is just as common: a historical-average WACC on a
-date when the fitted curve sits *below* that average (a low-premium
-state). The flat rate is then too high at the short end, so the
-constant-rate DCF **undervalues**. Signed error
-$(\text{wrong}-\text{correct})/\text{correct}$ is negative when the
-wrong model produces the smaller present value. The error scales with
-duration — worst exactly for the growth names where a DCF is already
-most fragile.
+On the 80-firm companion of Section 5 the short end of $\mu_t(n)$
+moves with $\beta_t$. The low-beta name (permno 10026) slopes up from
+5.5% to 9.5%. The high-beta names start above 11% and fade. A single
+rate taken from either end is the wrong rate at the other.
 
 ![Firm spot curves](../assets/figures/firm_spot_curves.png)
-<p class="figure-caption"><strong>Figure 2.</strong> $\mu_t(n)$ at three CRSP permnos, 30 September 2019. A single WACC is a flat line through this picture. Source: Section 5.</p>
-
-### 2. Cash-flow forecasts get a distribution, not a path
-
-A “conservative case” in a spreadsheet is an informal substitute for
-the $\tfrac12\mathrm{Var}$ term. Here the correction is analytic, and
-its *direction* depends on the sign of $\mathrm{Cov}(\sum g,\sum\mu)$,
-which no scenario table gives you. See [The VAR](system.md#where-the-joint-distribution-enters-the-price).
-
-### 3. Duration and risk become the same object
-
-Because $b(n)$ and $H(n)$ vary with horizon, the sensitivity of value
-to the state differs across the cash-flow strip.
-[van Binsbergen and Koijen (2017)](../references.md#vbk-2017) later
-measured a term structure of *returns* on traded dividend claims — a
-cousin of that object, not a direct test of a fitted $\mu_t(n)$.
-Isolation (`isolate_channels`) asks the counterfactual version of the
-same question: shut a named state on one side and revalue.
-
-## What the fitted curve looks like
-
-On the firm panel of Section 5 the short end of $\mu_t(n)$ moves with
-$\beta_t$. The low-beta name (permno 10026) slopes up from 5.5% to
-9.5%. The high-beta names start above 11% and fade. A flat WACC at
-either end is the wrong rate at the other.
+<p class="figure-caption"><strong>Figure 1</strong> (reprised). $\mu_t(n)$ at three CRSP permnos, 30 September 2019. A single rate is a flat line through this picture. Source: Section 5.</p>
 
 A variance decomposition of $\mu_t(10)$ on that window puts 57% on
 $\beta$ and 48% on $\mathit{bm}$. $\mathit{roe}$ is negligible *for
 the curve*. That does not mean cash flows do not matter for prices.
 They drive the numerator, which this decomposition does not show.
+$\mathit{cay}$ contributes 0.0% of curve variance here: the premium
+state the design kept after dropping the dividend yield does not move
+$\mu_t(10)$ on this vintage.
 
-## Price-explaining, not price-watching
+## What this is not competing with
 
-The alternative to this framework is guessing with structure: pick a
-WACC from a table, pick a terminal growth rate, run three scenarios,
-adjust by feel. Every claim about what drives the valuation is then
-untestable, because nothing in the procedure pins down where a number
-came from.
+Serious practice is not a cartoon WACC taken from a table and held
+flat forever. It already uses a changing risk-free rate, an implied
+or historical equity premium, rolling or fundamental betas
+([Fama and French, 1997](../references.md#ff-1997);
+[Lewellen and Nagel, 2006](../references.md#lewellen-nagel-2006)),
+multi-stage fade, and residual income. The increment here is
+narrower.
 
-A joint VAR replaces each guess with a measured object.
+| Object | Already in practice | What the joint VAR adds |
+|---|---|---|
+| Discount rate | CAPM or multi-factor cost of equity, sometimes with a fading premium | A curve $\mu_t(n)$ whose *shape* is disciplined by $\Phi$, not by a hand-set fade |
+| Cash flows | Analyst or internal forecasts; residual income | An optional VAR numerator; not required, and not identified as growth in Section 5 |
+| $g$–$\mu$ interaction | Implicit in scenarios, or ignored | $-2\,\mathrm{Cov}_t(\sum g,\sum\mu)$ inside the *price* if both sides come from $X$ |
+| Terminal value | Gordon or a fade to a long-run $(r,g)$ | The tail of the same recursion, when the cash-flow name is growth |
+| Duration | Sensitivity tables | $b(n)$ and $H(n)$ that vary with horizon |
 
-- “Rates are low today so growth stocks should be worth more” becomes
-  a computed curve $\mu_t(n)$ whose slope depends on estimated
-  persistence.
-- “Uncertainty is high so I add a premium” becomes the
-  sign-disciplined $\tfrac12\mathrm{Var}$ and $-2\,\mathrm{Cov}$ terms.
-- “This stock is riskier” becomes a $\beta_t$ series with measured
-  volatility and persistence.
+The comparison that matters is not “spreadsheet versus VAR.” It is
+whether the rate at year ten is today’s short rate, a historical
+average, or a forecast that mean-reverts at an estimated speed
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). A flat
+rate at *today’s* high $\mu_t(1)$ discounts every horizon too hard.
+A historical-average rate on a date when the fitted curve sits
+*below* that average is too high at the short end. Signed error
+$(\text{wrong}-\text{correct})/\text{correct}$ is negative when the
+wrong model produces the smaller present value. The error scales with
+duration.
 
-When the valuation is wrong, you can trace *which link* failed —
-premium regression, beta dynamics, or the cash-flow process — instead
-of re-arguing the whole model.
+Traded dividend claims
+([van Binsbergen, Brandt, and Koijen, 2012](../references.md#vbbk-2012);
+[van Binsbergen and Koijen, 2017](../references.md#vbk-2017)) later
+measured a term structure of *returns* on the cash-flow strip — a
+cousin of $\mu_t(n)$, not a direct test of a fitted curve.
 
-## The honest caveat
+Isolation (`isolate_channels`) asks the counterfactual version of the
+same question: shut a named state on one side and revalue. On the
+Section 5 companion the discount-side call raises
+`PerpetuityDivergesError`. That counterfactual curve does not exist
+here.
 
-Everything hinges on $\hat\Phi$ and $\hat\Sigma$. The priced recursion
-accumulates $\Phi^n$, so an overestimate of persistence compounds into
-large errors at long horizons.
-[Stambaugh (1999)](../references.md#stambaugh-1999) bias guarantees
-you overestimate persistence in short samples with persistent
-predictors.
+## What this sample cannot show
 
-You have traded transparent assumptions (a WACC you can argue about)
-for statistical assumptions that are harder to interrogate and just as
-consequential. Use the system to understand the **shape** of the
-discount curve and the **sign** of the growth–rate interaction. Be
-skeptical of the third decimal place.
+Section 5 is a software demonstration. The caveats are load-bearing.
 
-Estimation risk does not shrink the errors — it compounds them.
-Inspect `fit.spectral_radius` and the cash-flow own-lag before you
-publish a present value. The checklist is on
+- **80 firms, not 2,673.** The prepared state has 2,673 names. The
+  companion is pooled on the 80 longest histories. Those are not the
+  same sample. The 80 are survivors of a short window.
+- **2015–2019, not 1965–2019.** A research firm panel would start in
+  1965 or 1973. Overlapping annual pairs on four years are few; the
+  $r$ and $\pi$ loadings on the `roe` row are short-panel artifacts.
+- **Look-ahead in $(\xi,\Lambda)$.** The premium regression uses
+  market returns through December 2024 to value a September 2019
+  state. $b_0$ is precise ($t=3.41$). The slopes that make
+  $\lambda_t$ *move* have $|t|<2$. $\alpha=0.02$ is a calibration
+  intercept, not an estimate.
+- **Twelve-month betas.** The library convention is 60 months
+  ([Lewellen and Nagel, 2006](../references.md#lewellen-nagel-2006)
+  discuss the noise in short-window slopes).
+- **`roe` is not a cash-flow growth rate** and is not Vuolteenaho’s
+  $e_t$. No equity present value is reported. Residual income is
+  cited, not computed.
+- **The news identity does not close.**
+  `residual_share`$\,=2434$ is a failed diagnostic, not a
+  confirmation of [Vuolteenaho (2002)](../references.md#vuolteenaho-2002).
+
+[Stambaugh (1999)](../references.md#stambaugh-1999) bias still
+applies: persistence is overstated in short samples with persistent
+predictors, and the priced recursion compounds $\Phi^n$. Use the
+system to read the **shape** of the discount curve and, when both
+sides come from $X$, the **sign** of the growth–rate interaction. Be
+skeptical of the third decimal place. The checklist is on
 [Estimation](estimate.md#what-can-go-wrong).

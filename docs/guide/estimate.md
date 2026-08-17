@@ -21,9 +21,9 @@ $$
 
 | Name | What it is | How this library builds it |
 |---|---|---|
-| `g` | log cash-flow growth | Hodrick trailing dividends from total vs. ex-div returns |
-| `roe` | log profitability | $\log(\mathrm{NI}_t / \mathrm{BE}_{t-1})$ at the firm |
-| `beta` | rolling CAPM slope | 60-month window on excess returns |
+| `g` | log cash-flow growth | Hodrick (1992) trailing dividends from total vs. ex-div returns |
+| `roe` | log profitability *level* | $\log(\mathrm{NI}_t / \mathrm{BE}_{t-1})$; not Vuolteenaho $e_t$ |
+| `beta` | rolling CAPM slope | 60-month window; Section 5 uses 12 |
 | `dpo` | payout | log dividends minus log earnings, when both exist |
 | `bm` | book-to-market | firm panel |
 | `r` | one-year rate | FRED GS1, continuously compounded |
@@ -56,8 +56,10 @@ literatures and is the subject of [StateSpec](spec.md#where-the-names-come-from)
 A rolling regression of the firm’s log excess return on the market’s
 log excess return. The slope in each window *is* $\beta_t$ — a data
 series, not an assumption. Section 5 uses a twelve-month window
-because the CRSP sample is short; `BETA_WINDOW = 60` in
-`varvaluation.betas` is the longer convention.
+because the CRSP extract is short; `BETA_WINDOW = 60` in
+`varvaluation.betas` is the longer convention
+([Lewellen and Nagel, 2006](../references.md#lewellen-nagel-2006)
+discuss the noise in short-window slopes).
 
 Rolling betas are noisy. They genuinely move; they are also estimated
 with a short window. Treat them as a measured input, not a fact.
@@ -81,15 +83,31 @@ $$
 $$
 
 Section 5 runs this regression with Newey–West (12-lag) standard
-errors on overlapping annual market returns. The fitted coefficients
-become $(\xi,\Lambda)$ through `ExpectedReturnSpec`. In the firm
-illustration, $b_0=+0.095$ ($t=3.41$), $b_r=-0.737$ ($t=-1.49$),
-$b_{\mathit{cay}}=+0.708$ ($t=1.72$).
+errors on overlapping annual market returns
+([Hodrick, 1992](../references.md#hodrick-1992);
+[Newey and West, 1987](../references.md#newey-west-1987)). The
+fitted coefficients become $(\xi,\Lambda)$ through
+`ExpectedReturnSpec`. In the firm illustration,
+$b_0=+0.095$ ($t=3.41$), $b_r=-0.737$ ($t=-1.49$),
+$b_{\mathit{cay}}=+0.708$ ($t=1.72$). The sample is July 1965–
+December 2024. The valuation date in Section 5 is September 2019.
+That is **look-ahead**: later returns enter $(\xi,\Lambda)$ used to
+price an earlier $X_t$. A no-look-ahead vintage would stop the
+premium regression at 2019-09.
+
+$b_0$ is precise. The two slopes that make $\lambda_t$ *move* have
+$|t|<2$. On this vintage the quadratic term $H(n)$ is not identified.
+$\alpha=0.02$ in `ValuationModel.from_var` is a **calibration
+intercept**, not an estimate. It shifts every spot rate by about two
+percentage points.
 
 The premium regression is the fragile link. Coefficients at an annual
 horizon are imprecise; $\mathit{cay}$’s predictive power weakens
-without look-ahead. The framework at least tells you *which* link is
-fragile.
+without look-ahead
+([Goyal and Welch, 2008](../references.md#goyal-welch-2008)). The
+staging at least tells you *which* link is fragile. It is the same
+staging as Ang and Liu (2004, §III), not a single-equation
+identification of the product.
 
 ## 4. Estimate the VAR
 
@@ -100,13 +118,16 @@ $$
 X_{t+h} = c + \Phi X_t + u_{t+h}.
 $$
 
-On monthly data, `horizon=12` is an overlapping annual design. Adjacent
+On monthly data, `horizon=12` is an overlapping annual design
+([Hodrick, 1992](../references.md#hodrick-1992)). Adjacent
 pairs share eleven months, so ordinary standard errors would overstate
 confidence. `nw_lags=12` Newey–West standard errors
 ([Newey and West, 1987](../references.md#newey-west-1987)) are the
 correction: they estimate the covariance of the errors over a window of
 lags and inflate the uncertainty. Read “Newey–West, 12 lags” as
-“standard errors honest about the overlap.”
+“standard errors honest about the overlap.” Stacked Newey–West on the
+Section 5 panel is not date-clustered; no standard errors are printed
+there.
 
 `estimate_var_panel` does the same thing on a firm panel, but forms
 lag pairs **only inside** `spec.group`. A firm needs more months than
@@ -123,6 +144,11 @@ print(fit.Phi[spec.cashflow_index()])
 ``` text title="Terminal"
 nobs=2240  spectral_radius=0.995  Phi[roe,roe]=+0.458
 ```
+
+Those 2,240 pairs are the **80** longest firms, not the 2,673 in the
+prepared state. $\Phi_{\mathit{roe},\mathit{roe}}=0.46$ is a pooled
+own-lag of profitable-year $\log(\mathrm{NI}/\mathrm{BE})$ in
+2015–2019.
 
 `VARFit` holds $\Phi$, $c$, $\Sigma$, Newey–West `se`, residuals, the
 lagged design `X_lag`, and `spectral_radius`. The inbound frame is
@@ -158,14 +184,16 @@ rather than assumed away.
 
 | Fragile link | Symptom | What to inspect |
 |---|---|---|
-| Own-lag of $g$ near $1$ | $\mathbb{E}_t[C_{t+n}]/C_t$ explodes | `fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` |
+| Own-lag of $g$ near $1$, or a *level* in the CF slot | $\mathbb{E}_t[C_{t+n}]/C_t$ is not a price | `fit.Phi[spec.cashflow_index(), spec.cashflow_index()]`; use `spot_rates` on a path you have |
 | Spectral radius $\ge 1$ | `from_var` refuses | `fit.spectral_radius` |
-| Noisy rolling betas | $\mu_t(n)$ jitters at the short end | beta window, `var(beta)` |
-| Weak premium regression | $\lambda_t$ barely moves | $t$-stats on $b_r$, $b_{\mathit{cay}}$ |
+| Noisy rolling betas | $\mu_t(n)$ jitters at the short end | 12 vs 60-month window, `var(beta)` |
+| Weak premium regression | $\lambda_t$ barely moves; $H(n)$ unidentified | $t$-stats on $b_r$, $b_{\mathit{cay}}$ |
+| Look-ahead in $(\xi,\Lambda)$ | later returns price an earlier $X_t$ | premium sample end vs valuation date |
+| Calibration $\alpha$ | every spot rate shifts by $\alpha$ | do not treat $0.02$ as an estimate |
 | Stambaugh bias | persistence overstated in short samples | long-horizon `value` vs `perpetuity` |
 | Terminal rate $\le 0$ | `PerpetuityDivergesError` | last `spot_rates` entry |
 
-You have traded a WACC you can argue about over coffee for statistical
+You have traded a rate you can argue about over coffee for statistical
 assumptions that are harder to interrogate and just as consequential.
 [Stambaugh (1999)](../references.md#stambaugh-1999) bias guarantees that
 persistence is overstated in short samples with persistent predictors;

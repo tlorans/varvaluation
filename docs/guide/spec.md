@@ -25,12 +25,17 @@ spec.cashflow_index()     # 0
 names=('roe', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=roe  cashflow_index=0  group=permno
 ```
 
-Section 5 builds this spec on 2,673 firms. A single-series spec omits
-`group` and may name `g` in place of `roe`.
+Section 5 builds this spec on 2,673 firms; the companion is the 80
+longest histories. A single-series spec omits `group` and may name
+`g` in place of `roe`.
 
 `cashflow` is the most important argument. It tells both recursions
 which row of $\Phi$ is the growth (or profitability) variable. At the
-firm that name is `roe`.
+firm that name is `roe`. That `roe` is
+$\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$: a profitability
+*level*, built only when $\mathrm{NI}>0$. It is not log dividend
+growth, and it is not [Vuolteenaho’s](../references.md#vuolteenaho-2002)
+$e_t=\log(1+X_t/B_{t-1})$ (clean-surplus earnings, return units).
 
 Unknown, duplicate, or empty names raise `StateSpecError`. There is no
 integer index in the public API.
@@ -96,17 +101,17 @@ The cash-flow side is the profitability-forecasting literature.
   spread, and document multi-year fade in those pieces. They do
   **not** estimate a negative rates-to-profitability regression; do
   not hang $\Phi[\texttt{roe}, r]<0$ on that paper.
-- **At the firm, cash-flow news dominates.**
+- **Vuolteenaho’s object is different.**
   [Vuolteenaho (2002)](../references.md#vuolteenaho-2002) decomposes
-  firm-level stock returns and finds cash-flow news, not
-  expected-return news, drives most of the variance (for a typical
-  stock, more than twice the expected-return-news variance). The
-  joint distribution the VAR prices is first-order for firms — not a
-  refinement.
+  firm-level returns using clean-surplus
+  $e_t=\log(1+X_t/B_{t-1})$ and finds, for a typical stock,
+  cash-flow-news variance more than twice expected-return-news
+  variance. This library’s `roe` is not that $e_t$. Section 5 does
+  not reproduce the decomposition and does not confirm the finding.
 - **Persistence prices into multiples.** More mean-reverting
   profitability deserves a lower multiple. That is why the own-lag of
-  `spec.cashflow` is the first number to inspect before you publish a
-  present value.
+  `spec.cashflow` is the first number to inspect before you call
+  `value`. When the name is a *level*, do not call `value`.
 
 ### What moves expected returns
 
@@ -115,18 +120,21 @@ honest survivorship story.
 
 | Predictor | Standing | In a typical $X_t$? |
 |---|---|---|
-| Dividend yield | Weak by 2000 in- and out-of-sample ([Goyal and Welch, 2003](../references.md#goyal-welch-2003)) | No — deliberately dropped |
+| Dividend yield | Weak in- and out-of-sample ([Goyal and Welch, 2003](../references.md#goyal-welch-2003); [Goyal and Welch, 2008](../references.md#goyal-welch-2008)). The present-value identity can still imply return predictability ([Cochrane, 2008](../references.md#cochrane-2008); [van Binsbergen and Koijen, 2010](../references.md#vbk-2010)) | No — deliberately dropped |
 | Short rate | The robust short-horizon instrument ([Fama and Schwert, 1977](../references.md#fama-schwert-1977)) | Yes — `r` |
 | Term spread | More a bond result than an equity one | No |
 | Default spread | Used in some return systems | No (parsimony) |
-| $\mathit{cay}$ | Strong quarterly predictor, including out of sample ([Lettau and Ludvigson, 2001](../references.md#lettau-ludvigson-2001)) | Yes — `cay` |
+| $\mathit{cay}$ | Strong *in-sample* quarterly predictor ([Lettau and Ludvigson, 2001](../references.md#lettau-ludvigson-2001)). Whether it survives look-ahead-free and out-of-sample tests is disputed ([Goyal and Welch, 2008](../references.md#goyal-welch-2008)) | Yes — `cay`, with that caveat |
 | Inflation | Negative relation with stock returns ([Fama and Schwert, 1977](../references.md#fama-schwert-1977)) | Yes — `pi` |
-| Beta dynamics | Loadings move ([Fama and French, 1997](../references.md#ff-1997)) | Yes — `beta` (rolling) |
+| Beta dynamics | Loadings move ([Fama and French, 1997](../references.md#ff-1997)). Short-window slopes are noisy ([Lewellen and Nagel, 2006](../references.md#lewellen-nagel-2006)) | Yes — `beta` (rolling) |
 
 Selecting $X_t$ is applied predictability research, not free taste.
 Dividend yield — the most famous predictor — was dropped because its
-power collapsed; the short rate and $\mathit{cay}$ were kept because
-they survive. Citations for this table sit on
+forecasting power collapsed out of sample. The short rate is kept
+because the short-horizon relation is robust. $\mathit{cay}$ is kept
+as an in-sample state, not as a settled out-of-sample predictor.
+Section 5’s FRED reconstruction is not Lettau and Ludvigson’s
+cointegrating residual. Citations for this table sit on
 [References](../references.md).
 
 ### Why the two sides share a border

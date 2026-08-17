@@ -63,9 +63,12 @@ print(fit.nobs, fit.spectral_radius, fit.Phi[spec.cashflow_index(), spec.cashflo
 2240  0.995  0.458
 ```
 
-$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ is mean reversion of firm
-profitability. `fit.spectral_radius` is the largest absolute
-eigenvalue of $\Phi$.
+$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ is the pooled own-lag of
+$\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$ on the **80** longest
+histories in the 2015–2019 window of Section 5, not a fade coefficient
+from a long firm panel
+([Fama and French, 2000](../references.md#ff-2000)).
+`fit.spectral_radius` is the largest absolute eigenvalue of $\Phi$.
 
 ### Forecasting is recursive bookkeeping
 

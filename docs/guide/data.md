@@ -31,9 +31,11 @@ state = prepare_portfolio_state(
 
 - **`g`** — monthly dividends are backed out of the gap between returns
   with and without dividends, then summed over twelve months to remove
-  seasonality (Hodrick). $g_t=\log(D_t/D_{t-1})$.
+  seasonality
+  ([Hodrick, 1992](../references.md#hodrick-1992)).
+  $g_t=\log(D_t/D_{t-1})$.
 - **`beta`** — 60-month rolling CAPM slope of log excess returns on the
-  market.
+  market. Section 5 uses 12 months because that extract is short.
 - **`dpo`** — log payout when both dividends and a positive earnings
   proxy exist.
 
