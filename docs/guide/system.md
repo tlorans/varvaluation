@@ -1,8 +1,8 @@
-<p class="part-kicker">Part 03 · The joint system</p>
+<p class="part-kicker">Part 03 · The framework</p>
 
 # The VAR
 
-<p class="you-will"><strong>You will.</strong> Write one law of motion that forecasts cash flows and expected returns together.</p>
+<p class="you-will"><strong>You will.</strong> Write the joint system that makes the research program askable: both sides of the product from one law of motion.</p>
 
 You cannot price the product from two separate forecasts. The
 expectation of a product is a property of the joint distribution

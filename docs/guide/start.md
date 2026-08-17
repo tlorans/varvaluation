@@ -30,6 +30,6 @@ The smallest statistical object that produces both forecasts, and how they move 
 
 ## Where you go next
 
-You have felt the error. The [research program](program.md) said what would count as explaining it from data. The next hour is the joint system: one law of motion, a formula for the product that you evaluate rather than simulate, and names for every coordinate.
+You have felt the error. The [research program](program.md) is which named variables move that gap. The next hour is the *framework*: one joint system of regressions, so both sides of the product come from the same law, and names for every coordinate.
 
 Public files — Ken French portfolios and FRED macros, then a discount curve estimated from them — are [Part 04](data.md). Individual firms are [Part 06](wrds.md). Do not start there.

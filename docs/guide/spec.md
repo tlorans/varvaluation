@@ -1,4 +1,4 @@
-<p class="part-kicker">Part 03 · The joint system</p>
+<p class="part-kicker">Part 03 · The framework</p>
 
 # The state
 

@@ -4,7 +4,7 @@
 
 # Explain asset values from data
 
-<p class="hero-lead">Present value is what a claim is worth today. When expected returns are allowed to change, that value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period expected returns along the way. Using the same rate at every horizon is a special case, not a method. This handbook is how you enter the research program that treats that product as something you can measure.</p>
+<p class="hero-lead">Which variables drive what a claim is worth? When expected returns are allowed to change, present value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period expected returns along the way. The joint system that estimates both sides together is the <strong>framework</strong> — background you need. The <strong>research program</strong> is the contents of the state: which named variables move the value, not which characteristics line up average returns.</p>
 
 [The research program](guide/program.md){ .md-button .md-button--primary }
 [Install](install.md){ .md-button }
@@ -43,12 +43,12 @@ flat PV vs curve +8.0%
 ## Browse the handbook
 
 <div class="topic-cards">
-<a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>What would count as explaining asset values from data, and which paper you could write next.</span></a>
+<a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>Which named variables drive asset values — not which factors line up average returns.</span></a>
 <a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why one rate is the wrong tool, then learn the words you will carry.</span></a>
-<a href="guide/system/"><span class="part">Part 03</span><strong>The joint system</strong><span>Write one law of motion that carries cash flows and expected returns together.</span></a>
+<a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>The joint system is background: both sides of the product must come from one law of motion.</span></a>
 <a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>
 <a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Ask what part of last period's surprise came from cash flows, and what part from discount rates.</span></a>
 <a href="guide/walkthrough/"><span class="part">Part 06</span><strong>Firms</strong><span>Repeat the same steps on individual firms and draw three curves.</span></a>
 </div>
 
-The formulas that evaluate the product without simulation are [Ang and Liu (2004)](references.md#ang-liu-2004). The package is the bench. If you already have a cash-flow forecast and only need the denominator, skip to [For valuators](guide/practice.md).
+The formulas that evaluate the product without simulation are [Ang and Liu (2004)](references.md#ang-liu-2004). That is the framework. The package is the bench for asking which states move the curve. If you already have a cash-flow forecast and only need the denominator, skip to [For valuators](guide/practice.md).

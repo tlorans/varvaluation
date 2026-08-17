@@ -1,5 +1,5 @@
 site_name: Explain asset values from data
-site_description: A handbook for the research program that treats present value as the expectation of a product
+site_description: Which state variables drive asset values — a handbook. The joint VAR is the framework, not the program.
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -37,7 +37,7 @@ nav:
   - 02 Getting started:
       - Start here: guide/start.md
       - Why a product: guide/introduction.md
-  - 03 The joint system:
+  - 03 The framework:
       - The VAR: guide/system.md
       - Present value: guide/valuation.md
       - The state: guide/spec.md

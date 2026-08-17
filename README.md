@@ -1,14 +1,14 @@
 # varvaluation
 
-Present value is what a claim is worth today. When expected returns
-are allowed to change, that value is the expectation of a product:
+Which variables drive what a claim is worth? When expected returns
+are allowed to change, present value is the expectation of a product:
 each future cash flow multiplied by the sequence of one-period
-expected returns along the way. Using the same rate at every horizon
-is a special case, not a method. This package is the bench for the
-research program that treats that product as something you can
-measure. The formulas are Ang and Liu (2004). The cash-flow piece of
-a return surprise is read from the cash-flow equation, not from a
-leftover.
+expected returns along the way. A joint system of regressions is the
+framework that estimates both sides together. The research program is
+the contents of the state — which named variables move the value —
+not which characteristics line up average returns. The formulas are
+Ang and Liu (2004). The cash-flow piece of a return surprise is read
+from the cash-flow equation, not from a leftover.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 The firm illustration is a software demonstration on a short window
