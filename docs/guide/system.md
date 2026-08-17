@@ -103,6 +103,18 @@ c: [0.0027 0.0015]
 
 Both eigenvalues of $\Phi$ sit well inside the unit circle. The off-diagonal entries are small but non-zero — they are exactly the cross-forecast channels that carry part of the covariance into the product.
 
+The data the VAR is estimated on:
+
+![Simulated paths of return and growth](../assets/figures/simulated_state.svg)
+
+The contemporaneous piece of $\Sigma$ is visible in the residual scatter. Separate models of growth and of returns would never produce this joint cloud:
+
+![VAR residual scatter (shock covariance)](../assets/figures/var_residuals.svg)
+
+Because $\Phi$ is stable, multi-step forecasts glide back to the unconditional mean — the source of a non-flat spot curve:
+
+![Multi-step conditional expectations](../assets/figures/var_expectations.svg)
+
 ---
 
 ## Reading the state two ways

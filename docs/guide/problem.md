@@ -138,6 +138,12 @@ Mean reversion in the expected return already produces a non-flat curve:
 
 ![Mean reversion in expected returns](../assets/figures/mean_reversion.png)
 
+On the same synthetic state used throughout this course (seed 7) the effect is concrete. The joint VAR produces a rising spot curve $\mu_t(n)$. Discounting a 15-year unit annuity at the short rate $\mu_t(1)$ instead of the curve over-states present value by **+12.8 %**:
+
+![Flat versus curve discount factors](../assets/figures/flat_vs_curve_factors.svg)
+
+The shaded region is exactly the mispricing that appears when the product identity is replaced by a ratio of expectations.
+
 ## What we will compute
 
 Given a fitted VAR for $X_t$ and $\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t$:

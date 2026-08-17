@@ -72,6 +72,8 @@ cf = model.cashflow_expectation(X, n=30)
 |---:|---:|---:|---:|---:|
 | $E_t[C_{t+n}]/C_t$ | 0.999 | 1.008 | 1.021 | 1.034 |
 
+![Cash-flow recursion and the rising spot curve](../assets/figures/recursions.svg)
+
 ---
 
 ## 2. Priced recursion
@@ -118,7 +120,7 @@ spots = model.spot_rates(X, n=30)   # μ_t(1), …, μ_t(30)
 |---:|---:|---:|---:|---:|
 | $\mu_t(n)$ (%) | 2.37 | 3.78 | 4.09 | 4.19 |
 
-The curve rises from 2.4 % at $n=1$ toward roughly 4.2 % at long horizons. Locking the discount rate at $\mu_t(1)$ would misprice every longer strip.
+The curve rises from 2.4 % at $n=1$ toward roughly 4.2 % at long horizons. Locking the discount rate at $\mu_t(1)$ would misprice every longer strip — on this state the 15-year unit annuity is **+12.8 %** higher under the flat rate (see the discount-factor figure on the previous page).
 
 !!! note "The practical bridge"
     Forecast cash however you like; discount at $\mu_t(n)$. Each spot already contains the covariance correction. The two-step workflow survives; only the single WACC is replaced by a curve.
