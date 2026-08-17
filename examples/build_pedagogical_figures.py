@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,7 +22,7 @@ OUT = ROOT / "docs" / "assets" / "figures"
 
 plt.rcParams.update(
     {
-        "font.family": "serif",
+        "font.family": "DejaVu Serif",
         "font.size": 10,
         "axes.spines.top": False,
         "axes.spines.right": False,
@@ -54,6 +56,7 @@ def main() -> None:
     rates = model.spot_rates(X, n=n)
     cf = model.cashflow_expectation(X, n=n)
 
+    # ── 1. Simulated state paths ────────────────────────────────────
     ret = df["ret"].to_numpy()
     g = df["g"].to_numpy()
     t = np.arange(len(ret))
@@ -69,6 +72,7 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "simulated_state.svg")
 
+    # ── 2. Residual scatter = contemporaneous covariance in Σ ───────
     u = fit.residuals
     idx = np.linspace(0, len(u) - 1, 120).astype(int)
     fig, ax = plt.subplots(figsize=(4.6, 4.0))
@@ -84,6 +88,7 @@ def main() -> None:
     ax.legend(frameon=False, loc="upper left")
     _save(fig, "var_residuals.svg")
 
+    # ── 3. Multi-step conditional expectations ──────────────────────
     K = fit.Phi.shape[0]
     eye = np.eye(K)
     Phi = fit.Phi
@@ -96,7 +101,7 @@ def main() -> None:
         else:
             Phi_h = np.linalg.matrix_power(Phi, h)
             EX[i] = (eye - Phi_h) @ np.linalg.solve(eye - Phi, c) + Phi_h @ X
-    mu_path = alpha + EX @ xi
+    mu_path = alpha + EX @ xi  # Lambda = 0
 
     fig, axes = plt.subplots(3, 1, figsize=(6.2, 5.4), sharex=True)
     axes[0].plot(horizons, 100 * EX[:, 0], "o-", color="#1d4e89", ms=3, lw=1.2)
@@ -113,6 +118,7 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "var_expectations.svg")
 
+    # ── 4. Cash-flow recursion + spot curve ─────────────────────────
     mat = np.arange(1, n + 1)
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4))
     axes[0].plot(mat, cf, "o-", color="#1d4e89", ms=4, lw=1.4)
@@ -129,6 +135,7 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "recursions.svg")
 
+    # ── 5. Flat vs curve annuity factors ────────────────────────────
     curve_disc = np.exp(-mat * rates)
     flat_disc = np.exp(-mat * rates[0])
     fig, ax = plt.subplots(figsize=(6.0, 3.6))
