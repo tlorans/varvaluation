@@ -35,6 +35,7 @@ nav:
   - Install: install.md
   - Quickstart: quickstart.md
   - Guide:
+      - The idea: guide/idea.md
       - StateSpec: guide/spec.md
       - Valuation: guide/valuation.md
       - News: guide/news.md

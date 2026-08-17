@@ -18,12 +18,22 @@ xi, Lambda = ExpectedReturnSpec().xi_lambda(
     spec, {"b0": 0.05, "br": -0.15, "bcay": 2.0}
 )
 model = AngLiuModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.002)
-rates = model.spot_rates(fit.X_lag[-1], n=30)
-value = model.value(fit.X_lag[-1], n=80)
-news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
+X = fit.X_lag[-1]
+rates = model.spot_rates(X, n=30)            # discount curve
+cf    = model.cashflow_expectation(X, n=30)  # E_t[C_{t+n}] / C_t
+perp  = model.perpetuity(X)                  # Ang–Liu: numerator frozen at 1
+value = model.value(X, C=1.0, n=80)          # both recursions
+news  = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 ```
 
-`news.frame["cf"]` is cash-flow news from the `g` equation. `news.frame["residual"]` is the identity leftover, not the definition of cash-flow news.
+`perpetuity` is Ang and Liu’s published design (unit cash flow). `value`
+turns on the cash-flow recursion they derived and did not use. Prefer
+`perpetuity` at the portfolio if $\Phi_{g,g}$ is near one; use `value` at
+the firm. The full argument is on [Valuation](guide/valuation.md).
+
+`news.frame["cf"]` is cash-flow news from the `g` equation.
+`news.frame["residual"]` is the identity leftover, not the definition of
+cash-flow news.
 
 `treasury_test()` runs the Chen check: known cash flows ⇒ direct CF news ≈ 0.
 
