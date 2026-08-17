@@ -111,13 +111,13 @@ model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
 ## Roadmap
 
 <div class="topic-cards">
-<a href="guide/literature/"><span class="part">00</span><strong>Literature</strong><span>State variables, VAR specifications, and other asset classes.</span></a>
 <a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, why a flat rate fails.</span></a>
 <a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Why the VAR is the minimum object that carries the covariance.</span></a>
 <a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, priced recursion, spot rates $\mu_t(n)$.</span></a>
 <a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$.</span></a>
 <a href="guide/reproduce/"><span class="part">05</span><strong>Worked example</strong><span>Estimate, recurse, read the curve.</span></a>
 <a href="guide/industries/"><span class="part">06</span><strong>Other portfolios</strong><span>Same map, different universe.</span></a>
+<a href="guide/literature/"><span class="part">07</span><strong>Going further</strong><span>State variables, VAR specifications, and other asset classes.</span></a>
 </div>
 
 Formulas: [Ang and Liu (2004)](references.md#ang-liu-2004).

@@ -33,13 +33,13 @@ theme:
 
 nav:
   - Home: index.md
-  - Where the literature stands: guide/literature.md
   - The problem: guide/problem.md
   - One system: guide/system.md
   - The two recursions: guide/curve.md
   - Building the state: guide/state.md
   - Worked example: guide/reproduce.md
   - Other portfolios: guide/industries.md
+  - Going further: guide/literature.md
   - Software:
       - Install: install.md
       - API: api.md

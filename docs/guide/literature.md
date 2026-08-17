@@ -1,6 +1,8 @@
-# Where the literature stands
+# Going further
 
-The three-step map (product → covariance → one VAR) is asset-class agnostic. What changes across papers is **which coordinates enter \(X_t\)** and **which claim is being priced**. This page situates those choices before the course builds the machinery.
+You now have the three-step map, the two recursions, and a full offline sprint. This page is optional orientation: where the literature stands on **state-variable choices** and on **applications beyond equity portfolios**.
+
+The map (product → covariance → one VAR) is asset-class agnostic. What changes across papers is **which coordinates enter \(X_t\)** and **which claim is being priced**.
 
 ---
 
@@ -35,7 +37,7 @@ Ang and Liu’s empirical system is six-dimensional (growth, beta, and instrumen
 - **What sits outside the VAR.** A full Treasury curve can be kept *outside* \(X_t\) and supplied as data when forming spot rates — common in applications that already have a fitted yield curve.
 - **Pooled vs firm-by-firm.** A single companion on stacked lag pairs is not the same object as firm-level companions. Cross-firm lagging is a specification error the panel estimator is designed to avoid.
 
-The next pages ([One system](system.md), [Building the state](state.md)) turn these choices into concrete matrices and named coordinates.
+[Building the state](state.md) turns these choices into named coordinates; [One system](system.md) is where \(\Phi\) and \(\Sigma\) enter the map.
 
 ---
 
@@ -81,4 +83,4 @@ You should be able to:
 3. State, for bonds, real estate, and commodities, what plays the role of “cash flow” and what plays the role of “expected return.”
 4. Explain why the three-step map does not change when the claim changes — only the measurement of \(X_t\) does.
 
-The course now builds the product identity, the joint VAR, and the two recursions on a synthetic equity state. Other portfolios and other asset classes re-use the same objects.
+Full bibliography: [References](../references.md).
