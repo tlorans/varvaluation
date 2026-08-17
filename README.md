@@ -1,0 +1,66 @@
+# varvaluation
+
+VAR-based valuation and cash-flow / discount-rate news for Python.
+
+Given a named state vector, the library estimates a VAR(1), builds the Ang and Liu (2004) quadratic-Gaussian discount curve, and decomposes unexpected returns into **cash-flow news** and **discount-rate news**. Cash-flow news is taken from the cash-flow equation, not from the residual (Chen, Da, Zhao 2013).
+
+This is the public library. The teaching course lives at [tlorans/var_valuation](https://github.com/tlorans/var_valuation).
+
+## Install
+
+```text
+uv add varvaluation
+uv add "varvaluation[data]"          # Ken French / FRED / cay  (coming next)
+uv add "varvaluation[wrds,climate]"  # paper stack              (coming next)
+```
+
+Python 3.11+. Managed with `uv`.
+
+## Ten-line path
+
+```python
+import numpy as np
+import polars as pl
+from varvaluation import (
+    StateSpec,
+    ExpectedReturnSpec,
+    estimate_var,
+    AngLiuModel,
+    news_decomposition,
+)
+
+spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
+fit = estimate_var(df, spec)  # Polars frame with date + those columns
+
+xi, Lambda = ExpectedReturnSpec().xi_lambda(
+    spec, {"b0": 0.05, "br": -0.15, "bcay": 2.0}
+)
+model = AngLiuModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.002)
+rates = model.spot_rates(fit.X_lag[-1], n=30)
+value = model.value(fit.X_lag[-1], n=80)
+news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
+```
+
+`news.frame["cf"]` is the cash-flow-equation series. The identity leftover is `news.frame["residual"]`, never the definition of cash-flow news. `treasury_test()` is the Chen check: known cash flows, direct CF news ≈ 0.
+
+## What is in 0.1
+
+| Layer | Status |
+|---|---|
+| `StateSpec`, Pandera schemas, Newey–West VAR(1) / panel VAR | shipped |
+| Ang–Liu spot curve, PV, named channel isolation | shipped |
+| Chen-aware news + Treasury diagnostic | shipped |
+| `[data]` Ken French / FRED / cay | extra stub (loaders next) |
+| `[wrds]` firm panel | extra stub |
+| `[climate]` scenarios | extra stub |
+
+## References
+
+- Ang, A. and J. Liu (2004), “How to Discount Cash Flows with Time-Varying Expected Returns,” *Journal of Finance* 59(6), 2745–2783.
+- Ang, A. and J. Liu (2001), “A General Affine Earnings Valuation Model,” *Review of Accounting Studies* 6, 397–425.
+- Campbell, J. Y. (1991), “A Variance Decomposition for Stock Returns,” *Economic Journal* 101, 157–179.
+- Chen, L., Z. Da, and X. Zhao (2013), “What Drives Stock Price Movements?” *Review of Financial Studies* 26(4), 841–876.
+
+## License
+
+MIT
