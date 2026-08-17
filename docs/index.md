@@ -4,13 +4,16 @@ An exposition of the joint VAR, implemented in `varvaluation`
 
 !!! abstract "Abstract"
 
-    Once expected returns move, a constant-rate DCF is a different
-    random variable from the present value: dividing $\mathbb{E}_t[C]$
-    by a path of rates is not the same object as
-    $\mathbb{E}_t[C\times\text{discount path}]$. The well-defined
-    object is that conditional expectation of a product
-    ([Ang and Liu, 2004](references.md#ang-liu-2004), eq. 2). This
-    document is an exposition of that framework and a named-state
+    Present value is the conditional expectation of a product: each
+    cash flow times a path of one-period expected returns
+    ([Ang and Liu, 2004](references.md#ang-liu-2004), eq. 2). A
+    constant-rate DCF does something else. It forecasts cash flows,
+    divides them by one $r$, and calls the sum a value. Those two
+    calculations agree only when expected returns do not move. In
+    general $\mathbb{E}[XY]\ne\mathbb{E}[X]\,\mathbb{E}[Y]$, so
+    pulling the rate out of the expectation is not an approximation
+    of the present value — it is a different calculation. This
+    document is an exposition of the product and a named-state
     implementation in Python (`StateSpec` binds names to columns).
     It does not derive a new closed form.
     What is not in the 2004 paper is the public binding of names to

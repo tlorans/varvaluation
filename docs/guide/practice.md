@@ -1,8 +1,10 @@
 # 6. Discussion
 
 A constant-rate DCF and the framework of Sections 2–5 answer the same
-question (what a claim to future cash flows is worth) by identifying
-different random variables. Discount-rate variation is not a refinement
+question — what a claim to future cash flows is worth — by doing
+different calculations. The DCF divides expected cash flows by one
+rate. The present value is the expectation of cash flows times a path
+of one-period expected returns. Discount-rate variation is not a refinement
 ([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
 curve, the numerator, and the sign of the growth–rate interaction
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). This section
