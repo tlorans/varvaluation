@@ -1,0 +1,75 @@
+site_name: varvaluation
+site_description: VAR-based valuation and Chen-aware cash-flow / discount-rate news
+site_url: https://tlorans.github.io/varvaluation/
+repo_url: https://github.com/tlorans/varvaluation
+repo_name: tlorans/varvaluation
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  font:
+    text: Source Serif 4
+    code: Source Code Pro
+  features:
+    - navigation.sections
+    - navigation.instant
+    - content.code.copy
+    - toc.follow
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Quickstart: quickstart.md
+  - Guide:
+      - StateSpec: guide/spec.md
+      - Valuation: guide/valuation.md
+      - News: guide/news.md
+      - Public data: guide/data.md
+      - Climate: guide/climate.md
+      - WRDS / firms: guide/wrds.md
+  - API: api.md
+  - References: references.md
+
+exclude_docs: |
+  superpowers/
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/math.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tlorans/varvaluation

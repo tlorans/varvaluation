@@ -4,7 +4,7 @@ VAR-based valuation and cash-flow / discount-rate news for Python.
 
 Given a named state vector, the library estimates a VAR(1), builds the Ang and Liu (2004) quadratic-Gaussian discount curve, and decomposes unexpected returns into **cash-flow news** and **discount-rate news**. Cash-flow news is taken from the cash-flow equation, not from the residual (Chen, Da, Zhao 2013).
 
-This is the public library. The teaching course lives at [tlorans/var_valuation](https://github.com/tlorans/var_valuation).
+**Docs:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/). The teaching course lives at [tlorans/var_valuation](https://github.com/tlorans/var_valuation).
 
 ## Install
 

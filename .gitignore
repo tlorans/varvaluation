@@ -32,3 +32,7 @@ Thumbs.db
 
 # Local data caches
 .cache/
+
+# MkDocs
+site/
+.cache/plugin/
