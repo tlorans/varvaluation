@@ -1,45 +1,23 @@
 # 1. Introduction
 
-Prices and cash-flow forecasts do not move together. The gap is the
-discount rate. Once that rate itself moves, year one and year ten
-should not share a single $r$, and a constant-rate DCF is not
-computing present value.
+Usual practice forecasts cash flows and discounts every horizon at the
+same rate. That is a complete valuation only if the rate does not
+move. Expected returns do move
+([Cochrane, 2011](../references.md#cochrane-2011)). Year one and
+year ten then need different rates, and the well-defined object is
+the expectation of a *product*.
 
-A DCF writes value as a sum of expected cash flows, each divided by a
-power of one rate, then attaches a Gordon tail $C/(r-g)$.
-
-!!! note "In words — DCF, WACC, Gordon, $\mathbb{E}_t$"
-    **DCF** is the spreadsheet construction: forecast cash flows, divide
-    each by $(1+r)^n$, add them up. **WACC** (weighted average cost of
-    capital) is the blended required return of equity and after-tax
-    debt. In that spreadsheet it is “the” discount rate, applied to
-    every maturity. **Gordon growth** is the closed sum
-    $C_{t+1}/(r-g)$: if cash flows grow at a constant $g$ forever and
-    you discount at a constant $r>g$, the infinite tail collapses to
-    one ratio. That is where a DCF gets its terminal value.
-    $\mathbb{E}_t[\,\cdot\,]$ is the average over possible outcomes
-    using only information known at $t$. The subscript $t$ is the
-    timing of knowledge, not the date of the cash flow.
-
-Two claims are buried in that construction. The discount rate is the
-same at every maturity. Cash flows and discount rates may be forecast
-separately.
-
-Neither claim survives once expected returns vary
-([Cochrane, 2011](../references.md#cochrane-2011)). The object that
-remains well defined is the expectation of a *product*.
-
-Start from the definition of the one-period expected (log) return.
-Let $P_t$ be the ex-cash-flow price and $C_{t+1}$ the cash flow paid
-at $t+1$. Then
+Write $\mu_t$ for the one-period expected (log) return at date $t$,
+and $\mathbb{E}_t$ for the average over outcomes using only
+information known at $t$. Let $P_t$ be today’s ex-cash-flow price
+and $C_{t+1}$ the cash flow paid next period. By definition
 
 $$
 e^{\mu_t}
   = \mathbb{E}_t\!\left[\frac{P_{t+1}+C_{t+1}}{P_t}\right].
 $$
 
-$\mu_t$ is known at $t$: it is an *expectation*, part of today’s
-information, not the realized return $r_{t+1}$ that will be observed
+$\mu_t$ is known today. It is not the return that will be observed
 tomorrow. Solve for $P_t$, replace $P_{t+1}$ by the same relation
 dated $t+1$, and keep going. The result is
 
@@ -91,10 +69,12 @@ shape of the price.
   at horizon $n$.
 
 Constant $\mu$ and constant expected growth — their special case 1 —
-nest the Gordon model; $\Phi=\Sigma=0$ is a further degeneracy (no
-dynamics, no shocks), not that case. The same paper, following
-[Brennan (1997)](../references.md#brennan-1997), replaces the single
-WACC by a maturity-specific **spot curve** $\mu_t(n)$: one rate per
+nest the constant-growth formula often called Gordon (a fixed
+growth rate, a fixed discount rate, an infinite tail).
+$\Phi=\Sigma=0$ is a further degeneracy (no dynamics, no shocks),
+not that case. The same paper, following
+[Brennan (1997)](../references.md#brennan-1997), replaces a single
+rate for every maturity by a **spot curve** $\mu_t(n)$: one rate per
 horizon, so that a two-step workflow (forecast cash flows, then
 discount) can be kept while the rate depends on horizon and on $X_t$.
 
