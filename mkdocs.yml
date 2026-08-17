@@ -33,6 +33,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Where the literature stands: guide/literature.md
   - The problem: guide/problem.md
   - One system: guide/system.md
   - The two recursions: guide/curve.md
