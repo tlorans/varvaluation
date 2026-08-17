@@ -1,6 +1,8 @@
 # Reproduce the paper
 
-[Giacotto, Lin, and Zhao (2020)](../references.md#glz-2020), *Insurance: Mathematics and Economics* 95, 147–158. Sample: 1972 Q4 – 2018 Q4. Five portfolios.
+[Giacotto, Lin, and Zhao (2020)](../references.md#glz-2020),
+*Insurance: Mathematics and Economics* 95, 147–158.
+Sample: 1972 Q4 – 2018 Q4. Five portfolios.
 
 | Portfolio | SIC | What to check |
 |---|---|---|
@@ -10,7 +12,10 @@
 | Health | 6320–6329 | Close to P/C. |
 | All stocks excl. insurers | not 6300–6399 | Higher still. Average $\beta\approx 0.97$ vs $0.65$. |
 
-Those cells are Table 2. We will not hit them to the basis point (link-table vintage, Cosemans priors, the log-versus-simple ROE choice). The check is the same industries, the same objects, the same ranking, and a hump on the insurance curve.
+Those cells are Table 2. We will not hit them to the basis point
+(link-table vintage, Cosemans priors, log-versus-simple ROE). The
+check is the same industries, the same objects, the same ranking, and
+a hump on the insurance curve.
 
 ## Offline (no downloads)
 
@@ -18,7 +23,10 @@ Those cells are Table 2. We will not hit them to the basis point (link-table vin
 uv run python examples/reproduce_glz2020.py
 ```
 
-This draws a synthetic four-state VAR, one per paper portfolio, and prints Fig. 1 points, Tables 2–3, and a Table 4 annuity. It is the API, not the sample. $\tau=1$ equals the CCAPM. Life sits above P/C because its $\beta$ is higher. That is all the simulator is for.
+This draws a synthetic four-state VAR, one per paper portfolio, and
+prints Fig. 1 points, Tables 2–3, and a Table 4 annuity. It is the
+API, not the sample. $\tau=1$ equals the CCAPM. Life sits above P/C
+because its $\beta$ is higher. That is all the simulator is for.
 
 ## Live (WRDS)
 
@@ -28,7 +36,11 @@ uv add "varvaluation[data,wrds]"
 uv run python examples/reproduce_glz2020.py --wrds
 ```
 
-The script loads Compustat quarterly (`ibq`, `ceqq`), CRSP monthly for the CCM link, CRSP daily for the 125-day beta, FRED Treasuries and corporate yields, and Ken French T-bills. Queries cache under `~/.cache/varvaluation`. The first daily pull is large; later runs read parquet.
+The script loads Compustat quarterly (`ibq`, `ceqq`), CRSP monthly for
+the CCM link, CRSP daily for the 125-day beta, FRED Treasuries and
+corporate yields, and Ken French T-bills. Queries cache under
+`~/.cache/varvaluation`. The first daily pull is large; later runs
+read parquet.
 
 The body of the live path is the same four calls as the offline path:
 
@@ -62,7 +74,5 @@ slope_tests(rho_ts)
 | Mean $\rho(\tau)$ below CAPM for insurers | Table 2, all $t<0$ | sign, live |
 | Slope $\rho(5)-\rho(1)>0$ for insurers | Table 3 | sign, live |
 | 30-year annuity discrepancy | Table 4 | same formula |
-
-Figs. 2–5 overlay BXP (2018) and Berry-Stölzle–Xu (2018). Those series are not public here. Pass a flat rate of your own into `flat_annuity_value` if you want the same picture.
 
 The next page changes one argument — `sic=` — and keeps everything else.

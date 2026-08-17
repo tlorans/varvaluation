@@ -2,13 +2,19 @@
 
 Cash-flow expectations and discount rates from one VAR.
 
-A present value is the expectation of a product: each future cash flow
-multiplied by the path of one-period required returns. Those two paths
-have to be estimated together. The package implements the residual-income
-term structure of Giacotto, Lin, and Zhao (2020) — insurance first, then
-any industry — on top of the Ang and Liu (2004) recursions.
+A present value is the expectation of a **product**: each future cash
+flow multiplied by the path of one-period required returns. Those two
+paths have to be estimated together. The package implements the
+residual-income term structure of Giacotto, Lin, and Zhao (2020) —
+insurance first, then any industry — on top of the Ang and Liu (2004)
+recursions.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
+
+The handbook is written as a short course: start from the flat-rate DCF
+you already know, see why a joint model is required, meet the VAR, and
+arrive at a term structure of discount rates you can use in the usual
+two-step workflow.
 
 ## Install
 
