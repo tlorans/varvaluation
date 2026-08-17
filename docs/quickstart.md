@@ -1,9 +1,9 @@
-# Quickstart
+# Synthetic (no download)
 
-## From a prepared state frame
-
-Expected cash flows and the discount curve come from the same $X_t$.
-This is [`examples/quickstart.py`](https://github.com/tlorans/varvaluation/blob/main/examples/quickstart.py):
+The real recipe is the [worked application](guide/walkthrough.md).
+This page is only the two-state toy, if you want to see both sides
+print without Ken French or WRDS.
+[`examples/quickstart.py`](https://github.com/tlorans/varvaluation/blob/main/examples/quickstart.py):
 
 ```python
 from varvaluation import (
@@ -65,22 +65,4 @@ CF news ≈ 0.
 
 ## On real data
 
-The synthetic snippet above is only to see the two sides print. The
-full recipe — Ken French BE/ME deciles, FRED macro, a WRDS firm window,
-and the terminal at each step — is the
-[worked application](guide/walkthrough.md).
-
-```text
-uv add "varvaluation[data]"
-uv run python examples/walkthrough.py
-```
-
-## Read next
-
-| Page | Why |
-|---|---|
-| [Worked application](guide/walkthrough.md) | Seven steps on Ken French, FRED, and WRDS |
-| [The VAR](guide/system.md) | Why one system, and how the joint distribution enters the price |
-| [Estimation](guide/estimate.md) | How $(\Phi,c,\Sigma)$ are measured |
-| [Valuation](guide/valuation.md) | The two recursions, line by line |
-| [What changes](guide/practice.md) | Side-by-side with a textbook DCF |
+Go to the [worked application](guide/walkthrough.md).

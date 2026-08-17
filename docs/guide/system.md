@@ -1,5 +1,8 @@
 # The VAR
 
+If you have not run the numbers yet, start at the
+[worked application](walkthrough.md). This page is the why.
+
 Value is the expectation of a **product**: cash flow times a discount
 factor. The expectation of a product depends on the joint distribution,
 not on each piece separately. If you forecast cash flows in one model

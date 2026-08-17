@@ -1,8 +1,9 @@
 # Worked application
 
-Seven steps on **real** series: Ken French book-to-market deciles, FRED
-macro, and a CRSP–Compustat firm window from WRDS. The numbers below
-are the captured output of
+This is the page to run first. You do not need the VAR derivation
+beforehand — the seven steps below *are* the system, on real series.
+Ken French book-to-market deciles, FRED macro, and a CRSP–Compustat
+firm window from WRDS. The numbers are the captured output of
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
 Re-run it:
 
@@ -275,6 +276,18 @@ The discount curve at that firm still slopes up — 5.5% at one year,
 | 6 | News | Direct CF news dominates, especially on D10 |
 | 7 | Firms | 2,673 names; $\Phi_{\mathit{roe},\mathit{roe}}=0.46$ |
 
-The figures on [Valuation](valuation.md) and [What changes](practice.md)
-are this same recipe. The derivation of each object is on those pages;
-this page is the recipe run on the data.
+## Then understand
+
+You have now seen both sides of every strip, a curve that slopes up, a
+growth equation that works on D1 and fails on D10, and a firm `roe`
+that mean-reverts. The why is under **Understand**:
+
+| Page | The question it answers |
+|---|---|
+| [The VAR](system.md) | Why one system, and how the joint distribution enters the price |
+| [Estimation](estimate.md) | What each of the seven steps was measuring |
+| [Valuation](valuation.md) | The two recursions, line by line |
+| [News](news.md) | Why `cf` is the cash-flow equation, not the residual |
+| [What changes](practice.md) | Side-by-side with a textbook DCF |
+
+No download, just the two-state toy: [Synthetic](../quickstart.md).

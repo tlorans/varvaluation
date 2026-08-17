@@ -29,6 +29,10 @@ reconstructs cay from FRED. WRDS credentials: `WRDS_USERNAME` or
 
 Python 3.11+. Managed with `uv`.
 
+The real-data recipe is `uv run python examples/walkthrough.py`
+([worked application](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
+The snippet below is the no-download toy.
+
 ## Ten-line path
 
 ```python
