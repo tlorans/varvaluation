@@ -120,7 +120,22 @@ def _save(fig, name):
     print("wrote", path)
 
 
+def mean_reversion():
+    n = np.arange(1, 31)
+    rbar, r1 = 0.08, 0.14
+    fig, ax = plt.subplots(figsize=(6.2, 3.6))
+    for phi, ls in ((0.9, "-"), (0.5, "--"), (0.0, ":")):
+        ax.plot(n, 100 * (rbar + phi ** (n - 1) * (r1 - rbar)), ls, label=rf"$\phi={phi:.1f}$")
+    ax.axhline(100 * r1, color="0.5", lw=1, label="flat WACC at today")
+    ax.set_xlabel("horizon $n$")
+    ax.set_ylabel("expected return (%)")
+    ax.legend(frameon=False)
+    ax.set_xlim(1, 30)
+    _save(fig, "mean_reversion.png")
+
+
 def main():
+    mean_reversion()
     total, cap, macro = _load()
     spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
     coeffs = _rp(macro)

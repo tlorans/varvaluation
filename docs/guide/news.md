@@ -1,7 +1,8 @@
 # News
 
-Valuation asks: *what is it worth at $X_t$?* News asks a different question
-from the **same** VAR: *what moved last period’s unexpected return?*
+[Valuation](valuation.md) asks: *what is it worth at $X_t$?* News asks a
+different question from the **same** VAR: *what moved last period’s
+unexpected return?*
 
 Campbell (1991) writes the unexpected return as cash-flow news minus
 discount-rate news,

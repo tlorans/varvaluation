@@ -35,9 +35,12 @@ nav:
   - Install: install.md
   - Quickstart: quickstart.md
   - Guide:
+      - The VAR: guide/system.md
       - StateSpec: guide/spec.md
+      - Estimation: guide/estimate.md
       - Valuation: guide/valuation.md
       - News: guide/news.md
+      - What changes: guide/practice.md
       - Public data: guide/data.md
       - WRDS / firms: guide/wrds.md
   - API: api.md

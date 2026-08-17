@@ -26,4 +26,17 @@ state = prepare_portfolio_state(
 )
 ```
 
-`g`, `beta`, and `dpo` are built only when those names appear in `spec.names` (Hodrick trailing dividends, rolling CAPM beta). Every other name is joined from `macro` by column.
+`g`, `beta`, and `dpo` are built only when those names appear in
+`spec.names`. Every other name is joined from `macro` by column.
+
+- **`g`** — monthly dividends are backed out of the gap between returns
+  with and without dividends, then summed over twelve months to remove
+  seasonality (Hodrick). $g_t=\log(D_t/D_{t-1})$.
+- **`beta`** — 60-month rolling CAPM slope of log excess returns on the
+  market.
+- **`dpo`** — log payout when both dividends and a positive earnings
+  proxy exist.
+
+The five-stage pipeline that consumes this frame is
+[Estimation](estimate.md). Why these names rather than dividend yield
+is [StateSpec](spec.md#where-the-names-come-from).

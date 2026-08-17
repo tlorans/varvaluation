@@ -113,9 +113,18 @@ period’s unexpected return — of the **same** fitted VAR.
 ![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
 <p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles, 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons. These curves are the <em>denominator</em>. The present value multiplies each strip by the VAR’s expected cash flow at that horizon.</p>
 
-A longer derivation, equation by equation, is the
-[Dynamic DCF course](https://github.com/tlorans/var_valuation). Citations
-for the closed forms sit on [References](references.md).
+## How to read these pages
+
+| Page | What it is |
+|---|---|
+| [The VAR](guide/system.md) | What a VAR is, why one system, how the joint distribution enters the price |
+| [StateSpec](guide/spec.md) | How names bind to positions, and where those names come from |
+| [Estimation](guide/estimate.md) | Five stages from raw series to $(\Phi,c,\Sigma)$ |
+| [Valuation](guide/valuation.md) | The two recursions, the curve, Gordon as the degenerate case |
+| [News](guide/news.md) | What moved last period’s unexpected return |
+| [What changes](guide/practice.md) | Side-by-side with a textbook DCF, and the honest caveat |
+
+Citations sit on [References](references.md).
 
 ## Extras
 

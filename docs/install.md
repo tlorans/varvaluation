@@ -41,3 +41,5 @@ uv run mkdocs serve
 ```
 
 Figures in the guide are produced by `uv run python examples/build_docs_figures.py` and committed under `docs/assets/figures/`.
+
+After install, start at [The VAR](guide/system.md) and walk the guide in order. The homepage is the idea; the guide is the derivation.

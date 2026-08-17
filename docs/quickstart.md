@@ -84,3 +84,12 @@ FRED.
 
 A longer script is
 [`examples/run_application.py`](https://github.com/tlorans/varvaluation/blob/main/examples/run_application.py).
+
+## Read next
+
+| Page | Why |
+|---|---|
+| [The VAR](guide/system.md) | Why one system, and how the joint distribution enters the price |
+| [Estimation](guide/estimate.md) | How $(\Phi,c,\Sigma)$ are measured |
+| [Valuation](guide/valuation.md) | The two recursions, line by line |
+| [What changes](guide/practice.md) | Side-by-side with a textbook DCF |

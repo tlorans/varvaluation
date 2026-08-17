@@ -18,7 +18,12 @@ state = prepare_firm_state(panel, macro, spec, start="1965-07")
 fit = estimate_var_panel(state, spec)
 ```
 
-`prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped by default.
+`prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped.
+
+Firm-level `roe` mean-reverts more reliably than portfolio `g`. That is
+why a full `value` is often usable at the firm when the same recursion
+is not yet trustworthy on a Ken French value decile. Inspect
+`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` either way.
 
 ## Sample overlap
 

@@ -1,8 +1,9 @@
 # Valuation
 
-**Both** sides of every strip come from the same state $X_t$. This page
-derives the two recursions and then shows the special case that freezes
-the numerator.
+**Both** sides of every strip come from the same state $X_t$. [The
+VAR](system.md) page is why that has to be one system. This page
+derives the two recursions, defines the spot curve, and shows the
+special case that freezes the numerator.
 
 Given a fitted VAR and a one-period expected return
 
@@ -27,9 +28,7 @@ value = model.value(X, C=1.0, n=80)          # both from X
 non-positive *terminal* rate raises `PerpetuityDivergesError`.
 
 If $\Lambda = 0$, the quadratic term is off, $H(n)\equiv 0$, and the
-solution is exponential-affine — the scalar playground on the
-[course](https://github.com/tlorans/var_valuation). Same class. No second
-solver.
+solution is exponential-affine. Same class. No second solver.
 
 ---
 
@@ -152,7 +151,47 @@ purpose, so you can see the numerator channel by itself.
 
 ---
 
-## 4. Putting the two sides together
+## 4. The priced recursion
+
+The cash-flow recursion ignored discounting. The **priced** recursion
+does not. Each strip of the price–cash-flow ratio is the expectation of
+an exponential of cumulated growth *minus* cumulated expected returns.
+Under the quadratic-Gaussian law that expectation is
+
+$$
+\exp\!\bigl(a(n) + b(n)'X_t + X_t' H(n) X_t\bigr).
+$$
+
+$H(n)$ is there because $\mu_t$ is quadratic in $X_t$ whenever $\beta_t$
+and $\lambda_t$ both move. `model.price_recursion(n)` returns
+$(a,b,H)$. The first step is
+
+$$
+a(1) = -\alpha + e_1'c + \tfrac12 e_1'\Sigma e_1, \qquad
+b(1) = -\xi + \Phi'e_1, \qquad
+H(1) = -\Lambda,
+$$
+
+and the rest is a matrix Riccati. If $\det(I-2\Sigma H(n))$ leaves the
+positive reals, `RecursionDivergedError` is raised: the quadratic term
+has blown up.
+
+There is **no log-linearization**. Campbell–Shiller approximates a
+curved price–dividend identity by a first-order Taylor expansion,
+accurate near a typical ratio and drifting when prices or growth are
+far from typical. Here the relations are written in logs from the
+start, so the closed form is exact inside the class — which is why it
+does not break for high-growth or extreme-multiple names the way a
+log-linear identity does.
+
+When $\Lambda=0$, $H(n)\equiv 0$ and the strip is exponential-affine:
+a constant beta with a moving premium, or a moving beta with a constant
+premium. Letting **both** move at once is what the $H(n)$ recursion is
+for.
+
+---
+
+## 5. Putting the two sides together
 
 The spot rate $\mu_t(n)$ is defined so that
 
@@ -160,10 +199,20 @@ $$
 \frac{\mathbb{E}_t[C_{t+n}]}{C_t}\Big/\exp\!\bigl(n\,\mu_t(n)\bigr)
 $$
 
-is the contribution of horizon $n$ to the price–cash-flow ratio. In
-coefficients, $A(n) = (\bar a(n)-a(n))/n$, and likewise for $B$ and $G$.
-The $a,b,H$ recursion is the **priced** (discounted) counterpart of
-$\bar a,\bar b$; their difference *is* the curve.
+is the contribution of horizon $n$ to the price–cash-flow ratio. The
+left side is one term of the pricing sum — the expectation of a
+product. The right side says: take the *expected* cash flow at horizon
+$n$ and discount it at one horizon-specific rate $\mu_t(n)$. Summing
+over $n$ recovers the full price. Each $\mu_t(n)$ internally contains
+the covariance corrections of [The VAR](system.md); the two-step
+workflow (forecast, then discount) survives, only the single WACC is
+replaced by a curve.
+
+In coefficients, $A(n) = (\bar a(n)-a(n))/n$, and likewise for $B$ and
+$G$. The $a,b,H$ recursion is the priced counterpart of
+$\bar a,\bar b$; their difference *is* the curve. Under stationarity,
+$\mu_t(n)\to\bar\mu$ as $n\to\infty$. The curve can slope up, down, or
+be humped, and it moves with $X_t$.
 
 `model.value(X, C)` is then
 
@@ -192,7 +241,29 @@ rate, or the rate but not cash flows, is a half-valuation.
 
 ---
 
-## 5. When the growth forecast is not yet usable
+## 6. What replaces the terminal value
+
+Gordon growth is the **degenerate case**. Set $\Phi=0$ and $\Sigma=0$.
+Then $b(n)=0$, $H(n)=0$, $a(n)=n(g-\mu)$, and
+
+$$
+\frac{V_t}{C_t}
+  = \sum_{n=1}^{\infty} e^{\,n(g-\mu)}
+  = \frac{e^{g-\mu}}{1-e^{g-\mu}}
+  \;\approx\; \frac{1+g}{\mu-g}.
+$$
+
+Gordon is this system with **zero persistence, zero volatility, zero
+correlation**. Convergence in the general case requires the eigenvalues
+of $\Phi$ inside the unit circle *and* the priced strip eventually
+declining — the analogue of $\mu>g$, but now a condition on the
+**dynamics** rather than on two point estimates. The tail of
+`value` / `perpetuity` is a geometric remainder at $\mu_t(N)$, not a
+hand-set $(r,g)$ bolted on at year ten.
+
+---
+
+## 7. When the growth forecast is not yet usable
 
 On some Ken French **value** portfolios, $\Phi_{g,g}$ is near one. Then
 $\bar b(n)$ keeps stacking growth that barely mean-reverts,
@@ -214,7 +285,7 @@ ROE mean-reverts more reliably) or use `perpetuity` as a
 
 ---
 
-## 6. Freezing the numerator (optional)
+## 8. Freezing the numerator (optional)
 
 Sometimes you want only the curve: “what is a dollar a year worth under
 this $\mu_t(n)$?” Then set $\mathbb{E}_t[C_{t+n}] = 1$ and sum
@@ -231,7 +302,7 @@ expected cash flows, because they do not enter.
 
 ---
 
-## 7. The curve, in pictures
+## 9. The curve, in pictures
 
 ![Spot discount curves](../assets/figures/spot_curves.png)
 <p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. The present value multiplies each strip by $\mathbb{E}_t[C_{t+n}]/C_t$.</p>
@@ -241,7 +312,7 @@ expected cash flows, because they do not enter.
 
 ---
 
-## 8. Channel isolation
+## 10. Channel isolation
 
 Isolation is a **counterfactual**, not news. You shut a named state on one
 side, revalue with `value`, and compare.
