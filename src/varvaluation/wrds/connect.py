@@ -18,9 +18,20 @@ def cache_dir() -> Path:
     return path
 
 
+def _load_env() -> None:
+    """Load .env from cwd, then the package repo root if present."""
+    load_dotenv()
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        candidate = parent / ".env"
+        if candidate.is_file():
+            load_dotenv(candidate, override=False)
+            break
+
+
 def get_wrds_connection():
     """Open a wrds.Connection using WRDS_USERNAME / WRDS_USER and WRDS_PASSWORD."""
-    load_dotenv()
+    _load_env()
     user = os.environ.get("WRDS_USERNAME") or os.environ.get("WRDS_USER")
     password = os.environ.get("WRDS_PASSWORD")
     try:
