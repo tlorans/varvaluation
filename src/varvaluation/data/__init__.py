@@ -1,4 +1,4 @@
-"""Public-data extra: Ken French, FRED, Lettau–Ludvigson cay, GISTEMP."""
+"""Public-data extra: Ken French, FRED, Lettau–Ludvigson cay."""
 
 from importlib.util import find_spec
 
@@ -18,7 +18,6 @@ from varvaluation.data.macro import (
     load_cpi,
     load_gs1,
     load_macro,
-    load_temperature,
 )
 from varvaluation.data.portfolio import (
     BETA_WINDOW,
@@ -42,6 +41,5 @@ __all__ = [
     "load_gs1",
     "load_industry49",
     "load_macro",
-    "load_temperature",
     "prepare_portfolio_state",
 ]

@@ -2417,7 +2417,7 @@ requires-dist = [
     { name = "statsmodels", specifier = ">=0.14" },
     { name = "wrds", marker = "extra == 'wrds'", specifier = ">=3.2" },
 ]
-provides-extras = ["data", "wrds", "climate", "dev", "docs"]
+provides-extras = ["data", "wrds", "dev", "docs"]
 
 [[package]]
 name = "watchdog"

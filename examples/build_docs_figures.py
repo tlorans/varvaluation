@@ -19,19 +19,12 @@ from varvaluation import (
     ExpectedReturnSpec,
     StateSpec,
     estimate_var,
-    isolate_channels,
     news_decomposition,
-)
-from varvaluation.climate import (
-    build_climate_state,
-    override_var,
-    scenario_dynamics,
 )
 from varvaluation.data import (
     load_bm_deciles,
     load_cay,
     load_macro,
-    load_temperature,
     prepare_portfolio_state,
 )
 
@@ -76,13 +69,7 @@ def _load():
         macro = macro.join(published, on="date", how="left")
         if live is not None:
             macro = macro.with_columns(pl.coalesce(pl.col("cay"), live).alias("cay"))
-    try:
-        temp = load_temperature()
-    except Exception:
-        temp = (
-            load_temperature(path=PAPER / "gistemp_glb.csv") if PAPER.exists() else None
-        )
-    return total, cap, macro, temp
+    return total, cap, macro
 
 
 def _rp(macro: pl.DataFrame) -> dict:
@@ -134,7 +121,7 @@ def _save(fig, name):
 
 
 def main():
-    total, cap, macro, temp = _load()
+    total, cap, macro = _load()
     spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
     coeffs = _rp(macro)
     xi, Lambda = ExpectedReturnSpec().xi_lambda(spec, coeffs)
@@ -188,73 +175,6 @@ def main():
     ax.set_ylabel("Variance")
     ax.legend(frameon=False)
     _save(fig, "news_shares.png")
-
-    if temp is not None:
-        Y = build_climate_state(temp, burn_in=240)
-        macro_y = macro.join(Y, on="date", how="left")
-        spec7 = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi", "Y"), cashflow="g")
-        frame = macro_y.with_columns(
-            pl.Series("log_mkt", np.log(1 + macro_y["mkt"].to_numpy()))
-        )
-        frame = frame.with_columns(
-            pl.col("log_mkt").rolling_sum(12).shift(-12).alias("y_fwd")
-        )
-        frame = frame.with_columns((pl.col("y_fwd") - pl.col("r")).alias("y"))
-        start = pl.date(int(START[:4]), int(START[5:7]), 1)
-        end = pl.date(int(END[:4]), int(END[5:7]), 1).dt.month_end()
-        reg = frame.filter(pl.col("date").ge(start) & pl.col("date").le(end))
-        reg = reg.select(["y", "r", "cay", "Y"]).drop_nulls()
-        Xr = np.column_stack([np.ones(reg.height), reg.select(["r", "cay", "Y"]).to_numpy()])
-        fit_rp = sm.OLS(reg["y"].to_numpy(), Xr).fit()
-        coeffs7 = {
-            "b0": float(fit_rp.params[0]),
-            "br": float(fit_rp.params[1]),
-            "bcay": float(fit_rp.params[2]),
-            "bY": float(fit_rp.params[3]),
-        }
-        xi7, Lam7 = ExpectedReturnSpec(premium=("cay", "Y")).xi_lambda(spec7, coeffs7)
-        state7 = prepare_portfolio_state(
-            total, cap, macro_y, spec7, portfolio="D10", start=START, end=END
-        )
-        fit7 = estimate_var(state7, spec7)
-        alpha = _alpha(total, macro, "D10")
-        X7 = state7.select(list(spec7.names)).to_numpy()[-1]
-        scens = ("Net Zero 2050", "Current Policies", "Climate Breakdown")
-        fig, ax = plt.subplots(figsize=(6.2, 3.6))
-        palette = ["#2f6f4e", "#5b7c99", "#b04a3a"]
-        for scen, color in zip(scens, palette, strict=True):
-            dyn = scenario_dynamics(scen, n_paths=60, horizon_years=30, seed=1)
-            Phi_s, c_s, Sigma_s = override_var(fit7, dyn, "Y")
-            ms = AngLiuModel(spec7, Phi_s, c_s, Sigma_s, xi7, Lam7, alpha)
-            Xs = X7.copy()
-            Xs[spec7.index("Y")] = dyn.mean
-            ax.plot(maturities, 100 * ms.spot_rates(Xs, 30), color=color, lw=1.8, label=scen)
-        ax.set_xlabel("Maturity (years)")
-        ax.set_ylabel("Spot discount rate (%)")
-        ax.legend(frameon=False, fontsize=8)
-        _save(fig, "climate_curves.png")
-
-        fig, ax = plt.subplots(figsize=(6.0, 3.4))
-        labels, both, cf_only, dr_only = [], [], [], []
-        for scen in scens:
-            dyn = scenario_dynamics(scen, n_paths=60, horizon_years=30, seed=1)
-            Phi_s, c_s, Sigma_s = override_var(fit7, dyn, "Y")
-            ms = AngLiuModel(spec7, Phi_s, c_s, Sigma_s, xi7, Lam7, alpha)
-            Xs = X7.copy()
-            Xs[spec7.index("Y")] = dyn.mean
-            labels.append(scen.replace(" ", "\n"))
-            both.append(isolate_channels(ms, Xs, shut=("Y",), on="both", n=60).pv)
-            cf_only.append(isolate_channels(ms, Xs, shut=("Y",), on="cashflow", n=60).pv)
-            dr_only.append(isolate_channels(ms, Xs, shut=("Y",), on="discount", n=60).pv)
-        xs = np.arange(len(scens))
-        ax.bar(xs - 0.25, both, 0.24, color="#1d4e89", label="Both live")
-        ax.bar(xs, cf_only, 0.24, color="#2f6f4e", label="Cash-flow only")
-        ax.bar(xs + 0.25, dr_only, 0.24, color="#b04a3a", label="Discount-rate only")
-        ax.set_xticks(xs, labels)
-        ax.set_ylabel("Present value (unit cash flow scaled)")
-        ax.legend(frameon=False, fontsize=8)
-        _save(fig, "climate_channels.png")
-
     print("done")
 
 

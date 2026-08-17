@@ -39,9 +39,9 @@ A counterfactual, not news:
 ```python
 from varvaluation import isolate_channels
 
-iso = isolate_channels(model, X, shut=("Y",), on="cashflow")
-iso = isolate_channels(model, X, shut=("Y",), on="discount")
-iso = isolate_channels(model, X, shut=("Y",), on="both")  # unmodified
+iso = isolate_channels(model, X, shut=("cay",), on="cashflow")
+iso = isolate_channels(model, X, shut=("cay",), on="discount")
+iso = isolate_channels(model, X, shut=("cay",), on="both")  # unmodified
 ```
 
 `on="cashflow"` zeros $\Phi[\text{cashflow}, s]$ for each shut name. `on="discount"` zeros those names in every *other* row of $\Phi$ and in $\Lambda$.

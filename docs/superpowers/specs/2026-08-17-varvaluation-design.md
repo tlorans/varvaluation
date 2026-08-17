@@ -1,7 +1,7 @@
 # varvaluation — Design
 
 **Date:** 2026-08-17
-**Status:** Approved in conversation (sections 1–7)
+**Status:** Approved in conversation (sections 1–7). The `[climate]` extra was later removed from the public package; climate work stays in the manuscript repo.
 **Repo:** `tlorans/varvaluation` (public)
 **Local path:** `C:\DBD\varvaluation`
 **Import / PyPI name:** `varvaluation`

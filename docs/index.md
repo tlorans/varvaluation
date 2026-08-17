@@ -30,8 +30,7 @@ The teaching course that walks the derivation is [Dynamic DCF](https://github.co
 | Extra | What it adds |
 |---|---|
 | *(default)* | Named-state VAR, Ang–Liu valuation, Chen-aware news |
-| `[data]` | Ken French, FRED, cay, GISTEMP, portfolio state |
-| `[climate]` | Persistent temperature state $Y_t$, NGFS scenarios, `override_var` |
+| `[data]` | Ken French, FRED, cay, portfolio state |
 | `[wrds]` | CRSP–Compustat firm panel and firm-level state |
 
 ## License

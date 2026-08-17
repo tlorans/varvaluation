@@ -35,7 +35,7 @@ def test_spot_rate_n1_equals_mu():
 def test_disconnected_state_does_not_change_curve():
     spec6, p6 = _base()
     m6 = AngLiuModel(spec6, **p6)
-    names7 = spec6.names + ("Y",)
+    names7 = spec6.names + ("z",)
     spec7 = StateSpec(names=names7, cashflow="g")
     Phi = np.zeros((7, 7))
     Phi[:6, :6] = p6["Phi"]

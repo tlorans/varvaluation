@@ -49,11 +49,3 @@ def test_wrds_extra_importable():
 
     assert hasattr(wrds, "prepare_firm_state")
     assert hasattr(wrds, "load_firm_panel")
-
-
-def test_climate_importable():
-    import varvaluation.climate as climate
-
-    assert hasattr(climate, "build_climate_state")
-    assert hasattr(climate, "override_var")
-    assert hasattr(climate, "scenario_dynamics")

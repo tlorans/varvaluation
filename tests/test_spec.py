@@ -13,8 +13,8 @@ def test_index_and_cashflow():
 
 def test_unknown_name_raises():
     spec = StateSpec(names=("g", "r"), cashflow="g")
-    with pytest.raises(StateSpecError, match="Y"):
-        spec.index("Y")
+    with pytest.raises(StateSpecError, match="zzz"):
+        spec.index("zzz")
 
 
 def test_cashflow_must_be_in_names():
@@ -33,11 +33,11 @@ def test_empty_names_raise():
 
 
 def test_xi_lambda_symmetry_and_slots():
-    spec = StateSpec(names=("g", "beta", "r", "cay", "Y"), cashflow="g")
-    er = ExpectedReturnSpec(rate="r", beta="beta", premium=("cay", "Y"))
-    xi, Lam = er.xi_lambda(spec, {"b0": 0.05, "br": -0.2, "bcay": 2.0, "bY": 0.8})
+    spec = StateSpec(names=("g", "beta", "r", "cay", "z"), cashflow="g")
+    er = ExpectedReturnSpec(rate="r", beta="beta", premium=("cay", "z"))
+    xi, Lam = er.xi_lambda(spec, {"b0": 0.05, "br": -0.2, "bcay": 2.0, "bz": 0.8})
     assert xi[spec.index("r")] == pytest.approx(1.0)
     assert xi[spec.index("beta")] == pytest.approx(0.05)
-    assert Lam[spec.index("beta"), spec.index("Y")] == pytest.approx(0.4)
-    assert Lam[spec.index("Y"), spec.index("beta")] == pytest.approx(0.4)
+    assert Lam[spec.index("beta"), spec.index("z")] == pytest.approx(0.4)
+    assert Lam[spec.index("z"), spec.index("beta")] == pytest.approx(0.4)
     np.testing.assert_allclose(Lam, Lam.T)

@@ -44,4 +44,4 @@ fit = estimate_var(state, spec)
 
 `load_macro()` always tries to bring FF3, the one-year rate, and inflation. Cay is optional: if the published file is missing, it is reconstructed from FRED.
 
-A longer script that prints spot curves, perpetuities, news shares, climate scenarios, and a firm-level VAR is [`examples/run_application.py`](https://github.com/tlorans/varvaluation/blob/main/examples/run_application.py).
+A longer script that prints spot curves, perpetuities, news shares, and a firm-level VAR is [`examples/run_application.py`](https://github.com/tlorans/varvaluation/blob/main/examples/run_application.py).

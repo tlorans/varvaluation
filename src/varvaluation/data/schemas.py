@@ -54,12 +54,3 @@ cay_schema = pa.DataFrameSchema(
     coerce=True,
     strict=False,
 )
-
-temperature_schema = pa.DataFrameSchema(
-    {
-        "date": pa.Column(pl.Date, nullable=False),
-        "temp": pa.Column(float, nullable=False),
-    },
-    coerce=True,
-    strict=False,
-)

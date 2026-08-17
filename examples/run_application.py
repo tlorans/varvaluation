@@ -1,6 +1,6 @@
 """Apply the VAR to public data and print the main valuation / news results.
 
-Tries live Ken French / FRED / cay / GISTEMP downloads first. If a source
+Tries live Ken French / FRED / cay downloads first. If a source
 fails, falls back to the local manuscript data directory when present.
 
 Run from the package root::
@@ -23,7 +23,6 @@ from varvaluation import (
     StateSpec,
     estimate_var,
     estimate_var_panel,
-    isolate_channels,
     news_decomposition,
 )
 from varvaluation.data import (
@@ -33,7 +32,6 @@ from varvaluation.data import (
     load_ff3,
     load_gs1,
     load_macro,
-    load_temperature,
     prepare_portfolio_state,
 )
 
@@ -90,14 +88,7 @@ def load_inputs():
     if "cay" in macro.columns:
         cay_nn = macro.filter(pl.col("cay").is_not_null())
         print(f"  cay {cay_nn['date'][0]} → {cay_nn['date'][-1]}")
-
-    temp = _ok("GISTEMP", load_temperature)
-    if temp is None and PAPER_DATA.exists():
-        temp = _ok(
-            "GISTEMP (local)",
-            lambda: load_temperature(path=PAPER_DATA / "gistemp_glb.csv"),
-        )
-    return total, capgains, macro, temp
+    return total, capgains, macro
 
 
 def risk_premium(macro: pl.DataFrame, y_col: str | None = None) -> dict:
@@ -153,7 +144,7 @@ def annual_returns(total: pl.DataFrame, col: str) -> pl.DataFrame:
     )
 
 
-def report_portfolio(name, total, capgains, macro, spec, xi, Lambda, temp=None):
+def report_portfolio(name, total, capgains, macro, spec, xi, Lambda):
     print(f"\n=== {name} ===")
     state = prepare_portfolio_state(
         total, capgains, macro, spec, portfolio=name, start=START, end=END
@@ -221,7 +212,7 @@ def report_portfolio(name, total, capgains, macro, spec, xi, Lambda, temp=None):
 
 
 def main():
-    total, capgains, macro, temp = load_inputs()
+    total, capgains, macro = load_inputs()
     print(
         f"  deciles {total['date'][0]} → {total['date'][-1]}  "
         f"macro {macro['date'][0]} → {macro['date'][-1]}"
@@ -240,51 +231,8 @@ def main():
     results = {}
     for name in FOCUS:
         results[name] = report_portfolio(
-            name, total, capgains, macro, spec, xi, Lambda, temp
+            name, total, capgains, macro, spec, xi, Lambda
         )
-
-    if temp is not None and results.get("D10") and results["D10"] is not None:
-        print("\n=== Climate extension on D10 ===")
-        from varvaluation.climate import (
-            build_climate_state,
-            override_var,
-            scenario_dynamics,
-        )
-
-        Y = build_climate_state(temp, burn_in=240)
-        macro_y = macro.join(Y, on="date", how="left")
-        spec7 = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi", "Y"), cashflow="g")
-        rp7 = risk_premium(macro_y, y_col="Y")
-        print("  RP with Y:", {k: f"{v:+.3f}" for k, v in rp7["coeffs"].items()})
-        xi7, Lam7 = ExpectedReturnSpec(premium=("cay", "Y")).xi_lambda(spec7, rp7["coeffs"])
-        state7 = prepare_portfolio_state(
-            total, capgains, macro_y, spec7, portfolio="D10", start=START, end=END
-        )
-        fit7 = estimate_var(state7, spec7)
-        print(
-            f"  K=7 nobs={fit7.nobs}  ρ(Φ)={fit7.spectral_radius:.4f}  "
-            f"Φ[g,Y]={fit7.Phi[0, spec7.index('Y')]:+.4f}"
-        )
-        try:
-            m7 = AngLiuModel.from_var(fit7, xi7, Lam7, results["D10"]["alpha"])
-            X7 = state7.select(list(spec7.names)).to_numpy()[-1]
-            v_hist = m7.value(X7, n=80)
-            print(f"  historical full PV={v_hist.pv:.3f}")
-            for scen in ("Net Zero 2050", "Current Policies", "Climate Breakdown"):
-                dyn = scenario_dynamics(scen, n_paths=80, horizon_years=40, seed=1)
-                Phi_s, c_s, Sigma_s = override_var(fit7, dyn, "Y")
-                ms = AngLiuModel(spec7, Phi_s, c_s, Sigma_s, xi7, Lam7, results["D10"]["alpha"])
-                Xs = X7.copy()
-                Xs[spec7.index("Y")] = dyn.mean
-                vs = ms.value(Xs, n=80)
-                iso_cf = isolate_channels(ms, Xs, shut=("Y",), on="cashflow", n=80)
-                iso_dr = isolate_channels(ms, Xs, shut=("Y",), on="discount", n=80)
-                print(
-                    f"  {scen:<22} meanY={dyn.mean:+.3f}  PV={vs.pv:.3f}  "
-                    f"CF-only={iso_cf.pv:.3f}  DR-only={iso_dr.pv:.3f}"
-                )
-        except Exception as exc:
-            print(f"  climate valuation failed: {type(exc).__name__}: {exc}")
 
     print("\n=== Firm-level (cached WRDS window if present) ===")
     try:

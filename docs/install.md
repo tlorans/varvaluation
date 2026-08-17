@@ -5,7 +5,7 @@ Python 3.11 or 3.12. The project is managed with [uv](https://docs.astral.sh/uv/
 ```text
 uv add varvaluation
 uv add "varvaluation[data]"
-uv add "varvaluation[wrds,climate]"
+uv add "varvaluation[wrds]"
 ```
 
 Or, from a clone:
@@ -24,7 +24,6 @@ uv run pytest -q
 | default | numpy, scipy, polars, pandera, statsmodels |
 | `[data]` | pandas-datareader, pyarrow, openpyxl |
 | `[wrds]` | wrds, python-dotenv, pyarrow |
-| `[climate]` | none beyond the core |
 
 Importing `varvaluation.data` or `varvaluation.wrds` without the extra raises `ExtraNotInstalled` and names the extra to add.
 

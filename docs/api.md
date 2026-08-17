@@ -21,7 +21,6 @@ Exceptions: `StateSpecError`, `SchemaError`, `NonStationaryVARError`, `Recursion
 Subpackages (not re-exported at top level):
 
 - `varvaluation.data` — public loaders and `prepare_portfolio_state`
-- `varvaluation.climate` — `build_climate_state`, `scenario_dynamics`, `override_var`
 - `varvaluation.wrds` — `load_firm_panel`, `prepare_firm_state`
 
 Docstrings on the objects are the contract. The design note in the repo (`docs/superpowers/specs/`) is the longer specification.

@@ -4,7 +4,7 @@ import pytest
 
 pytest.importorskip("pandas_datareader")
 
-from varvaluation.data import load_cay, load_cpi, load_gs1, load_macro, load_temperature
+from varvaluation.data import load_cay, load_cpi, load_gs1, load_macro
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
@@ -39,13 +39,6 @@ def test_load_cay_forward_fills_quarterly():
     april = df.filter(pl.col("date").dt.month() == 4)
     march = df.filter(pl.col("date").dt.month() == 3)
     assert april["cay"][0] == pytest.approx(march["cay"][0])
-
-
-def test_load_temperature_monthly():
-    df = load_temperature(path=FIXTURES / "gistemp_sample.csv")
-    assert df.height == 24
-    assert df["temp"][0] == pytest.approx(0.24)
-    assert df["date"][0].month == 1
 
 
 def test_load_macro_joins_required_series():

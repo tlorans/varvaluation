@@ -1,6 +1,6 @@
 # StateSpec
 
-`StateSpec` is the only place names are bound to positions. Nothing in the core knows that column 0 is ROE or that column 6 is temperature.
+`StateSpec` is the only place names are bound to positions. Nothing in the core assumes a particular state order.
 
 ```python
 from varvaluation import StateSpec
@@ -43,8 +43,8 @@ $$
 ```python
 from varvaluation import ExpectedReturnSpec
 
-er = ExpectedReturnSpec(rate="r", beta="beta", premium=("cay", "Y"))
-xi, Lambda = er.xi_lambda(spec, {"b0": 0.05, "br": -0.2, "bcay": 2.0, "bY": 0.8})
+er = ExpectedReturnSpec(rate="r", beta="beta", premium=("cay",))
+xi, Lambda = er.xi_lambda(spec, {"b0": 0.05, "br": -0.2, "bcay": 2.0})
 ```
 
 Keys are `b0`, `br`, and `b{name}` for each premium state (`cay` → `bcay`). Missing keys default to 0. If you already have $\xi$ and $\Lambda$, skip the builder.

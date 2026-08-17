@@ -39,7 +39,6 @@ nav:
       - Valuation: guide/valuation.md
       - News: guide/news.md
       - Public data: guide/data.md
-      - Climate: guide/climate.md
       - WRDS / firms: guide/wrds.md
   - API: api.md
   - References: references.md

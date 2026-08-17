@@ -1,4 +1,4 @@
-"""FRED, Lettau–Ludvigson cay, and NASA GISTEMP loaders."""
+"""FRED and Lettau–Ludvigson cay loaders."""
 
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ from varvaluation.data.schemas import (
     _validate,
     cay_schema,
     inflation_schema,
-    temperature_schema,
     treasury_schema,
 )
 
@@ -28,22 +27,6 @@ CAY_URLS = (
     "https://www.sydneyludvigson.com/s/cay_current.csv",
     "https://sites.google.com/site/martinlettau/cay_current.csv",
 )
-GISTEMP_URL = "https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv"
-
-_MONTH_COLS = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-]
 
 
 def _read_csv(path: str | Path | None, url: str, cache_name: str, refresh: bool) -> pl.DataFrame:
@@ -166,52 +149,6 @@ def load_cay(*, path: str | Path | None = None, refresh: bool = False) -> pl.Dat
         raise RuntimeError(
             f"could not load published cay ({last_err}) or reconstruct from FRED ({exc})"
         ) from exc
-
-
-def parse_gistemp(text: str) -> pl.DataFrame:
-    lines = text.splitlines()
-    header_idx = next(
-        (i for i, line in enumerate(lines) if line.strip().startswith("Year")),
-        None,
-    )
-    if header_idx is None:
-        raise ValueError("no 'Year' header row in GISTEMP file")
-    headers = [h.strip() for h in lines[header_idx].split(",")]
-    month_pos = {m: headers.index(m) for m in _MONTH_COLS if m in headers}
-    if len(month_pos) != 12:
-        raise ValueError(f"expected 12 monthly columns, found {list(month_pos)}")
-
-    dates: list[int] = []
-    values: list[float] = []
-    for line in lines[header_idx + 1 :]:
-        parts = [p.strip() for p in line.split(",")]
-        if len(parts) < 13:
-            continue
-        try:
-            year = int(parts[0])
-        except (ValueError, IndexError):
-            continue
-        for m_num, month in enumerate(_MONTH_COLS, start=1):
-            token = parts[month_pos[month]]
-            if not token or token.startswith("*"):
-                continue
-            try:
-                values.append(float(token))
-            except ValueError:
-                continue
-            dates.append(year * 100 + m_num)
-
-    from varvaluation.data.french import _yyyymm_to_date
-
-    df = pl.DataFrame({"date": _yyyymm_to_date(dates), "temp": values}).sort("date")
-    return _validate(temperature_schema, df, "gistemp")
-
-
-def load_temperature(*, path: str | Path | None = None, refresh: bool = False) -> pl.DataFrame:
-    """NASA GISTEMP v4 global land-ocean temperature anomaly, monthly, °C."""
-    if path is None:
-        path = cached_download(GISTEMP_URL, "gistemp_glb.csv", refresh=refresh)
-    return parse_gistemp(Path(path).read_text(encoding="utf-8", errors="replace"))
 
 
 def load_macro(

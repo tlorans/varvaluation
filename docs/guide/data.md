@@ -10,7 +10,6 @@ Extra: `uv add "varvaluation[data]"`.
 | `load_gs1()` | FRED GS1 | `date, r` (continuously compounded) |
 | `load_cpi()` | FRED CPIAUCSL | `date, pi` (12-month log) |
 | `load_cay()` | Lettau–Ludvigson, or FRED reconstruction | `date, cay` |
-| `load_temperature()` | NASA GISTEMP v4 | `date, temp` |
 | `load_macro()` | join of FF3 + GS1 + CPI + cay | one monthly frame |
 
 Downloads cache under `~/.cache/varvaluation`. Pass `path=` (or `path_total` / `path_exdiv`) to read a local file.
