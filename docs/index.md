@@ -43,7 +43,7 @@ flat PV vs curve +8.0%
 ## Browse the handbook
 
 <div class="topic-cards">
-<a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>Which named variables drive asset values — not which factors line up average returns.</span></a>
+<a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>Two halves: which variables move expected cash flows, and which move expected returns.</span></a>
 <a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why one rate is the wrong tool, then learn the words you will carry.</span></a>
 <a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>The joint system is background: both sides of the product must come from one law of motion.</span></a>
 <a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>

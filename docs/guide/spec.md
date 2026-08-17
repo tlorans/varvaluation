@@ -124,7 +124,9 @@ come from improving those two maps.
 
 ### What moves cash flows
 
-The cash-flow side is the profitability-forecasting literature.
+The cash-flow side is half of the [research program](program.md):
+which named variables move expected cash flows. The notes below
+are the first papers; they are not the whole half.
 
 - **Profitability mean-reverts, and is forecastable.**
   [Fama and French (2000)](../references.md#ff-2000) show that
