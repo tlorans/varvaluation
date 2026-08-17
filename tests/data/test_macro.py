@@ -4,7 +4,7 @@ import pytest
 
 pytest.importorskip("pandas_datareader")
 
-from varvaluation.data import load_cay, load_cpi, load_gs1, load_temperature
+from varvaluation.data import load_cay, load_cpi, load_gs1, load_macro, load_temperature
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
@@ -46,3 +46,36 @@ def test_load_temperature_monthly():
     assert df.height == 24
     assert df["temp"][0] == pytest.approx(0.24)
     assert df["date"][0].month == 1
+
+
+def test_load_macro_joins_required_series():
+    df = load_macro(
+        ff3=FIXTURES / "ff3_sample.csv",
+        gs1=FIXTURES / "gs1_sample.csv",
+        cpi=FIXTURES / "cpi_sample.csv",
+        cay=FIXTURES / "cay_sample.csv",
+    )
+    assert {"date", "mkt", "r", "pi", "cay"}.issubset(df.columns)
+
+
+def test_load_macro_continues_without_cay():
+    df = load_macro(
+        ff3=FIXTURES / "ff3_sample.csv",
+        gs1=FIXTURES / "gs1_sample.csv",
+        cpi=FIXTURES / "cpi_sample.csv",
+        cay=FIXTURES / "missing_cay.csv",
+        require_cay=False,
+    )
+    assert {"date", "mkt", "rf", "r", "pi"}.issubset(df.columns)
+    assert "cay" not in df.columns
+
+
+def test_load_macro_require_cay_raises():
+    with pytest.raises(Exception):
+        load_macro(
+            ff3=FIXTURES / "ff3_sample.csv",
+            gs1=FIXTURES / "gs1_sample.csv",
+            cpi=FIXTURES / "cpi_sample.csv",
+            cay=FIXTURES / "missing_cay.csv",
+            require_cay=True,
+        )

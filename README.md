@@ -14,7 +14,7 @@ uv add "varvaluation[data]"          # Ken French / FRED / cay / GISTEMP
 uv add "varvaluation[wrds,climate]"  # firm panel + climate scenarios
 ```
 
-`[data]` loaders cache downloads under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the network — that is what the tests do. WRDS credentials: `WRDS_USERNAME` (or `WRDS_USER`) and `WRDS_PASSWORD` in the environment or a `.env` file.
+`[data]` loaders cache downloads under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the network — that is what the tests do. `load_macro()` requires FF3, GS1, and CPI; **cay is optional**. If the published Lettau–Ludvigson CSV is unavailable, `load_cay()` reconstructs cay from FRED (PCEC, household net worth, wages). WRDS credentials: `WRDS_USERNAME` (or `WRDS_USER`) and `WRDS_PASSWORD` in the environment or a `.env` file.
 
 Python 3.11+. Managed with `uv`.
 

@@ -92,3 +92,64 @@ def test_live_panel_and_firm_state():
     assert fit.nobs > spec.K + 1
     assert fit.Phi.shape == (spec.K, spec.K)
     assert np.isfinite(fit.spectral_radius)
+
+
+def test_live_firm_var_overlaps_cay():
+    """CRSP 2014–2019 so the firm state still has cay (published series ends 2019Q3)."""
+    from varvaluation import StateSpec, estimate_var_panel
+    from varvaluation.data import load_macro
+    from varvaluation.wrds import merge_firm_panel, prepare_firm_state
+    from varvaluation.wrds.load import load_ccm_link, load_compustat_annual, load_crsp_monthly
+
+    paper = (
+        Path(__file__).resolve().parents[3]
+        / "corpo_research_papers"
+        / "papers"
+        / "01-discounting"
+        / "code"
+        / "data"
+    )
+    try:
+        macro = load_macro()
+    except Exception:
+        macro = None
+    if macro is None or "cay" not in macro.columns:
+        if not paper.exists():
+            pytest.skip("no cay series available")
+        macro = load_macro(
+            ff3=paper / "ff3_factors" / "F-F_Research_Data_Factors.csv",
+            gs1=paper / "gs1_fred.csv",
+            cpi=paper / "cpi_fred.csv",
+            cay=paper / "cay_current.csv",
+            require_cay=True,
+        )
+
+    crsp = load_crsp_monthly(start="2014-01", end="2019-12-31", use_cache=True)
+    comp = load_compustat_annual(start="2012-01", end="2019-12-31", use_cache=True)
+    link = load_ccm_link(use_cache=True)
+    panel = merge_firm_panel(crsp, comp, link)
+    spec = StateSpec(
+        names=("roe", "beta", "bm", "r", "cay", "pi"),
+        cashflow="roe",
+        group="permno",
+        horizon=12,
+        nw_lags=12,
+    )
+    state = prepare_firm_state(
+        panel, macro, spec, start="2015-01", end="2019-09", beta_window=12
+    )
+    assert state.height > 500
+    assert "cay" in state.columns
+    assert state["date"].max().year >= 2018
+
+    top = (
+        state.group_by("permno")
+        .len()
+        .sort("len", descending=True)
+        .head(80)["permno"]
+        .to_list()
+    )
+    slim = state.filter(pl.col("permno").is_in(top))
+    fit = estimate_var_panel(slim, spec)
+    assert fit.nobs > spec.K + 1
+    assert fit.spectral_radius < 1.05

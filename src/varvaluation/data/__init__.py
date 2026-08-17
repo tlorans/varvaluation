@@ -14,6 +14,7 @@ from varvaluation.data.cache import cache_dir
 from varvaluation.data.french import load_bm_deciles, load_ff3, load_industry49
 from varvaluation.data.macro import (
     load_cay,
+    load_cay_from_fred,
     load_cpi,
     load_gs1,
     load_macro,
@@ -35,6 +36,7 @@ __all__ = [
     "compute_rolling_betas",
     "load_bm_deciles",
     "load_cay",
+    "load_cay_from_fred",
     "load_cpi",
     "load_ff3",
     "load_gs1",
