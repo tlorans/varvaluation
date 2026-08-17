@@ -1,14 +1,17 @@
 # 3. Estimation
 
-The closed forms of Section 2 are useful only if every coefficient
-can be measured. The stages below are ordinary linear regressions on
-overlapping annual pairs, with
+The facts of Section 1 were measured with ordinary tools: overlapping
+annual regressions, rolling betas, a predictive regression for the
+premium. The closed forms of Section 2 are useful only if every
+coefficient can be measured the same way. The stages below are those
+regressions, with
 [Newey and West (1987)](../references.md#newey-west-1987) standard
 errors. What is not ordinary is the refusal to keep cash flows and
 expected returns in separate drawers
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III). The
 library calls `estimate_var` and `ExpectedReturnSpec` implement those
-stages. Section 5 reports the numbers they produce.
+stages. Section 5 reports the numbers they produce. It does not
+re-estimate Campbell–Shiller or Vuolteenaho.
 
 ## 1. Build the observables
 

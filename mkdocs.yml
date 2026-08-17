@@ -1,5 +1,5 @@
 site_name: Discounting cash flows when expected returns move
-site_description: A joint VAR framework, illustrated in varvaluation
+site_description: Discount rates move. So does the curve. An exposition of Ang and Liu (2004), with a library.
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation

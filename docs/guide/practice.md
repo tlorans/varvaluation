@@ -1,15 +1,21 @@
 # 6. Discussion
 
+A valuator already lives in the field of Section 1. The market’s
+multiple moves with expected returns. A firm’s earnings fade. Next
+year’s index dividend is a claim you can isolate. The question is
+whether the rate at year ten is today’s short rate, a historical
+average, or a forecast that mean-reverts at an estimated speed
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV).
+
 A constant-rate DCF and the framework of Sections 2–5 answer the same
 question — what a claim to future cash flows is worth — by doing
 different calculations. The DCF divides expected cash flows by one
 rate. The present value is the expectation of cash flows times a path
-of one-period expected returns. Discount-rate variation is not a refinement
-([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
-curve, the numerator, and the sign of the growth–rate interaction
-([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). This section
-states what a valuator can take from the *curve*, and what the sample
-of Section 5 cannot show.
+of one-period expected returns. Discount-rate variation is not a
+refinement ([Cochrane, 2011](../references.md#cochrane-2011)). It
+changes the curve, the numerator, and the sign of the growth–rate
+interaction. This section states what a valuator can take from the
+*curve*, and what the sample of Section 5 cannot show.
 
 ## What a valuator can take
 

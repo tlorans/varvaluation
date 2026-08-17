@@ -1,11 +1,14 @@
 # 2.3 The state
 
-The VAR is a grammar. Which names sit in $X_t$ is a judgment inherited
-from two literatures: what forecasts profitability, and what forecasts
-expected returns ([Cochrane, 2011](../references.md#cochrane-2011)).
-In the library, `StateSpec` is the only place those names are bound to
-positions. No integer index is public. The engine does not assume that
-column 0 is dividend growth.
+Which names sit in $X_t$ is the empirical heart of the model, not a
+taste in notation. One literature asks what forecasts profitability
+([Fama and French, 2000](../references.md#ff-2000)). Another asks
+what forecasts expected returns
+([Cochrane, 2011](../references.md#cochrane-2011)). The VAR is only
+the grammar that forces those two maps to share a shock. In the
+library, `StateSpec` is the only place the names are bound to
+positions. No integer index is public. The engine does not assume
+that column 0 is dividend growth.
 
 ```python
 from varvaluation import StateSpec

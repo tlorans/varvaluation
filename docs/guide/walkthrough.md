@@ -1,8 +1,11 @@
 # 5. Illustration
 
-This section is a **software demonstration**, not an empirical
-contribution. It runs the calls of Sections 2–4 on a short
-CRSP–Compustat extract.
+The facts of Section 1 were established on long market and firm
+panels. This section is not another such panel. It is a **software
+demonstration**: the calls of Sections 2–4 on a short CRSP–Compustat
+extract, so that the machinery is visible on real files. It does not
+re-measure Campbell–Shiller, Vuolteenaho, or the dividend-strip
+curve.
 
 !!! note "In words — the files this section opens"
     **WRDS** is the academic vendor. **CRSP** is the monthly

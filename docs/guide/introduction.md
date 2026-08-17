@@ -1,8 +1,34 @@
 # 1. Introduction
 
-A discounted-cash-flow (DCF) valuation writes the value of a claim as a
-sum of expected cash flows, each divided by a power of one rate $r$,
-then attaches a Gordon terminal value $C/(r-g)$ at a finite horizon.
+Open a price chart and a spreadsheet of expected earnings. They do not
+move together. For a generation that looked like a puzzle about
+“excess volatility.” It is now a fact about discount rates. Almost all
+variation in the market’s price–dividend ratio is variation in
+expected returns, not in expected dividend growth
+([Campbell and Shiller, 1988](../references.md#campbell-shiller-1988);
+[Cochrane, 2011](../references.md#cochrane-2011)). If the dividend
+yield does not forecast growth, the present-value identity says it
+must forecast returns
+([Cochrane, 2008](../references.md#cochrane-2008)). The “discounted”
+part of discounted cash flow is doing the work.
+
+At the firm the same identity tells the opposite story. For a typical
+stock, cash-flow-news variance is more than twice expected-return-news
+variance ([Vuolteenaho, 2002](../references.md#vuolteenaho-2002)).
+A name moves when its earnings path is revised. Profitability is
+forecastable and fades toward economy-wide levels
+([Fama and French, 2000](../references.md#ff-2000)). A firm sitting
+at an extraordinary ROE is, on average, on its way back. Since 2012
+the claim to next year’s S&P 500 dividend can be isolated from the
+rest of the index with index options
+([van Binsbergen, Brandt, and Koijen, 2012](../references.md#vbbk-2012);
+[van Binsbergen and Koijen, 2017](../references.md#vbk-2017)).
+Near-term dividend claims do not earn the same premium as the market.
+The slope is debated. That the object exists is not.
+
+Those are measurements. A valuation that picks one rate $r$ and a
+Gordon tail $C/(r-g)$ is then answering a different question from the
+one the data pose.
 
 !!! note "In words — DCF, WACC, Gordon, $\mathbb{E}_t$"
     **DCF** is the spreadsheet construction: forecast cash flows, divide
@@ -19,11 +45,7 @@ then attaches a Gordon terminal value $C/(r-g)$ at a finite horizon.
 
 Two claims are buried in that construction. The discount rate is the
 same at every maturity. Cash flows and discount rates may be forecast
-separately.
-
-Neither claim survives once expected returns vary. Discount-rate
-variation is the organising fact of empirical asset pricing
-([Cochrane, 2011](../references.md#cochrane-2011)). The object that
+separately. Neither claim survives the facts above. The object that
 remains well defined is the expectation of a *product*.
 
 Start from the definition of the one-period expected (log) return.
