@@ -1,7 +1,6 @@
 # Offline check
 
-No downloads. A synthetic state, one VAR, the two Ang–Liu recursions
-and the spot curve $\mu_t(n)$. This is a check on the implementation.
+No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$. This is a check on the implementation.
 
 ```python
 from varvaluation import (
@@ -21,9 +20,7 @@ model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha as needed
 # V     = model.value(X, C0=1.0)               # sum of strips + tail
 ```
 
-Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the
-definition of the spot curve. The same path on live data is the
-[worked example](guide/reproduce.md).
+Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the definition of the spot curve. The same path on live data is the [worked example](guide/reproduce.md).
 
 ```text
 uv run python examples/reproduce_glz2020.py

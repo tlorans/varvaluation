@@ -2,18 +2,17 @@
 
 Cash-flow expectations and discount rates from one VAR.
 
-A present value is the expectation of a **product**: each future cash
-flow multiplied by the path of one-period required returns. Those two
-paths have to be estimated together. The package implements the
-closed-form recursions of Ang and Liu (2004) — a cash-flow recursion,
-a priced recursion, and the term structure of spot discount rates
-$\mu_t(n)$ — with an optional residual-income map for the numerator.
+A present value is the expectation of a **product**: each future cash flow multiplied by the path of one-period required returns. Those two paths have to be estimated together. The package implements the closed-form recursions of Ang and Liu (2004) — a cash-flow recursion, a priced recursion, and the term structure of spot discount rates $\mu_t(n)$ — with an optional residual-income map for the numerator.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 
-The handbook is written as a short course: start from the flat-rate DCF
-you already know, see why a joint model is required, meet the VAR, and
-arrive at $\mu_t(n)$ and the strip-sum present value.
+The handbook is written as a short course. Three claims, in order:
+
+1. **Product** — value is $E[\text{discount path}\times\text{cash flow}]$.
+2. **Covariance** — that product expands to a covariance term that enters the price level.
+3. **One VAR** — cash-flow growth and expected returns must share one law of motion, or the covariance is missing.
+
+Everything else (the two recursions, the spot curve, the strip-sum present value) follows from those three claims.
 
 ## Install
 
@@ -23,9 +22,7 @@ uv add "varvaluation[data]"   # Ken French / FRED Treasuries / DEF / TERM
 uv add "varvaluation[wrds]"   # Compustat quarterly + CRSP daily
 ```
 
-Python 3.11+. Managed with `uv`. `[data]` caches under
-`~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). WRDS
-credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`.
+Python 3.11+. Managed with `uv`. `[data]` caches under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). WRDS credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`.
 
 ## The core calls
 
@@ -40,8 +37,7 @@ model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
 # V     = model.value(X, C0)                  # sum of strips + tail
 ```
 
-`uv run python examples/reproduce_glz2020.py` runs a synthetic state
-end to end. Add `--wrds` for a live Compustat / CRSP panel.
+`uv run python examples/reproduce_glz2020.py` runs a synthetic state end to end. Add `--wrds` for a live Compustat / CRSP panel.
 
 ## What is in 0.1
 

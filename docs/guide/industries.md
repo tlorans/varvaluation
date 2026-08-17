@@ -1,15 +1,14 @@
 # Other portfolios
 
-The state is still
+## Where this sits on the map
+
+The three-step map does not change. The state is still
 
 $$
 X_t = (g_t,\; \beta_t,\; \ldots)',
 $$
 
-the cash-flow recursion is still Ang and Liu’s $\bar a(n),\bar b(n)$,
-the priced recursion is still $a(n),b(n),H(n)$, and the spot curve is
-still $\mu_t(n)$. What changes is **which names are averaged into
-$X_t$**.
+the cash-flow recursion is still Ang and Liu’s $\bar a(n),\bar b(n)$, the priced recursion is still $a(n),b(n),H(n)$, and the spot curve is still $\mu_t(n)$. What changes is **which names are averaged into $X_t$**.
 
 ```python
 from varvaluation import prepare_industry_state
@@ -18,6 +17,8 @@ state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))  # banks
 state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836),))  # drugs
 state = prepare_industry_state(panel, macro, spec, sic="ex")             # exclude a range
 ```
+
+---
 
 ## What is common and what is not
 
@@ -29,9 +30,9 @@ state = prepare_industry_state(panel, macro, spec, sic="ex")             # exclu
 | The VAR $\Phi,c,\Sigma$ | | yes |
 | $\mu_t(n)$ | | yes |
 
-Estimate shared instruments once if you choose to. Re-estimate the VAR
-for each portfolio. Different $\Phi$ and different average $\beta$
-produce different curves in the same month.
+Estimate shared instruments once if you choose to. Re-estimate the VAR for each portfolio. Different $\Phi$ and different average $\beta$ produce different curves in the same month.
+
+---
 
 ## Checklist
 
@@ -43,6 +44,14 @@ produce different curves in the same month.
 6. `value` as the sum of strips; compare to a flat CAPM at the same date.
 
 !!! warning "The one rule"
-    If step 5 ever takes cash from one estimated system and rates from
-    another, stop. That is the mistake the whole package exists to
-    prevent. Both recursions must share $(\Phi,c,\Sigma)$.
+    If step 5 ever takes cash from one estimated system and rates from another, stop. That is the mistake the whole package exists to prevent. Both recursions must share $(\Phi,c,\Sigma)$.
+
+---
+
+## After this page
+
+You should be able to:
+
+1. Switch the universe that enters $X_t$ without touching the recursions or the mental map.
+2. State which objects are shared across portfolios and which are re-estimated.
+3. Enforce the rule that both recursions always read from the same $(\Phi,c,\Sigma)$.
