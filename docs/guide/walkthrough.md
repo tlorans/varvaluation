@@ -1,9 +1,17 @@
 # Worked application
 
-This is the page to run first. You do not need the VAR derivation
-beforehand — the seven steps below *are* the system, on real series.
-Ken French book-to-market deciles, FRED macro, and a CRSP–Compustat
-firm window from WRDS. The numbers are the captured output of
+!!! abstract "Purpose"
+
+    This page is the empirical counterpart of the claim on the
+    homepage. On Ken French book-to-market deciles, FRED macro, and a
+    CRSP–Compustat window from WRDS it identifies both sides of the
+    present value from one VAR
+    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III), then
+    reads the curve, the numerator, and the news from that same object.
+    You do not need the derivation first. The seven steps *are* the
+    system.
+
+The numbers below are the captured output of
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
 Re-run it:
 
@@ -45,9 +53,10 @@ cay            1959-01-31 → 2026-01-31
 ```
 
 Cay here is reconstructed from FRED (PCEC, household net worth,
-wages) when the published Lettau–Ludvigson file is missing, and then
-extended through the latest quarter. That is why it starts in 1959,
-not 1952.
+wages) when the published file of
+[Lettau and Ludvigson (2001)](../references.md#lettau-ludvigson-2001)
+is missing, and then extended through the latest quarter. That is why
+it starts in 1959, not 1952.
 
 ---
 
@@ -247,7 +256,9 @@ one firm at 2019-09-30  permno=10026  roe=-2.080  NI/BE=0.125  bm=-1.470
 
 Three things to take from that block.
 
-1. **`roe` is $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$**, not a
+1. **`roe` is $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$**, the
+   firm-level cash-flow state of
+   [Vuolteenaho (2002)](../references.md#vuolteenaho-2002), not a
    net-return. `roe = −2.08` is an ROE of $e^{-2.08}\approx 12.5\%$, a
    normal profitable firm. Do not feed it into `value` as if it were
    log dividend growth of −208%.

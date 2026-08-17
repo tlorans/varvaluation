@@ -1,5 +1,5 @@
 site_name: varvaluation
-site_description: Cash-flow and discount-rate forecasts from one VAR
+site_description: Joint cash-flow and discount-rate valuation from one VAR
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -54,6 +54,8 @@ exclude_docs: |
 markdown_extensions:
   - admonition
   - attr_list
+  - footnotes
+  - md_in_html
   - tables
   - toc:
       permalink: true

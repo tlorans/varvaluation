@@ -1,11 +1,10 @@
 # varvaluation
 
-Cash-flow and discount-rate forecasts from one VAR.
-
-You name a state $X_t$, estimate a VAR(1), and get expected cash flows
-**and** a discount curve from the same system. `value` multiplies them.
-Unexpected returns can be split into cash-flow news and discount-rate
-news; cash-flow news is taken from the cash-flow equation, not from the
+When expected returns move, value is the expectation of a product —
+cash flows times a path of discount rates. This library identifies both
+sides, and their covariance, from one named-state VAR. `value`
+multiplies them. Unexpected returns split into cash-flow news and
+discount-rate news; cash-flow news is the cash-flow equation, not the
 residual.
 
 **Docs:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).

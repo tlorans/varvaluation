@@ -1,9 +1,18 @@
 # Valuation
 
+!!! abstract "Purpose"
+
+    This page is the closed form. Given a fitted VAR and
+    $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
+    $\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are
+    exact functions of $X_t$
+    ([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions
+    I.1 and II.1). `value` multiplies them. That is the definition of
+    present value when expected returns move.
+
 **Both** sides of every strip come from the same state $X_t$. [The
-VAR](system.md) page is why that has to be one system. This page
-derives the two recursions, defines the spot curve, and shows the
-special case that freezes the numerator.
+VAR](system.md) page is why that has to be one system. The special
+case that freezes the numerator is `perpetuity`.
 
 Given a fitted VAR and a one-period expected return
 
@@ -28,7 +37,11 @@ value = model.value(X, C=1.0, n=80)          # both from X
 non-positive *terminal* rate raises `PerpetuityDivergesError`.
 
 If $\Lambda = 0$, the quadratic term is off, $H(n)\equiv 0$, and the
-solution is exponential-affine. Same class. No second solver.
+solution is exponential-affine — the case in which beta or the premium
+is constant, the setting of earlier affine present-value models
+([Ang and Liu, 2001](../references.md#ang-liu-2001)). Letting **both**
+move at once is what the $H(n)$ recursion is for. Same class. No
+second solver.
 
 ---
 
@@ -176,13 +189,14 @@ and the rest is a matrix Riccati. If $\det(I-2\Sigma H(n))$ leaves the
 positive reals, `RecursionDivergedError` is raised: the quadratic term
 has blown up.
 
-There is **no log-linearization**. Campbell–Shiller approximates a
-curved price–dividend identity by a first-order Taylor expansion,
-accurate near a typical ratio and drifting when prices or growth are
-far from typical. Here the relations are written in logs from the
-start, so the closed form is exact inside the class — which is why it
-does not break for high-growth or extreme-multiple names the way a
-log-linear identity does.
+There is **no log-linearization**.
+[Campbell and Shiller (1988)](../references.md#campbell-shiller-1988)
+approximate a curved price–dividend identity by a first-order Taylor
+expansion, accurate near a typical ratio and drifting when prices or
+growth are far from typical. Here the relations are written in logs
+from the start, so the closed form is exact inside the class — which
+is why it does not break for high-growth or extreme-multiple names the
+way a log-linear identity does.
 
 When $\Lambda=0$, $H(n)\equiv 0$ and the strip is exponential-affine:
 a constant beta with a moving premium, or a moving beta with a constant
@@ -254,7 +268,8 @@ $$
 $$
 
 Gordon is this system with **zero persistence, zero volatility, zero
-correlation**. Convergence in the general case requires the eigenvalues
+correlation** ([Ang and Liu, 2004](../references.md#ang-liu-2004),
+special case 1). Convergence in the general case requires the eigenvalues
 of $\Phi$ inside the unit circle *and* the priced strip eventually
 declining — the analogue of $\mu>g$, but now a condition on the
 **dynamics** rather than on two point estimates. The tail of

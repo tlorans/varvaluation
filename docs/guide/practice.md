@@ -1,7 +1,16 @@
 # What changes
 
-The textbook DCF and this system answer the same question — what is a
-claim to future cash flows worth today — with different objects.
+!!! abstract "Purpose"
+
+    A constant-rate DCF and this system answer the same question —
+    what a claim to future cash flows is worth — with different
+    objects. Discount-rate variation is not a refinement
+    ([Cochrane, 2011](../references.md#cochrane-2011)). It changes the
+    curve, the numerator, and the sign of the growth–rate interaction
+    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV).
+
+The textbook DCF and this system are not two presentations of one
+formula. They identify different random variables.
 
 ## Side by side
 
@@ -47,10 +56,12 @@ which no scenario table gives you. See [The VAR](system.md#where-the-joint-distr
 ### 3. Duration and risk become the same object
 
 Because $b(n)$ and $H(n)$ vary with horizon, the sensitivity of value
-to the state differs across the cash-flow strip. That is the object
-dividend-strip markets later made observable. Isolation
-(`isolate_channels`) asks the counterfactual version of the same
-question: shut a named state on one side and revalue.
+to the state differs across the cash-flow strip.
+[van Binsbergen and Koijen (2017)](../references.md#vbk-2017) later
+measured a term structure of *returns* on traded dividend claims — a
+cousin of that object, not a direct test of a fitted $\mu_t(n)$.
+Isolation (`isolate_channels`) asks the counterfactual version of the
+same question: shut a named state on one side and revalue.
 
 ## What the fitted curve looks like
 
@@ -95,8 +106,10 @@ of re-arguing the whole model.
 
 Everything hinges on $\hat\Phi$ and $\hat\Sigma$. The priced recursion
 accumulates $\Phi^n$, so an overestimate of persistence compounds into
-large errors at long horizons. Stambaugh bias guarantees you
-overestimate persistence in short samples with persistent predictors.
+large errors at long horizons.
+[Stambaugh (1999)](../references.md#stambaugh-1999) bias guarantees
+you overestimate persistence in short samples with persistent
+predictors.
 
 You have traded transparent assumptions (a WACC you can argue about)
 for statistical assumptions that are harder to interrogate and just as

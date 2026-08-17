@@ -1,11 +1,21 @@
 # News
 
+!!! abstract "Purpose"
+
+    [Valuation](valuation.md) asks what a claim is worth at $X_t$. News
+    asks a different question of the **same** fitted VAR: what moved
+    last period’s unexpected return
+    ([Campbell, 1991](../references.md#campbell-1991))? Cash-flow news
+    is the revision in the cash-flow *equation*, never the leftover of
+    a discount-rate model
+    ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
+
 [Valuation](valuation.md) asks: *what is it worth at $X_t$?* News asks a
 different question from the **same** VAR: *what moved last period’s
 unexpected return?*
 
-Campbell (1991) writes the unexpected return as cash-flow news minus
-discount-rate news,
+[Campbell (1991)](../references.md#campbell-1991) writes the unexpected
+return as cash-flow news minus discount-rate news,
 
 $$
 r_{t+1} - \mathbb{E}_t r_{t+1}
@@ -26,11 +36,12 @@ N_{\mathrm{CF}}^{\text{resid}}
   = (r_{t+1}-\mathbb{E}_t r_{t+1}) + N_{\mathrm{DR}}.
 $$
 
-Chen, Da, Zhao (2013) point out that this residual absorbs every
-misspecification of the discount-rate model. Their Treasury test makes it
-concrete: coupon payments are known, so there is no cash-flow news, and
-the VAR still finds some — because $N_{\mathrm{DR}}$ is imperfect, and
-the leftover is labelled “cash flow.”
+[Chen, Da, and Zhao (2013)](../references.md#chen-da-zhao-2013) point
+out that this residual absorbs every misspecification of the
+discount-rate model. Their Treasury test makes it concrete: coupon
+payments are known, so there is no cash-flow news, and the VAR still
+finds some — because $N_{\mathrm{DR}}$ is imperfect, and the leftover
+is labelled “cash flow.”
 
 This library never uses the residual as the definition of cash-flow news.
 

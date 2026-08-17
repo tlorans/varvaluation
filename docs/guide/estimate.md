@@ -1,9 +1,17 @@
 # Estimation
 
+!!! abstract "Purpose"
+
+    The closed form is useful only if every object in it can be
+    measured. The stages below are ordinary linear regressions —
+    overlapping annual pairs with
+    [Newey and West (1987)](../references.md#newey-west-1987) standard
+    errors. The innovation is refusing to keep cash flows and expected
+    returns in separate drawers
+    ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III).
+
 Every object in the priced recursions is measured. The pipeline runs
-from raw series to a discount curve in five stages. Nothing in it is
-exotic: each stage is a linear regression. The innovation is refusing
-to keep the pieces in separate drawers.
+from raw series to a discount curve in five stages.
 
 ## 1. Build the observables
 
@@ -82,10 +90,11 @@ $$
 
 On monthly data, `horizon=12` is an overlapping annual design. Adjacent
 pairs share eleven months, so ordinary standard errors would overstate
-confidence. `nw_lags=12` Newey–West standard errors are the correction:
-they estimate the covariance of the errors over a window of lags and
-inflate the uncertainty. Read “Newey–West, 12 lags” as “standard errors
-honest about the overlap.”
+confidence. `nw_lags=12` Newey–West standard errors
+([Newey and West, 1987](../references.md#newey-west-1987)) are the
+correction: they estimate the covariance of the errors over a window of
+lags and inflate the uncertainty. Read “Newey–West, 12 lags” as
+“standard errors honest about the overlap.”
 
 `estimate_var_panel` does the same thing on a firm panel, but forms
 lag pairs **only inside** `spec.group`. A firm needs more months than
@@ -152,6 +161,9 @@ rather than assumed away.
 
 You have traded a WACC you can argue about over coffee for statistical
 assumptions that are harder to interrogate and just as consequential.
-Use the system to read the *shape* of the curve and the *sign* of the
+[Stambaugh (1999)](../references.md#stambaugh-1999) bias guarantees that
+persistence is overstated in short samples with persistent predictors;
+the priced recursion then compounds that bias into $\Phi^n$. Use the
+system to read the *shape* of the curve and the *sign* of the
 growth–rate interaction. Be skeptical of the third decimal place.
 [What changes](practice.md) returns to this caveat.

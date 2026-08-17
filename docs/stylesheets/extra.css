@@ -1,3 +1,29 @@
+/* Academic reading: purpose block, citations, bibliography. */
+.md-typeset .admonition.abstract,
+.md-typeset details.abstract {
+  border-color: var(--md-default-fg-color--lightest);
+  font-size: 0.95em;
+}
+.md-typeset .admonition.abstract > .admonition-title,
+.md-typeset details.abstract > summary {
+  background: transparent;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+.md-typeset .cite,
+.md-typeset a[href*="references.md"] {
+  font-variant-numeric: oldstyle-nums;
+}
+.md-typeset .biblio p,
+.md-typeset .biblio li {
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+  margin-bottom: 0.55em;
+}
+.md-typeset .biblio li {
+  list-style: none;
+}
+
 /* Figures sit in the text column, with a quiet caption. */
 .md-typeset figure,
 .md-typeset p > img {

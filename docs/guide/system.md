@@ -3,14 +3,18 @@
 If you have not run the numbers yet, start at the
 [worked application](walkthrough.md). This page is the why.
 
-Value is the expectation of a **product**: cash flow times a discount
-factor. The expectation of a product depends on the joint distribution,
-not on each piece separately. If you forecast cash flows in one model
-and expected returns in another, you have no covariance, no consistent
-horizon dynamics, and the two forecasts can contradict each other.
+!!! abstract "Purpose"
 
-A **vector autoregression** is one system that produces both forecasts,
-and their covariance, from the same state $X_t$.
+    Value is $\mathbb{E}_t$ of a *product* — cash flow times a discount
+    factor ([Ang and Liu, 2004](../references.md#ang-liu-2004)). The
+    expectation of a product is a property of the joint distribution.
+    A VAR is the smallest statistical object that produces both
+    forecasts, and their covariance, from one state $X_t$.
+
+If you forecast cash flows in one model and expected returns in
+another, you have no covariance, no consistent horizon dynamics, and
+the two forecasts can contradict each other. That is not a modelling
+preference. It is a failure to identify the price.
 
 ## What a VAR is
 
@@ -42,7 +46,9 @@ Three named objects, each with a job:
 | $\Sigma$ | which shocks arrive together |
 
 Gaussian shocks plus linear dynamics is what makes every future horizon
-computable in closed form.
+computable in closed form — the same architecture as affine
+term-structure models, applied to equity
+([Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1).
 
 ### Forecasting is recursive bookkeeping
 
@@ -172,8 +178,11 @@ $$
   is **lower** than any DCF that ignores the interaction.
 
 That is why both forecasts have to come from one system. It is not only
-about variance decompositions after the fact. **The joint distribution
-enters the price level.**
+about variance decompositions after the fact
+([Campbell, 1991](../references.md#campbell-1991)). **The joint
+distribution enters the price level.** The $-2\,\mathrm{Cov}$ term is
+the precise, quantitative reason a split DCF is not an approximation
+but a different (and generally inconsistent) object.
 
 The [Valuation](valuation.md) page turns this Gaussian expectation into
 two recursions. [Estimation](estimate.md) shows how $(\Phi,c,\Sigma)$
