@@ -113,7 +113,7 @@ def main() -> int:
 
     _print("Step 2 — StateSpec and prepare_firm_state")
     spec = StateSpec(
-        names=("g", "beta", "bm", "r", "cay", "pi"),
+        names=("g", "roe", "beta", "bm", "r", "cay", "pi"),
         cashflow="g",
         group="permno",
         horizon=12,

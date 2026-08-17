@@ -98,6 +98,28 @@ def main() -> int:
     print(f"cross-section {last_date}  firms={cross.height}")
     xi, Lambda = premium(macro, spec)
 
+    # Profitability as a predictor of dividend growth (cash-flow slot stays g).
+    spec_roe = StateSpec(
+        names=("g", "roe", "beta", "bm", "r", "cay", "pi"),
+        cashflow="g",
+        group="permno",
+        horizon=12,
+        nw_lags=12,
+    )
+    state_roe = prepare_firm_state(
+        panel, macro, spec_roe, start="2001-01", end="2019-09", beta_window=60
+    )
+    top_roe = (
+        state_roe.group_by("permno")
+        .len()
+        .sort("len", descending=True)
+        .head(80)["permno"]
+        .to_list()
+    )
+    slim_roe = state_roe.filter(pl.col("permno").is_in(top_roe))
+    cross_roe = as_of(slim_roe, panel, last_date)
+    xi_roe, lam_roe = premium(macro, spec_roe)
+
     print()
     print("Raw alpha=0.02")
     best = None
@@ -116,8 +138,21 @@ def main() -> int:
             best = (score, label, zeros, fit)
 
     print()
+    print("With roe in the state (cash-flow slot still g)")
+    fit_roe = estimate_var_panel(slim_roe, spec_roe, phi_zeros=(("g", "r"), ("g", "pi")))
+    try:
+        a_roe, err_roe = calibrate_alpha(
+            fit_roe, xi_roe, lam_roe, cross_roe, alpha0=0.02, n=40
+        )
+        _print(err_roe, label="g + roe", extra=f"  alpha={a_roe:.3f}  rho={fit_roe.spectral_radius:.3f}")
+        extra_best = (err_roe.rmse_log_pv_me, "g + roe", (("g", "r"), ("g", "pi")), a_roe, err_roe)
+    except NonStationaryVARError as exc:
+        print(f"g + roe refused ({exc})")
+        extra_best = None
+
+    print()
     print("Alpha calibrated so median PV/ME ~ 1")
-    best_cal = None
+    best_cal = extra_best
     for label, zeros in CANDIDATES:
         fit = estimate_var_panel(slim, spec, phi_zeros=zeros)
         try:

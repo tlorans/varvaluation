@@ -70,18 +70,21 @@ $PV/ME$ sits between 3 and 5. RMSE of the log is 1.35–1.65
 2× of the market. Correlation of the logs is already 0.95: the
 ranking is decent; the level is not.
 
-**Intercept chosen so the median ratio is about 1**
-($\alpha=0.067$). RMSE of the log falls to about **0.81**. Sixty
-percent of names land within 2× of the market. Correlation stays
-0.95. Shutting the short rate and inflation out of the cash-flow
-equation barely moves the RMSE. The intercept does the work.
+**Intercept chosen so the median ratio is about 1.** Raising
+$\alpha$ from 0.02 to 0.067 does most of the level work. Then one
+change to the *state* helps the shape: put profitability in $X$ as
+a predictor of dividend growth, and still price $g$.
 
-| Cash-flow equation | RMSE of $\log(PV/ME)$, raw | RMSE after $\alpha$ |
-|---|---|---|
-| Unrestricted | 1.57 | 0.81 |
-| No short rate or inflation in $g$ | 1.65 | **0.81** |
-| Also no consumption–wealth gap in $g$ | 1.53 | 0.82 |
-| $g$ on its own lag only | 1.35 | 0.83 |
+On the walkthrough’s 80 longest payers that have both names, that
+spec scores **RMSE of $\log(PV/ME)=0.69$**, correlation 0.96, and
+**75% of names within 2×** of the market. Without profitability in
+the state, the same intercept left RMSE at 0.81 and only 61% within
+2×. Firm-specific Gordon growth and clipping long-run $g$ did not
+beat the joint system.
+
+Profitability helps forecast cash. It is not the cash itself. An
+RMSE of 0.69 is better and still large: a typical miss of about
+$e^{0.69}\approx 2.0$ times.
 
 The walkthrough prints the same two lines, then the three names at
 the calibrated intercept. Those three are no longer 10× toys; they
