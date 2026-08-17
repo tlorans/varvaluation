@@ -20,6 +20,9 @@ rates = model.spot_rates(X_t, n=30)
 news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 ```
 
+![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
+<p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles. Sample 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons.</p>
+
 The teaching course that walks the derivation is [Dynamic DCF](https://github.com/tlorans/var_valuation). This site is the library.
 
 ## Extras

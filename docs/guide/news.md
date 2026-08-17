@@ -33,6 +33,9 @@ news = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 
 `residual = unexpected - (cf - dr)` is always present as a diagnostic.
 
+![Cash-flow vs discount-rate news variance](../assets/figures/news_shares.png)
+<p class="figure-caption">Variance of direct cash-flow news versus discount-rate news. CF news is the $g$ equation, not the residual. Value (D10) is CF-dominated; DR news is small once $\lambda$ is the expected-return gradient.</p>
+
 The returns frame must be simple returns in $(-1, 5)$. Use compounded twelve-month simple returns, not a raw sum of log returns.
 
 ## Treasury test

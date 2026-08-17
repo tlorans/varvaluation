@@ -33,3 +33,9 @@ model_s = AngLiuModel(fit.spec, Phi_s, c_s, Sigma_s, xi, Lambda, alpha)
 Shipped scenarios (NGFS / Melin–Zhang parameterisation): `Net Zero 2050`, `Below 2C`, `Current Policies`, `Climate Destabilization`, `Climate Breakdown`, and the others in `load_scenario_parameters()`.
 
 `override_var` is generic. The state name does not have to be `"Y"`.
+
+![Discount curves under climate scenarios](../assets/figures/climate_curves.png)
+<p class="figure-caption">D10 spot curves after replacing the $Y$ equation with scenario AR(1) moments. Same $\xi$, $\Lambda$, and non-climate block of $\Phi$.</p>
+
+![Channel isolation under climate scenarios](../assets/figures/climate_channels.png)
+<p class="figure-caption">Present values with both channels live, cash-flow loadings on $Y$ shut, or discount-rate loadings on $Y$ shut. Isolation is a valuation counterfactual, not news.</p>

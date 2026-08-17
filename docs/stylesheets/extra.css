@@ -1,0 +1,18 @@
+/* Figures sit in the text column, with a quiet caption. */
+.md-typeset figure,
+.md-typeset p > img {
+  display: block;
+  margin: 1.4rem auto 0.4rem;
+  max-width: 100%;
+}
+.md-typeset .figure-caption,
+.md-typeset em:has(+ img),
+.md-typeset p:has(> img) + p > em {
+  display: block;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.85em;
+  margin: 0.2rem 0 1.4rem;
+}
+.md-typeset .arithmatex {
+  overflow-x: auto;
+}

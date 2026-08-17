@@ -22,6 +22,12 @@ perp = model.perpetuity(X, n=80)           # unit cash flow
 
 If $\Lambda = 0$, $H(n)\equiv 0$ and the solution is exponential-affine (the course playground). Same class; no second solver.
 
+![Spot discount curves](../assets/figures/spot_curves.png)
+<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample.</p>
+
+![Variance decomposition, D10](../assets/figures/variance_decomp_d10.png)
+<p class="figure-caption">Share of spot-rate variance by state variable, value decile. On this sample $\mathit{cay}$ and $\beta$ dominate; cash-flow growth $g$ is negligible in the <em>discount curve</em>.</p>
+
 ## What to trust at the portfolio level
 
 The paper’s portfolio path is the **perpetuity** (cash flow held at 1). Activating the cash-flow recursion on a near-unit-root $g$ equation (value portfolios) can explode the full PV. Check $\Phi_{g,g}$ and prefer `perpetuity` when that loading is near one.

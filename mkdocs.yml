@@ -27,7 +27,6 @@ theme:
     code: Source Code Pro
   features:
     - navigation.sections
-    - navigation.instant
     - content.code.copy
     - toc.follow
 
@@ -62,12 +61,13 @@ markdown_extensions:
       generic: true
 
 extra_javascript:
-  - javascripts/math.js
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
+  - javascripts/math.js
 
 extra_css:
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
+  - stylesheets/extra.css
 
 extra:
   social:

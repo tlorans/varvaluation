@@ -33,3 +33,12 @@ Importing `varvaluation.data` or `varvaluation.wrds` without the extra raises `E
 Public downloads go to `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to any loader to skip the network.
 
 WRDS credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`, in the environment or a `.env` file at the repo root. Do not commit `.env`.
+
+## Documentation site
+
+```text
+uv sync --extra docs --extra data
+uv run mkdocs serve
+```
+
+Figures in the guide are produced by `uv run python examples/build_docs_figures.py` and committed under `docs/assets/figures/`.
