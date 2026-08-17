@@ -8,6 +8,21 @@
 
 This page is step 3.
 
+```mermaid
+flowchart TB
+  subgraph two ["Two separate models"]
+    G["Growth model → E[∑g]"]
+    R["Return model → E[∑μ]"]
+  end
+  two -.->|"Cov has nowhere to live"| miss["Price misses −2 Cov"]
+  subgraph one ["One joint VAR"]
+    V["Xₜ₊₁ = c + Φ Xₜ + uₜ₊₁"]
+    V --> Phi["Φ: cross-forecasts"]
+    V --> Sig["Σ: shock covariance"]
+  end
+  one --> ok["Both recursions share the same matrices"]
+```
+
 ---
 
 ## Why separate models fail
@@ -71,6 +86,22 @@ The off-diagonal cells of $\Phi$ and of $\Sigma$ *are* the covariance structure 
     2. **Mean reversion.** A stable $\Phi$ delivers rates that glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
     3. **Testable cross-forecasts.** Does the premium forecast growth? Coefficients of $\Phi$, with standard errors.
     4. **Closed form.** Linear dynamics + Gaussian shocks ⇒ every cumulated sum is conditionally normal ⇒ $E[e^{\cdot}]$ is analytic.
+
+---
+
+## Numerical illustration (same offline state)
+
+From `examples/quickstart.py` (seed 7):
+
+```text
+spectral radius: 0.409
+Phi:
+ [[0.295 0.124]
+  [0.006 0.402]]
+c: [0.0027 0.0015]
+```
+
+Both eigenvalues of $\Phi$ sit well inside the unit circle. The off-diagonal entries are small but non-zero — they are exactly the cross-forecast channels that carry part of the covariance into the product.
 
 ---
 

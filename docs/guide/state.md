@@ -103,6 +103,10 @@ from varvaluation import prepare_industry_state
 state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))
 ```
 
+Different portfolios produce different curves in the same month because they carry different average $\beta$ and different $\Phi$:
+
+![Spot curves by book-to-market decile](../assets/figures/spot_curves.png)
+
 The next page runs estimate → recurse → curve on a worked example.
 
 ---

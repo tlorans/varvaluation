@@ -8,6 +8,11 @@
 
 This page writes out claims 1 and 2. Claim 3 is the next page.
 
+```mermaid
+flowchart LR
+  A["1 · Product"] --> B["2 · Covariance"] --> C["3 · One VAR"]
+```
+
 ---
 
 ## 1. Value is the expectation of a product
@@ -38,6 +43,17 @@ V_t
 $$
 
 **In plain English:** the object inside the expectation is a **product** — a cash flow multiplied by a path of one-period discount factors. You cannot price it from two separate forecasts of “cash” and “rate”.
+
+```mermaid
+flowchart TB
+  subgraph flat ["Flat DCF"]
+    F["V = E[C] / (1+r)ⁿ<br/>discount factor outside"]
+  end
+  subgraph ang ["Ang–Liu identity"]
+    A["V = E[ e<sup>−∑μ</sup> · C ]<br/>product stays inside"]
+  end
+  flat -->|"r moves → error"| ang
+```
 
 !!! note "Punchline"
     Damodaran’s formula replaces $E[\text{product}]$ by a ratio of expectations. Once expected returns move, that replacement is an error — not an approximation of secondary order.
@@ -83,6 +99,13 @@ Four pieces enter the price level:
 
 If good news about growth arrives together with *higher* expected returns — the usual aggregate pattern — then $\mathrm{Cov}>0$, the $-2\,\mathrm{Cov}$ term is negative, and **value is lower** than any DCF that ignores the interaction.
 
+```mermaid
+flowchart LR
+  G["∑g growth"] --- Cov["Cov(∑g, ∑μ) > 0"]
+  M["∑μ discount"] --- Cov
+  Cov -->|"−2 Cov"| P["Price level ↓"]
+```
+
 !!! note "Punchline"
     The covariance is not a variance-decomposition detail. It shifts the level of the price. A model that forecasts cash and discount rates in separate drawers has already set it to zero.
 
@@ -110,6 +133,10 @@ V_t(n)
 $$
 
 A flat rule sets $\mu_t(n)=\mu_t$ for all $n$. Ang and Liu show the curve is not flat: at short horizons the market risk premium dominates; at long horizons the risk-free rate and time-varying betas do. Using a constant rate produces large misvaluations.
+
+Mean reversion in the expected return already produces a non-flat curve:
+
+![Mean reversion in expected returns](../assets/figures/mean_reversion.png)
 
 ## What we will compute
 

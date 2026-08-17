@@ -32,6 +32,8 @@ state = prepare_industry_state(panel, macro, spec, sic="ex")             # exclu
 
 Estimate shared instruments once if you choose to. Re-estimate the VAR for each portfolio. Different $\Phi$ and different average $\beta$ produce different curves in the same month.
 
+![Spot curves by style](../assets/figures/spot_curves.png)
+
 ---
 
 ## Checklist

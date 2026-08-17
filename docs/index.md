@@ -22,6 +22,14 @@ This package implements the closed-form recursions of
 
 Three claims, in order. Everything else is bookkeeping.
 
+```mermaid
+flowchart LR
+  A["1 · Product<br/>Value = E[discount × cash flow]"]
+  B["2 · Covariance<br/>Cov enters the price level"]
+  C["3 · One VAR<br/>Cash flows & rates share Xₜ"]
+  A --> B --> C
+```
+
 <div class="topic-cards">
 <a href="guide/problem/"><span class="part">1</span><strong>Product</strong><span>Value is $E[\text{discount path}\times\text{cash flow}]$, not a ratio of separate forecasts.</span></a>
 <a href="guide/problem/#the-covariance-term"><span class="part">2</span><strong>Covariance</strong><span>$E[XY]=E[X]E[Y]+\mathrm{Cov}(X,Y)$. That covariance enters the <em>price level</em>.</span></a>
@@ -50,10 +58,47 @@ V_t = \sum_{s=1}^{\infty}
   \Bigr].
 $$
 
+```mermaid
+flowchart TB
+  subgraph ratio ["Ratio of expectations (flat DCF)"]
+    R["V = E[C] / (1+r)ⁿ"]
+  end
+  subgraph product ["Expectation of a product (Ang–Liu)"]
+    P["V = E[ e<sup>−∑μ</sup> · C ]"]
+  end
+  ratio -.->|"valid only if r deterministic"| product
+```
+
 Expand the lognormal strip and the covariance between cumulated growth
 and cumulated expected returns appears with a minus sign. Positive
 comovement lowers value. Separate models of the two sides set that term
 to zero by construction.
+
+## A numerical glimpse (offline, no data)
+
+```text
+$ python examples/quickstart.py
+spectral radius: 0.409
+spot mu(n) %      n=1, 5, 10: 2.37, 3.78, 4.09
+E[C]/C            n=1, 5, 10: 0.999, 1.008, 1.021
+value: 24.07
+```
+
+```text
+$ python examples/flat_vs_curve.py
+mu(1)  2.37%
+mu(10) 4.09%
+flat PV vs curve  +8.0%
+```
+
+| Maturity $n$ | $\mu_t(n)$ (%) | $E_t[C_{t+n}]/C_t$ |
+|---:|---:|---:|
+| 1 | 2.37 | 0.999 |
+| 5 | 3.78 | 1.008 |
+| 10 | 4.09 | 1.021 |
+| 15 | 4.19 | 1.034 |
+
+The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat present value is about **8 % higher** than the curve-consistent value.
 
 ## Four calls
 
