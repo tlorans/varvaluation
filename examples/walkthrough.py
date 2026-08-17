@@ -20,6 +20,7 @@ warnings.filterwarnings("ignore", message="Sortedness of columns")
 
 from varvaluation import (
     ExpectedReturnSpec,
+    NonStationaryVARError,
     PerpetuityDivergesError,
     StateSpec,
     ValuationModel,
@@ -45,7 +46,8 @@ def risk_premium(macro: pl.DataFrame) -> dict:
     )
     frame = frame.with_columns((pl.col("y_fwd") - pl.col("r")).alias("y"))
     start = pl.date(int(START[:4]), int(START[5:7]), 1)
-    end = pl.date(int(END[:4]), int(END[5:7]), 1).dt.month_end()
+    # Stop the premium at the valuation date (no look-ahead past 2019-09).
+    end = pl.date(2019, 9, 30)
     frame = (
         frame.filter(pl.col("date").ge(start) & pl.col("date").le(end))
         .select(["date", "y", "r", "cay"])
@@ -97,8 +99,8 @@ def main() -> int:
         print(f"WRDS extra missing: {type(exc).__name__}: {exc}")
         return 1
 
-    crsp = load_crsp_monthly(start="2014-01", end="2019-12-31", use_cache=True)
-    comp = load_compustat_annual(start="2012-01", end="2019-12-31", use_cache=True)
+    crsp = load_crsp_monthly(start="2000-01", end="2019-12-31", use_cache=True)
+    comp = load_compustat_annual(start="1998-01", end="2019-12-31", use_cache=True)
     link = load_ccm_link(use_cache=True)
     panel = merge_firm_panel(crsp, comp, link)
     print(
@@ -117,7 +119,7 @@ def main() -> int:
     print(f"names={spec.names}  cashflow={spec.cashflow}  "
           f"cashflow_index={spec.cashflow_index()}  group={spec.group}")
     state = prepare_firm_state(
-        panel, macro, spec, start="2015-01", end="2019-09", beta_window=12
+        panel, macro, spec, start="2001-01", end="2019-09", beta_window=60
     )
     print(
         f"state  {state.height} firm-months  "
@@ -161,7 +163,12 @@ def main() -> int:
     )
 
     _print("Step 5 — ValuationModel at three firms")
-    model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+    try:
+        model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
+    except NonStationaryVARError as exc:
+        print(exc)
+        print("No present value: the companion is explosive on this window.")
+        return 0
     last_date = slim["date"].max()
     last = slim.filter(pl.col("date") == last_date).sort("permno")
     picks = [
@@ -195,7 +202,10 @@ def main() -> int:
         )
         try:
             val = model.value(X, C=C, n=40)
-            print(f"  pv={val.pv:.2f}  (C=TTM dividends, CRSP thousands)")
+            print(
+                f"  pv={val.pv:.2f} CRSP thousands  "
+                f"(${val.pv / 1e3:,.1f} million; C=TTM dividends)"
+            )
         except PerpetuityDivergesError as exc:
             print(f"  value  {exc}")
 
