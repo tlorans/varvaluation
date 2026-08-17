@@ -1,4 +1,8 @@
-# 2.3 The state
+<p class="part-kicker">Part 03 · The joint system</p>
+
+# The state
+
+<p class="you-will"><strong>You will.</strong> Name every coordinate, including the cash-flow slot.</p>
 
 The VAR is a grammar. Which names sit in $X_t$ is a judgment inherited
 from two literatures: what forecasts profitability, and what forecasts

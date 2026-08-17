@@ -1,7 +1,12 @@
-# WRDS / firms
+<p class="part-kicker">Part 06 · Firms</p>
 
-The data extra that Section 5 actually uses.
-Extra: `uv add "varvaluation[wrds]"`.
+# WRDS / firm panel
+
+<p class="you-will"><strong>You will.</strong> Build a CRSP–Compustat state without lagging firm A into firm B.</p>
+
+Public data gave you a curve. A firm panel is the next state. Lag
+pairs are formed only inside a `permno`, so one name is never used
+to forecast another. Extra: `uv add "varvaluation[wrds]"`.
 
 Credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`, in the environment or a `.env` file. Queries cache as parquet under `~/.cache/varvaluation/wrds`.
 

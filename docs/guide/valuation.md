@@ -1,6 +1,10 @@
-# 2.2 Present value
+<p class="part-kicker">Part 03 · The joint system</p>
 
-Given the VAR of Section 2.1 and a one-period expected return
+# Present value
+
+<p class="you-will"><strong>You will.</strong> Evaluate the closed form for the product and the spot curve it implies.</p>
+
+Given the VAR of [The VAR](system.md) and a one-period expected return
 $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
 $\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are exact
 functions of $X_t$

@@ -1,6 +1,6 @@
 # Software
 
-The library `varvaluation` is the computational form of Sections 2–4.
+The library `varvaluation` is the bench for the handbook.
 Python 3.11 or 3.12. The project is managed with
 [uv](https://docs.astral.sh/uv/).
 
@@ -44,6 +44,7 @@ uv run mkdocs serve
 
 Figures in the guide are produced by `uv run python examples/build_docs_figures.py` and committed under `docs/assets/figures/`.
 
-Section 5 is the software demonstration:
+The firm illustration is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
-The argument begins at the [Introduction](guide/introduction.md).
+Start at the [research program](guide/program.md) or
+[Getting started](guide/start.md).

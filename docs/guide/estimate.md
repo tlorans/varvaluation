@@ -1,14 +1,20 @@
-# 3. Estimation
+<p class="part-kicker">Part 04 · Measurement</p>
 
-The closed forms of Section 2 are useful only if every coefficient
-can be measured. The stages below are ordinary linear regressions on
-overlapping annual pairs, with
+# Estimate
+
+<p class="you-will"><strong>You will.</strong> Measure $\Phi$ and $(\xi,\Lambda)$ in stages, with Newey–West on overlapping pairs.</p>
+
+The closed forms of [The joint system](system.md) are useful only if
+every coefficient can be measured. The stages below are ordinary
+linear regressions on overlapping annual pairs, with
 [Newey and West (1987)](../references.md#newey-west-1987) standard
 errors. What is not ordinary is the refusal to keep cash flows and
 expected returns in separate drawers
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III). The
 library calls `estimate_var` and `ExpectedReturnSpec` implement those
-stages. Section 5 reports the numbers they produce.
+stages. [Three curves](walkthrough.md) reports the numbers they
+produce on a firm panel; [Public data](data.md) is the first real
+curve, with no WRDS.
 
 ## 1. Build the observables
 

@@ -1,8 +1,12 @@
-# 2.1 The joint system
+<p class="part-kicker">Part 03 · The joint system</p>
 
-Value is the conditional expectation of a product
-([Ang and Liu, 2004](../references.md#ang-liu-2004)). The expectation
-of a product is a property of the joint distribution. A vector
+# The VAR
+
+<p class="you-will"><strong>You will.</strong> Write one law of motion that forecasts cash flows and expected returns together.</p>
+
+You cannot price the product from two separate forecasts. The
+expectation of a product is a property of the joint distribution
+([Ang and Liu, 2004](../references.md#ang-liu-2004)). A vector
 autoregression is the smallest statistical object that produces both
 forecasts, and their covariance, from one state $X_t$. Separate
 models of cash flows and of expected returns omit that covariance,

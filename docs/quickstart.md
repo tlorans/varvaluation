@@ -1,6 +1,6 @@
 # Synthetic check
 
-Section 5 uses a CRSP–Compustat firm panel. The two-state draw below
+[Three curves](guide/walkthrough.md) uses a CRSP–Compustat firm panel. The two-state draw below
 reproduces both sides of the present value with no downloads. It is a
 check on the implementation, not a substitute for the illustration.
 [`examples/quickstart.py`](https://github.com/tlorans/varvaluation/blob/main/examples/quickstart.py):
@@ -65,4 +65,4 @@ CF news ≈ 0.
 
 ## Illustration on market data
 
-[Section 5](guide/walkthrough.md).
+[Three curves](guide/walkthrough.md).

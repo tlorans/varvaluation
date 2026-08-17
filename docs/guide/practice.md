@@ -1,10 +1,17 @@
-# 6. Discussion
+<p class="part-kicker">Part 06 · Firms</p>
 
-The question that matters is whether the rate at year ten is today’s
-short rate, a historical average, or a forecast that mean-reverts
-with the state ([Ang and Liu, 2004](../references.md#ang-liu-2004),
-§IV). This section states what a valuator can take from the *curve*,
-and what the sample of Section 5 cannot show.
+# For valuators
+
+<p class="you-will"><strong>You will.</strong> Discount a cash-flow path you already have at the fitted curve.</p>
+
+You already have a path — an analyst schedule, a residual-income
+model, an internal forecast. The question that matters is whether
+the rate at year ten is today’s short rate, a historical average, or
+a forecast that mean-reverts with the state
+([Ang and Liu, 2004](../references.md#ang-liu-2004), §IV). This
+chapter is the denominator. What the sample of
+[Three curves](walkthrough.md) cannot show is at the end of that
+chapter and below.
 
 ## What a valuator can take
 
@@ -89,7 +96,8 @@ here.
 
 ## What this sample cannot show
 
-Section 5 is a software demonstration. The caveats are load-bearing.
+[Three curves](walkthrough.md) is a software demonstration. The
+caveats are load-bearing.
 
 - **80 firms, not 2,673.** The prepared state has 2,673 names. The
   companion is pooled on the 80 longest histories. Those are not the

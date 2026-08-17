@@ -1,5 +1,5 @@
-site_name: Discounting cash flows when expected returns move
-site_description: When expected returns move, one rate is the wrong tool
+site_name: Explain asset values from data
+site_description: A handbook for the research program that treats present value as the expectation of a product
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -27,26 +27,32 @@ theme:
     code: Source Code Pro
   features:
     - navigation.sections
+    - navigation.footer
     - content.code.copy
     - toc.follow
 
 nav:
-  - Abstract: index.md
-  - 1. Introduction: guide/introduction.md
-  - 2. Framework:
-      - The joint system: guide/system.md
+  - Home: index.md
+  - 01 The research program: guide/program.md
+  - 02 Getting started:
+      - Start here: guide/start.md
+      - Why a product: guide/introduction.md
+  - 03 The joint system:
+      - The VAR: guide/system.md
       - Present value: guide/valuation.md
       - The state: guide/spec.md
-  - 3. Estimation: guide/estimate.md
-  - 4. Return news: guide/news.md
-  - 5. Illustration: guide/walkthrough.md
-  - 6. Discussion: guide/practice.md
+  - 04 Measurement:
+      - Estimate: guide/estimate.md
+      - Public data: guide/data.md
+  - 05 What moved the return: guide/news.md
+  - 06 Firms:
+      - WRDS / panel: guide/wrds.md
+      - Three curves: guide/walkthrough.md
+      - For valuators: guide/practice.md
   - Software:
       - Install: install.md
       - API: api.md
-      - Public data: guide/data.md
-      - WRDS / firms: guide/wrds.md
-      - Synthetic: quickstart.md
+      - Synthetic check: quickstart.md
   - References: references.md
 
 exclude_docs: |

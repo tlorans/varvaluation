@@ -1,4 +1,12 @@
+<p class="part-kicker">Part 04 · Measurement</p>
+
 # Public data
+
+<p class="you-will"><strong>You will.</strong> Load Ken French / FRED and print a real $\mu(n)$ with no WRDS.</p>
+
+This is the first *real* discount curve. Ken French portfolios and
+FRED macros are enough to estimate $\Phi$ and print $\mu_t(n)$.
+Firm-level CRSP–Compustat work is [Part 06](wrds.md).
 
 Extra: `uv add "varvaluation[data]"`.
 

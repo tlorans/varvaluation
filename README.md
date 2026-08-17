@@ -1,15 +1,17 @@
 # varvaluation
 
-When expected returns move, year one and year ten should not share a
-single rate. Present value is the expectation of a product. This package
-implements Ang and Liu (2004): one named-state VAR identifies both sides
-and their covariance. `value` multiplies them when the cash-flow name is
-log growth. Cash-flow news is the cash-flow equation, not the residual.
+Present value is the expectation of a product: each cash flow times a
+path of one-period expected returns. One rate for every horizon is a
+degeneracy, not a method. This package is the bench for the research
+program that treats that product as something you can measure. The
+closed forms are Ang and Liu (2004). Cash-flow news is the cash-flow
+equation, not the residual.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-Section 5 is a software demonstration on a short CRSP–Compustat window
-(2,673 prepared firms; a pooled companion on the 80 longest histories).
-It reports the discount curve, not firm present values.
+The firm illustration is a software demonstration on a short
+CRSP–Compustat window (2,673 prepared firms; a pooled companion on the
+80 longest histories). It reports the discount curve, not firm present
+values.
 
 ## Install
 
@@ -28,60 +30,42 @@ reconstructs cay from FRED. WRDS credentials: `WRDS_USERNAME` or
 
 Python 3.11+. Managed with `uv`.
 
-The illustration is `uv run python examples/walkthrough.py`
-([Section 5](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
-The snippet below is the no-download check.
+The firm illustration is `uv run python examples/walkthrough.py`
+([Three curves](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
 
-## Ten-line path
+## Flat rate versus the curve
+
+Year one and year ten do not share a rate. The snippet values a
+ten-period unit claim two ways — the fitted curve, and a flat rate
+equal to today's μ(1). No downloads.
 
 ```python
-from varvaluation import (
-    ExpectedReturnSpec,
-    ValuationModel,
-    estimate_var,
-    news_decomposition,
-)
+from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
 from varvaluation.news import simulate_return_var
+import numpy as np
 
 df, spec = simulate_return_var(nobs=400, seed=7)
 fit = estimate_var(df, spec)
-
 xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
     spec, {"b0": 0.01}
 )
 model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
 X = fit.X_lag[-1]
-
 rates = model.spot_rates(X, n=10)
-cf = model.cashflow_expectation(X, n=10)
-val = model.value(X, C=1.0, n=40)
-news = news_decomposition(
-    fit, df.select(["date", "ret"]), return_col="ret", return_state="ret"
-)
-
-print(f"spectral radius: {fit.spectral_radius:.3f}")
-print(
-    "spot mu(n) %      n=1, 5, 10:",
-    ", ".join(f"{100 * rates[k]:.2f}" for k in (0, 4, 9)),
-)
-print(
-    "E[C]/C            n=1, 5, 10:",
-    ", ".join(f"{cf[k]:.3f}" for k in (0, 4, 9)),
-)
-print(f"value: {val.pv:.2f}")
-print(f"news var  cf={news.shares.var_cf:.4f}  dr={news.shares.var_dr:.4f}")
+n = np.arange(1, 11)
+curve = float(np.sum(np.exp(-n * rates)))
+flat = float(np.sum(np.exp(-n * rates[0])))
+print(f"mu(1) {100*rates[0]:.2f}%   mu(10) {100*rates[-1]:.2f}%")
+print(f"flat PV vs curve {(flat/curve - 1)*100:+.1f}%")
 ```
 
 ```text
-spectral radius: 0.409
-spot mu(n) %      n=1, 5, 10: 2.37, 3.78, 4.09
-E[C]/C            n=1, 5, 10: 0.999, 1.008, 1.021
-value: 24.07
-news var  cf=0.0002  dr=0.0001
+mu(1) 2.37%   mu(10) 4.09%
+flat PV vs curve +8.0%
 ```
 
-`news.frame["cf"]` is the cash-flow-equation series. The identity leftover
-is `news.frame["residual"]`, never the definition of cash-flow news.
+`uv run python examples/flat_vs_curve.py` prints the same three numbers.
+The synthetic check with news is `uv run python examples/quickstart.py`.
 
 ## Public data (`[data]`)
 

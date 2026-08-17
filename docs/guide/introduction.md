@@ -1,8 +1,11 @@
-# 1. Introduction
+<p class="part-kicker">Part 02 · Getting started</p>
 
-Usual practice forecasts cash flows and discounts every horizon at the
-same rate. That is a complete valuation only if the rate does not
-move. Expected returns do move
+# Why a product
+
+<p class="you-will"><strong>You will.</strong> Write present value as the expectation of a product and keep the objects table next to you.</p>
+
+You have already seen that a flat rate and a moving curve do not
+price the same claim. The reason is not taste. Expected returns move
 ([Cochrane, 2011](../references.md#cochrane-2011)). Year one and
 year ten then need different rates, and the well-defined object is
 the expectation of a *product*.
@@ -141,14 +144,14 @@ value of earnings above a charge on book
 accounting companion that would price book. It is cited, not
 implemented.
 
-## What this document is
+## What the library adds
 
-This is an exposition and a library, not a new closed form. The
-recursions, the spot curve, and Gordon as a nest are
+The recursions, the spot curve, and Gordon as a nest are
 [Ang and Liu (2004)](../references.md#ang-liu-2004). The residual-income
-companion is cited, not implemented.
+companion is cited, not implemented. The closed forms are not new.
 
-What is not in those papers, and is the increment this site claims:
+What is not in those papers, and is the increment this handbook
+uses as a bench:
 
 1. **Named-state binding.** `StateSpec` makes the cash-flow row a
    name (`"roe"`, `"g"`), not “whatever sits in column 0.”
@@ -160,9 +163,9 @@ What is not in those papers, and is the increment this site claims:
 4. **A callable implementation** (`ValuationModel`) of the 2004
    priced and cash-flow recursions.
 
-Section 5 is a software demonstration on a WRDS extract. **WRDS** is
-the academic vendor for US market and accounting data. **CRSP** is
-the monthly stock-return file; **Compustat** is the annual
+[Three curves](walkthrough.md) runs those calls on a WRDS extract.
+**WRDS** is the academic vendor for US market and accounting data.
+**CRSP** is the monthly stock-return file; **Compustat** is the annual
 fundamentals file; a **permno** is CRSP’s permanent firm identifier.
 The prepared state has 2,673 firms. The *pooled companion* — one
 $\Phi$ estimated on stacked lag pairs — uses the 80 longest
@@ -174,20 +177,22 @@ the model.
 
 The market premium regression that supplies $(\xi,\Lambda)$ uses
 returns through December 2024, after the September 2019 valuation
-date — look-ahead, disclosed in Section 3. The illustration reports
-$\mu_t(n)$ and $\mathbb{E}_t[\mathit{roe}_{t+n}]$. It does not
-report a present value of those equities, because
+date — look-ahead, disclosed in [Estimation](estimate.md). The
+illustration reports $\mu_t(n)$ and
+$\mathbb{E}_t[\mathit{roe}_{t+n}]$. It does not report a present
+value of those equities, because
 $\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$
 (GAAP net income over lagged book equity) is a profitability
 *level*, not log cash-flow growth, and not Vuolteenaho’s
 $e_t=\log(1+X_t/B_{t-1})$ (clean-surplus earnings in return units).
 
-Section 2 states the joint system. Section 3 records staged
-estimation, including the seam between a market premium regression
-and a firm VAR — the same staging as Ang and Liu (2004, §III), not
-a single-equation identification of the product. Section 4 treats
-news. Section 5 runs the library. Section 6 says what a valuator
-can take from the curve, and what this sample cannot show.
+[The joint system](system.md) states the VAR. [Estimation](estimate.md)
+records staged measurement, including the seam between a market
+premium regression and a firm VAR — the same staging as Ang and Liu
+(2004, §III), not a single-equation identification of the product.
+[What moved the return](news.md) treats news. [Firms](walkthrough.md)
+runs the library. [For valuators](practice.md) says what you can take
+from the curve when you already have a path.
 
 ## Objects and words
 

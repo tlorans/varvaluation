@@ -1,16 +1,22 @@
-# 4. Return news
+<p class="part-kicker">Part 05 · What moved the return</p>
 
-Section 2 asks what a claim is worth at $X_t$. This section asks a
-different question of the same fitted VAR: what moved last period’s
-unexpected return ([Campbell, 1991](../references.md#campbell-1991)).
+# What moved the return
+
+<p class="you-will"><strong>You will.</strong> Split last period's unexpected return into cash-flow news and discount-rate news.</p>
+
+[The joint system](system.md) asks what a claim is worth at $X_t$.
+This chapter asks a different question of the same fitted VAR: what
+moved last period’s unexpected return
+([Campbell, 1991](../references.md#campbell-1991)).
 At the market the answer is mostly discount rates. At the firm it is
 mostly cash flows ([Vuolteenaho, 2002](../references.md#vuolteenaho-2002)).
 Cash-flow news is the revision in the cash-flow equation, never the
 leftover of a discount-rate model
 ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
 The library function `news_decomposition` is that construction.
-Section 5 calls it so the diagnostic is visible. On that companion
-the identity does not close; the printed shares are not a result.
+[Three curves](walkthrough.md) calls it so the diagnostic is visible.
+On that companion the identity does not close; the printed shares
+are not a result.
 
 [Campbell (1991)](../references.md#campbell-1991) writes the unexpected
 return as cash-flow news minus discount-rate news,

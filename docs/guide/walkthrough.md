@@ -1,8 +1,13 @@
-# 5. Illustration
+<p class="part-kicker">Part 06 · Firms</p>
 
-This section is a **software demonstration**, not an empirical
-contribution. It runs the calls of Sections 2–4 on a short
-CRSP–Compustat extract.
+# Three curves
+
+<p class="you-will"><strong>You will.</strong> Draw $\mu_t(n)$ at three names on a short window, then read what the window cannot show.</p>
+
+The picture on the old landing was the argument. Here you produce
+it. The script runs the calls of Parts 03–05 on a short
+CRSP–Compustat extract. What the window cannot show is collected at
+the end of this chapter.
 
 !!! note "In words — the files this section opens"
     **WRDS** is the academic vendor. **CRSP** is the monthly
@@ -266,4 +271,13 @@ diagnostic is visible. Do not read it as a result.
 | `spot_rates` / `perpetuity` | Three unit-curve diagnostics | Equity values; a priced residual-income identity |
 | `news_decomposition` | That the identity does not close | $N_{\mathrm{CF}}$ vs $N_{\mathrm{DR}}$ shares |
 
-Section 6 says what a valuator can take from the curve.
+[For valuators](practice.md) says what you can take from the curve
+when you already have a path.
+
+## Limits of this illustration
+
+This run is a software demonstration, not an empirical contribution.
+The window is short, the companion is 80 survivors, `roe` is a
+profitability level, and the news identity does not close. The
+load-bearing list is
+[What this sample cannot show](practice.md#what-this-sample-cannot-show).
