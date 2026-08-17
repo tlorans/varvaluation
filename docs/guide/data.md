@@ -38,5 +38,7 @@ state = prepare_portfolio_state(
   proxy exist.
 
 The five-stage pipeline that consumes this frame is
-[Estimation](estimate.md). Why these names rather than dividend yield
-is [StateSpec](spec.md#where-the-names-come-from).
+[Estimation](estimate.md). The same loaders run end to end, with the
+terminal at each step, on the [worked application](walkthrough.md).
+Why these names rather than dividend yield is
+[StateSpec](spec.md#where-the-names-come-from).

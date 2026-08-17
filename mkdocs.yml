@@ -35,6 +35,7 @@ nav:
   - Install: install.md
   - Quickstart: quickstart.md
   - Guide:
+      - Worked application: guide/walkthrough.md
       - The VAR: guide/system.md
       - StateSpec: guide/spec.md
       - Estimation: guide/estimate.md

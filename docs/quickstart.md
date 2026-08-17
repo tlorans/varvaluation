@@ -63,32 +63,23 @@ cash-flow news.
 `treasury_test()` runs the known-cash-flow check: coupons known ⇒ direct
 CF news ≈ 0.
 
-## From Ken French
+## On real data
 
-```python
-from varvaluation import StateSpec, estimate_var
-from varvaluation.data import load_bm_deciles, load_macro, prepare_portfolio_state
+The synthetic snippet above is only to see the two sides print. The
+full recipe — Ken French BE/ME deciles, FRED macro, a WRDS firm window,
+and the terminal at each step — is the
+[worked application](guide/walkthrough.md).
 
-total, capgains = load_bm_deciles()
-macro = load_macro()
-spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
-state = prepare_portfolio_state(
-    total, capgains, macro, spec, portfolio="D10", start="1965-07"
-)
-fit = estimate_var(state, spec)
+```text
+uv add "varvaluation[data]"
+uv run python examples/walkthrough.py
 ```
-
-`load_macro()` always tries to bring FF3, the one-year rate, and inflation.
-Cay is optional: if the published file is missing, it is reconstructed from
-FRED.
-
-A longer script is
-[`examples/run_application.py`](https://github.com/tlorans/varvaluation/blob/main/examples/run_application.py).
 
 ## Read next
 
 | Page | Why |
 |---|---|
+| [Worked application](guide/walkthrough.md) | Seven steps on Ken French, FRED, and WRDS |
 | [The VAR](guide/system.md) | Why one system, and how the joint distribution enters the price |
 | [Estimation](guide/estimate.md) | How $(\Phi,c,\Sigma)$ are measured |
 | [Valuation](guide/valuation.md) | The two recursions, line by line |

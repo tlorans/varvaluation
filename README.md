@@ -9,6 +9,8 @@ news; cash-flow news is taken from the cash-flow equation, not from the
 residual.
 
 **Docs:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
+The [worked application](https://tlorans.github.io/varvaluation/guide/walkthrough/)
+runs the same recipe on Ken French, FRED, and WRDS and prints each step.
 
 ## Install
 

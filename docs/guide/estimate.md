@@ -17,7 +17,7 @@ $$
 | Name | What it is | How this library builds it |
 |---|---|---|
 | `g` | log cash-flow growth | Hodrick trailing dividends from total vs. ex-div returns |
-| `roe` | log profitability | $\log(1+\mathrm{NI}_t / \mathrm{BE}_{t-1})$ at the firm |
+| `roe` | log profitability | $\log(\mathrm{NI}_t / \mathrm{BE}_{t-1})$ at the firm |
 | `beta` | rolling CAPM slope | 60-month window on excess returns |
 | `dpo` | payout | log dividends minus log earnings, when both exist |
 | `bm` | book-to-market | firm panel |
@@ -127,7 +127,9 @@ in [The VAR](system.md): without it the unconditional mean does not
 exist and the tail of the sum has nowhere to settle.
 
 The two recursions, and what to do when $\Phi_{g,g}$ is near one, are
-on [Valuation](valuation.md).
+on [Valuation](valuation.md). The same five stages run on Ken French,
+FRED, and WRDS — with the terminal at each step — are the
+[worked application](walkthrough.md).
 
 ## The division of labor
 

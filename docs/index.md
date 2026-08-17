@@ -117,6 +117,7 @@ period’s unexpected return — of the **same** fitted VAR.
 
 | Page | What it is |
 |---|---|
+| [Worked application](guide/walkthrough.md) | Seven steps on Ken French, FRED, and WRDS, with the terminal output |
 | [The VAR](guide/system.md) | What a VAR is, why one system, how the joint distribution enters the price |
 | [StateSpec](guide/spec.md) | How names bind to positions, and where those names come from |
 | [Estimation](guide/estimate.md) | Five stages from raw series to $(\Phi,c,\Sigma)$ |
