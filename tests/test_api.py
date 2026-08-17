@@ -18,6 +18,19 @@ def test_public_names():
         "NewsResult",
         "NewsShares",
         "ValuationResult",
+        "ResidualIncome",
+        "CCAPMSpec",
+        "TermStructureModel",
+        "ResidualIncomeModel",
+        "paper_state_spec",
+        "flat_annuity_value",
+        "valuation_discrepancy",
+        "TermStructureError",
+        "simulate_paper_state",
+        "INSURANCE",
+        "prepare_industry_state",
+        "capm_tests",
+        "slope_tests",
     ):
         assert hasattr(v, name), name
     assert v.ValuationModel is v.AngLiuModel

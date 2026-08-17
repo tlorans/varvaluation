@@ -61,6 +61,60 @@ class StateSpec:
 
 
 @dataclass(frozen=True)
+class ResidualIncome:
+    """Clean-surplus cash flow: C_{t+1} = B_t (exp(ROE_{t+1}) - exp(g_{t+1})).
+
+    ``roe`` is log book return, ``ln(1 + NI / B_lag)``. ``book_growth`` is
+    log book growth, ``ln(B_t / B_{t-1})``. These are the first two
+    coordinates of Giacotto, Lin, and Zhao (2020).
+    """
+
+    roe: str = "roe"
+    book_growth: str = "g"
+
+    def bind(self, spec: StateSpec) -> tuple[int, int]:
+        return spec.index(self.roe), spec.index(self.book_growth)
+
+
+@dataclass(frozen=True)
+class CCAPMSpec:
+    """Conditional CAPM: μ_t = R_{f,t} + β_t × MRP_t.
+
+    ``rate`` is unused in the paper path: the Treasury curve sits
+    outside the VAR and is supplied later as ``y(τ)``. The quadratic
+    form Θ is zero except the symmetric β–MRP cell of 1/2, so
+    ``X' Θ X = β × MRP``.
+    """
+
+    beta: str = "beta"
+    premium: str = "mrp"
+    rate: str | None = None
+
+    def theta(self, spec: StateSpec) -> np.ndarray:
+        if self.rate is not None:
+            spec.index(self.rate)
+        theta = np.zeros((spec.K, spec.K))
+        i_beta = spec.index(self.beta)
+        i_prem = spec.index(self.premium)
+        theta[i_beta, i_prem] = theta[i_prem, i_beta] = 0.5
+        return theta
+
+
+def paper_state_spec(*, horizon: int = 4, nw_lags: int = 4) -> StateSpec:
+    """Giacotto–Lin–Zhao industry state: (ROE, g, β, MRP).
+
+    Quarterly observations of annualized variables; ``horizon=4`` makes
+    each VAR step one year, so a 30-step curve is a 30-year curve.
+    """
+    return StateSpec(
+        names=("roe", "g", "beta", "mrp"),
+        cashflow="g",
+        horizon=horizon,
+        nw_lags=nw_lags,
+    )
+
+
+@dataclass(frozen=True)
 class ExpectedReturnSpec:
     """Build xi and Lambda for mu_t = alpha + r_t + beta_t * lambda_t.
 

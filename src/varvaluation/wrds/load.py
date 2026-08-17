@@ -123,6 +123,125 @@ def merge_firm_panel(crsp: pl.DataFrame, comp: pl.DataFrame, link: pl.DataFrame)
     return merged.drop(drop)
 
 
+_COMPUSTAT_Q_SQL = """
+    SELECT gvkey, datadate, fyearq, fqtr, sich AS sic,
+           ibq, ceqq, cshoq, prccq
+    FROM comp.fundq
+    WHERE indfmt = 'INDL'
+      AND datafmt = 'STD' AND popsrc = 'D' AND consol = 'C'
+      AND datadate >= '{start}'
+      AND datadate <= '{end}'
+"""
+
+_CRSP_DAILY_SQL = """
+    SELECT permno, date, ret, prc, shrout
+    FROM crsp.dsf
+    WHERE date >= '{start}'
+      AND date <= '{end}'
+      {permno_clause}
+"""
+
+_CRSP_DSI_SQL = """
+    SELECT date, vwretd
+    FROM crsp.dsi
+    WHERE date >= '{start}'
+      AND date <= '{end}'
+"""
+
+
+def load_compustat_quarterly(
+    start: str = "1971-01",
+    end: str = "2018-12-31",
+    *,
+    use_cache: bool = True,
+) -> pl.DataFrame:
+    """Compustat quarterly: ibq (item #8) and ceqq (item #59)."""
+    start_s, end_s = _bound(start, default="1971-01-01"), _bound(end, default="2018-12-31")
+
+    def _build():
+        df = _fetch(_COMPUSTAT_Q_SQL.format(start=start_s, end=end_s))
+        return df.with_columns(
+            pl.col("datadate").cast(pl.Date),
+            pl.col("fyearq").cast(pl.Int64),
+            pl.col("fqtr").cast(pl.Int64),
+            pl.col("sic").cast(pl.Int64),
+            pl.col("ibq").cast(pl.Float64),
+            pl.col("ceqq").cast(pl.Float64),
+            pl.col("cshoq").cast(pl.Float64),
+            pl.col("prccq").cast(pl.Float64),
+        )
+
+    return load_or_cache(f"compq_{start_s}_{end_s}", _build, use_cache=use_cache)
+
+
+def load_crsp_daily(
+    start: str = "1971-01",
+    end: str = "2018-12-31",
+    *,
+    permnos: list[int] | None = None,
+    use_cache: bool = True,
+) -> pl.DataFrame:
+    """CRSP daily stock file, optionally restricted to ``permnos``."""
+    start_s, end_s = _bound(start, default="1971-01-01"), _bound(end, default="2018-12-31")
+    tag = "all" if not permnos else f"n{len(permnos)}"
+    clause = ""
+    if permnos:
+        chunk = ",".join(str(int(p)) for p in permnos)
+        clause = f"AND permno IN ({chunk})"
+
+    def _build():
+        df = _fetch(
+            _CRSP_DAILY_SQL.format(start=start_s, end=end_s, permno_clause=clause)
+        )
+        return df.with_columns(
+            pl.col("date").cast(pl.Date),
+            pl.col("permno").cast(pl.Int64),
+            pl.col("ret").cast(pl.Float64),
+            pl.col("prc").cast(pl.Float64),
+            pl.col("shrout").cast(pl.Float64),
+        )
+
+    return load_or_cache(f"crsp_dsf_{start_s}_{end_s}_{tag}", _build, use_cache=use_cache)
+
+
+def load_crsp_dsi(
+    start: str = "1971-01",
+    end: str = "2018-12-31",
+    *,
+    use_cache: bool = True,
+) -> pl.DataFrame:
+    """CRSP value-weighted market daily return."""
+    start_s, end_s = _bound(start, default="1971-01-01"), _bound(end, default="2018-12-31")
+
+    def _build():
+        df = _fetch(_CRSP_DSI_SQL.format(start=start_s, end=end_s))
+        return df.with_columns(
+            pl.col("date").cast(pl.Date),
+            pl.col("vwretd").cast(pl.Float64),
+        )
+
+    return load_or_cache(f"crsp_dsi_{start_s}_{end_s}", _build, use_cache=use_cache)
+
+
+def merge_quarterly_panel(
+    crsp_m: pl.DataFrame,
+    compq: pl.DataFrame,
+    link: pl.DataFrame,
+) -> pl.DataFrame:
+    """Asof-merge quarterly Compustat onto monthly CRSP through CCM."""
+    linked = compq.join(link, on="gvkey", how="inner")
+    linked = linked.rename({"lpermno": "permno", "datadate": "date"})
+    linked = linked.with_columns(pl.col("linkenddt").fill_null(pl.date(2099, 12, 31)))
+    crsp_m = crsp_m.sort(["permno", "date"])
+    linked = linked.sort(["permno", "date"])
+    merged = crsp_m.join_asof(linked, by="permno", on="date", strategy="backward")
+    merged = merged.filter(
+        (pl.col("date") >= pl.col("linkdt")) & (pl.col("date") <= pl.col("linkenddt"))
+    )
+    drop = [c for c in ("linkdt", "linkenddt", "linktype", "linkprim") if c in merged.columns]
+    return merged.drop(drop)
+
+
 def load_firm_panel(
     start: str = "1965-07",
     end: str | None = None,

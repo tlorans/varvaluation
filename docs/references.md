@@ -2,19 +2,18 @@
 
 In-text citations use author–year and link here.
 
-The recursions are those of Ang and Liu (2004, 2001). This library
-implements the **quadratic-Gaussian** case: both $\beta_t$ and
-$\lambda_t$ may move, so $\mu_t$ is quadratic in $X_t$ and the priced
-strip carries an $H(n)$ recursion. When $\Lambda=0$ the same class
-collapses to exponential-affine. Gordon growth is their special case 1
-(constant expected return and constant expected growth).
-$\Phi=\Sigma=0$ is a further degeneracy that delivers the same closed
-form, not the statement of that case.
+The insurance term structure is [Giacotto, Lin, and Zhao (2020)](#glz-2020).
+Clean surplus is [Feltham and Ohlson (1995)](#feltham-ohlson-1995).
+The priced recursions sit in the quadratic-Gaussian class of
+[Ang and Liu (2004)](#ang-liu-2004). The older dividend-growth engine
+in the library is that class applied to a single growing payout.
 
 <div class="biblio" markdown="1">
 
 ## Recursions and news
 
+- <span id="glz-2020"></span>Giacotto, C., X. Lin, and Y. Zhao (2020), “Term structure of discount rates for firms in the insurance industry,” *Insurance: Mathematics and Economics* 95, 147–158. Residual-income cash flow plus a conditional CAPM, one VAR, a maturity-specific cost of capital. This handbook’s worked example.
+- <span id="cosemans-2016"></span>Cosemans, M., R. Frehen, P. C. Schotman, and R. Bauer (2016), “Estimating Security Betas Using Prior Information Based on Firm Fundamentals,” *Review of Financial Studies* 29(4), 1072–1112. The paper’s posterior beta.
 - <span id="ang-liu-2004"></span>Ang, A. and J. Liu (2004), “How to Discount Cash Flows with Time-Varying Expected Returns,” *Journal of Finance* 59(6), 2745–2783. Definition II.1 and Proposition II.1 are the spot curve $\mu_t(n)=A(n)+B(n)'X_t+X_t'G(n)X_t$. Special case 1 nests Gordon.
 - <span id="ang-liu-2001"></span>Ang, A. and J. Liu (2001), “A General Affine Earnings Valuation Model,” *Review of Accounting Studies* 6, 397–425. Residual-income companion. Corollary 2.2: a constant spread over the risk-free rate is not always available, even with constant interest rates.
 - <span id="brennan-1997"></span>Brennan, M. J. (1997), “The Term Structure of Discount Rates,” *Financial Management* 26(1), 81–90. Maturity-specific discount rates; the two-step workflow the 2004 curve keeps.
@@ -26,7 +25,7 @@ form, not the statement of that case.
 - <span id="feltham-ohlson-1995"></span>Feltham, G. A. and J. A. Ohlson (1995), “Valuation and Clean Surplus Accounting for Operating and Financial Activities,” *Contemporary Accounting Research* 11(2), 689–731.
 - <span id="hodrick-1992"></span>Hodrick, R. J. (1992), “Dividend Yields and Expected Stock Returns: Alternative Procedures for Inference and Measurement,” *Review of Financial Studies* 5(3), 357–386. Overlapping annual horizons; trailing-dividend construction.
 - <span id="newey-west-1987"></span>Newey, W. K. and K. D. West (1987), “A Simple, Positive Semi-definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix,” *Econometrica* 55(3), 703–708.
-- <span id="ohlson-1995"></span>Ohlson, J. A. (1995), “Earnings, Book Values, and Dividends in Equity Valuation,” *Contemporary Accounting Research* 11(2), 661–687. Residual income. Cited, not implemented.
+- <span id="ohlson-1995"></span>Ohlson, J. A. (1995), “Earnings, Book Values, and Dividends in Equity Valuation,” *Contemporary Accounting Research* 11(2), 661–687. Residual income. Implemented for industry valuation as the Feltham–Ohlson cash-flow map.
 - <span id="stambaugh-1999"></span>Stambaugh, R. F. (1999), “Predictive Regressions,” *Journal of Financial Economics* 54(3), 375–421.
 - <span id="vuolteenaho-2002"></span>Vuolteenaho, T. (2002), “What Drives Firm-Level Stock Returns?” *Journal of Finance* 57(1), 233–264. Uses $e_t=\log(1+X_t/B_{t-1})$, not $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$. Section 5 does not confirm the finding.
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from varvaluation import ExpectedReturnSpec, StateSpec, StateSpecError
+from varvaluation import CCAPMSpec, ExpectedReturnSpec, ResidualIncome, StateSpec, StateSpecError, paper_state_spec
 
 
 def test_index_and_cashflow():
@@ -41,3 +41,16 @@ def test_xi_lambda_symmetry_and_slots():
     assert Lam[spec.index("beta"), spec.index("z")] == pytest.approx(0.4)
     assert Lam[spec.index("z"), spec.index("beta")] == pytest.approx(0.4)
     np.testing.assert_allclose(Lam, Lam.T)
+
+
+def test_residual_income_bind():
+    spec = paper_state_spec()
+    i_roe, i_g = ResidualIncome().bind(spec)
+    assert i_roe == 0
+    assert i_g == 1
+
+
+def test_ccapm_unknown_premium_raises():
+    spec = paper_state_spec()
+    with pytest.raises(StateSpecError):
+        CCAPMSpec(premium="cay").theta(spec)

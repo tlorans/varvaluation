@@ -1,5 +1,5 @@
-site_name: Explain asset values from data
-site_description: Which state variables drive asset values — a handbook. The joint VAR is the framework, not the program.
+site_name: Cash flows and discount rates from one VAR
+site_description: Term structure of discount rates. Cash-flow expectations and required returns come from the same system.
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -33,31 +33,32 @@ theme:
 
 nav:
   - Home: index.md
-  - 01 The research program: guide/program.md
-  - 02 Getting started:
-      - Start here: guide/start.md
-      - Why a product: guide/introduction.md
-  - 03 The framework:
-      - The VAR: guide/system.md
-      - Present value: guide/valuation.md
-      - The state: guide/spec.md
-  - 04 Measurement:
-      - Estimate: guide/estimate.md
-      - Public data: guide/data.md
-  - 05 What moved the return: guide/news.md
-  - 06 Firms:
-      - WRDS / panel: guide/wrds.md
-      - Three curves: guide/walkthrough.md
-      - Fit to the market: guide/pricing.md
-      - For valuators: guide/practice.md
+  - The problem: guide/problem.md
+  - One system, two readings: guide/system.md
+  - From the VAR to the curve: guide/curve.md
+  - Building the state: guide/state.md
+  - Reproduce the paper: guide/reproduce.md
+  - Other industries: guide/industries.md
   - Software:
       - Install: install.md
       - API: api.md
-      - Synthetic check: quickstart.md
+      - Offline check: quickstart.md
   - References: references.md
 
 exclude_docs: |
   superpowers/
+  guide/data.md
+  guide/estimate.md
+  guide/introduction.md
+  guide/news.md
+  guide/practice.md
+  guide/pricing.md
+  guide/program.md
+  guide/spec.md
+  guide/start.md
+  guide/valuation.md
+  guide/walkthrough.md
+  guide/wrds.md
 
 markdown_extensions:
   - admonition

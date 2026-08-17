@@ -1,7 +1,7 @@
 [project]
 name = "varvaluation"
 version = "0.1.0"
-description = "Cash-flow and discount-rate forecasts from one VAR"
+description = "Term structure of discount rates: cash flows and required returns from one VAR"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"

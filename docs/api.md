@@ -1,107 +1,81 @@
 # API
 
-The public surface of the library that implements Sections 2–4.
-Top-level imports (`import varvaluation as v`).
+The public surface. Top-level imports (`import varvaluation as v`).
 
-## Types
+## Paper path
 
 | Name | Role |
 |---|---|
-| `StateSpec` | Named state layout. `cashflow` picks the growth row of $\Phi$ |
-| `ExpectedReturnSpec` | Builds $(\xi,\Lambda)$ from $b_0, b_r, b_z$ |
-| `VARFit` | $\Phi$, $c$, $\Sigma$, Newey–West `se`, residuals, `X_lag`, `spectral_radius` |
-| `ValuationModel` | Cash-flow and priced recursions from the same $X$ |
-| `ValuationResult` | `pv`, `n_used`, `tail_rate` |
-| `NewsResult` | `frame` (`date, cf, dr, unexpected, residual`) and `shares` |
-| `NewsShares` | `var_cf`, `var_dr`, `cov`, `var_unexpected`, `residual_share` |
+| `paper_state_spec()` | `(roe, g, beta, mrp)`, `horizon=4` |
+| `ResidualIncome` | Clean-surplus map: `C = B (exp(ROE) - exp(g))` |
+| `CCAPMSpec` | $\mu = R_f + \beta\cdot\mathrm{MRP}$; $\Theta$ has the $\beta$–MRP cell |
+| `TermStructureModel` | Eqs. 6–9. Alias of `ResidualIncomeModel` |
+| `INSURANCE` | SIC presets: `all`, `pc`, `life`, `health` |
+| `prepare_industry_state` | Value-weighted industry series of the four names |
+| `select_sic` | Keep a SIC range, or `"ex"` for all-but-insurers |
+| `capm_tests` / `slope_tests` | Tables 2 and 3 |
+| `curve_panel` | $\rho(\tau)$ on every date |
+| `flat_annuity_value` / `valuation_discrepancy` | Table 4 |
+| `simulate_paper_state` | Offline four-state draw |
 
-## Estimation
+### TermStructureModel
 
-| Call | What it does |
-|---|---|
-| `estimate_var(df, spec)` | Newey–West VAR(1) on a single series. Pairs are $(X_t, X_{t+h})$ with $h=$ `spec.horizon` |
-| `estimate_var_panel(df, spec)` | Same, lag pairs formed only inside `spec.group` |
-| `spectral_radius(Phi)` | Largest absolute eigenvalue |
-
-`VARFit` fields: `spec`, `Phi` ($K\times K$), `c` ($K$,), `Sigma`
-($K\times K$), `se` (regressors $\times$ equations), `nobs`,
-`spectral_radius`, `residuals`, `residual_dates`, `X_lag`.
-
-## ValuationModel
-
-Construct with `ValuationModel.from_var(fit, xi, Lambda, alpha)` or
-`ValuationModel(spec, Phi, c, Sigma, xi, Lambda, alpha)`. `from_var`
-raises `NonStationaryVARError` if the spectral radius is $\ge 1$.
+Construct with `TermStructureModel.from_var(fit, ResidualIncome(), CCAPMSpec())`. Refuses a spectral radius $\ge 1$.
 
 | Method | Returns |
 |---|---|
-| `cashflow_recursion(n)` | $\bar a(n),\bar b(n)$ — affine $\mathbb{E}_t[C_{t+n}]/C_t$ |
-| `cashflow_expectation(X, n)` | those expectations at state $X$, length $n$ |
-| `price_recursion(n)` | $a(n), b(n), H(n)$ — priced quadratic-Gaussian strips |
-| `spot_discount_coefficients(n)` | $A(n), B(n), G(n)$ of $\mu_t(n)$ |
-| `spot_rates(X, n)` | $\mu_t(1),\ldots,\mu_t(n)$ |
-| `value(X, C=1.0, n=100)` | present value when `cashflow` is log growth; both sides from $X$ |
-| `perpetuity(X, n=100)` | unit cash flow, curve only (`unit_curve_pv` in Section 5) |
+| `expected_cashflow(X, n)` | $\mathbb{E}_t[C_{t+k}]/B_t$, length $n$ |
+| `cost_of_capital(X, y, n)` | $\rho(1),\ldots,\rho(n)$; `y` is a scalar or a length-$n$ Treasury curve |
+| `unconditional_curve(y, n)` | eq. 9 at $\bar x$ |
+| `flat_ccapm_rate(X, y1)` | $y(1)+\beta\cdot\mathrm{MRP}$ |
+| `annuity_value(X, y, n=30)` | $\sum_{k=1}^{n} e^{-k\rho(k)}$ |
 | `unconditional_mean()` | $(I-\Phi)^{-1}c$ |
-| `unconditional_covariance()` | vec-solved $\mathrm{Var}(X)$ |
-| `variance_exact(n)` | $\mathrm{Var}(\mu_t(k))$ for $k=1,\ldots,n$ |
-| `variance_decomposition(n)` | state-by-state shares of that variance |
-| `long_term_rate(n=200)` | $\mu_t(n)$ as $n$ grows |
+| `one_period_premium(X)` | $\beta\cdot\mathrm{MRP}$ |
 
-`isolate_channels(model, X, shut, on=)` rebuilds a counterfactual
-model. `on` is `"cashflow"`, `"discount"`, or `"both"`.
-
-## Fit to the market
+### Estimation
 
 | Call | What it does |
 |---|---|
-| `pricing_errors(model, state)` | Value every row; score $PV$ against `me` |
-| `calibrate_alpha(fit, xi, Lambda, state)` | Pick the discount intercept so median $PV/ME$ is nearest 1 |
-| `as_of(state, panel, on)` | State on one date, with `me` from `prc × shrout` |
+| `estimate_var(df, spec)` | Newey–West VAR(1). Pairs are $(X_t, X_{t+h})$, $h=$ `spec.horizon` |
+| `estimate_var_panel(df, spec)` | Same, pairs only inside `spec.group` |
+| `spectral_radius(Phi)` | Largest absolute eigenvalue |
 
-`PricingFit` fields: `n`, `n_failed`, `median_pv_me`, `mean_log_pv_me`,
-`rmse_log_pv_me` (the headline miss), `corr_log`, `share_within_2x`,
-`frame`. The argument is on [Fit to the market](guide/pricing.md).
+`VARFit` fields: `spec`, `Phi`, `c`, `Sigma`, `se`, `nobs`, `spectral_radius`, `residuals`, `residual_dates`, `X_lag`.
 
-## News
+## Also in the library
 
-| Call | What it does |
+These are not the paper path. They stay imported.
+
+| Name | Role |
 |---|---|
-| `news_decomposition(fit, returns, ...)` | Direct CF news from the cash-flow equation; DR news from $\lambda$ |
-| `treasury_test(nobs=600)` | Synthetic known-cash-flow check: `var_cf` $\approx 0$ |
+| `StateSpec` | Named state layout. `cashflow` is the growth row for the dividend-growth engine |
+| `ExpectedReturnSpec` | Builds $(\xi,\Lambda)$ for $\mu=\alpha+r+\beta\lambda$ |
+| `AngLiuModel` / `ValuationModel` | Single growing payout; `spot_rates`, `value`, `perpetuity` |
+| `isolate_channels` | Counterfactual value after zeroing named loadings |
+| `news_decomposition` / `treasury_test` | Chen-aware CF/DR news |
+| `pricing_errors` / `calibrate_alpha` | Model PV against market equity |
 
-Pass **either** `xi` and `Lambda` (expected-return gradient) **or**
-`return_state` (a named return equation). Passing both, or neither,
-raises `StateSpecError`. `residual` is the identity leftover, never the
-definition of cash-flow news.
+## `[data]`
 
-## Schemas
+Not re-exported at top level. `import varvaluation.data`.
 
-`state_schema(spec)` and `returns_schema(...)` are the Pandera inbound
-contracts. `estimate_var` and `news_decomposition` validate on the way
-in.
+`load_paper_macro()`, `load_treasury_curve()`, `interpolate_yields()`, `load_corporate_spread()`, `fit_mrp()`, `dividend_yield_from_returns()`, plus the older Ken French / FRED / cay loaders.
+
+## `[wrds]`
+
+`import varvaluation.wrds`.
+
+`load_compustat_quarterly()`, `load_crsp_daily()`, `load_crsp_dsi()`, `quarter_end_betas()`, `attach_posterior_beta()`, plus the older annual firm panel.
 
 ## Exceptions
 
 | Exception | When |
 |---|---|
-| `StateSpecError` | unknown, duplicate, or empty names; bad news arguments |
+| `StateSpecError` | unknown, duplicate, or empty names |
 | `SchemaError` | inbound frame fails Pandera |
 | `EstimationError` | too few lag pairs |
-| `NonStationaryVARError` | spectral radius $\ge 1$ at construct or unconditional moments |
-| `RecursionDivergedError` | $\det(I-2\Sigma H(n))$ left the positive reals |
-| `PerpetuityDivergesError` | non-positive terminal spot rate |
-| `ExtraNotInstalled` | `varvaluation.data` or `.wrds` imported without the extra |
-
-## Subpackages
-
-Not re-exported at top level.
-
-- `varvaluation.data` — `load_ff3`, `load_bm_deciles`, `load_industry49`,
-  `load_gs1`, `load_cpi`, `load_cay`, `load_macro`,
-  `prepare_portfolio_state`
-- `varvaluation.wrds` — `load_firm_panel`, `prepare_firm_state`
-- `varvaluation.news.simulate_return_var` — two-state synthetic panel
-  used by `treasury_test` and the software check
-
-Docstrings on the objects are the contract.
+| `NonStationaryVARError` | spectral radius $\ge 1$ |
+| `RecursionDivergedError` | a Gaussian integral left the positive reals |
+| `TermStructureError` | eq. 9 argument is not positive |
+| `PerpetuityDivergesError` | non-positive terminal spot rate (dividend-growth engine) |
+| `ExtraNotInstalled` | `.data` or `.wrds` imported without the extra |

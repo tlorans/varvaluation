@@ -25,6 +25,10 @@ class PerpetuityDivergesError(VarValuationError, ArithmeticError):
     """Terminal discount rate is non-positive."""
 
 
+class TermStructureError(VarValuationError, ArithmeticError):
+    """Cost-of-capital argument left the positive reals."""
+
+
 class ExtraNotInstalled(VarValuationError, ImportError):
     """Optional extra imported but not installed."""
 

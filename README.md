@@ -1,126 +1,63 @@
 # varvaluation
 
-The framework models cash flows and the discount rate together.
-When the required return is allowed to change, present value is the
-expectation of a product: each future cash flow multiplied by the
-sequence of one-period required returns along the way. Growth of
-cash is the cash-flow path you can price. Profitability is a level
-(earnings on book), not that path. The research program is which
-observed variables belong in the joint forecast. The formulas are
-Ang and Liu (2004). The cash-flow piece of a return surprise is read
-from the cash-flow equation, not from a leftover.
+Cash-flow expectations and discount rates from one VAR.
+
+A present value is the expectation of a product: each future cash flow
+multiplied by the path of one-period required returns. Those two paths
+have to be estimated together. The package implements the residual-income
+term structure of Giacotto, Lin, and Zhao (2020) — insurance first, then
+any industry — on top of the Ang and Liu (2004) recursions.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-The firm illustration is a software demonstration on a short window
-of US equity files (2,673 prepared firms; one persistence matrix
-pooled on the 80 longest histories). It reports the discount curve,
-not firm present values.
 
 ## Install
 
 ```text
 uv add varvaluation
-uv add "varvaluation[data]"   # Ken French / FRED / cay
-uv add "varvaluation[wrds]"   # CRSP–Compustat firm panel
+uv add "varvaluation[data]"   # Ken French / FRED Treasuries / DEF / TERM
+uv add "varvaluation[wrds]"   # Compustat quarterly + CRSP daily
 ```
 
-`[data]` loaders cache downloads under `~/.cache/varvaluation` (override
-with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the
-network. `load_macro()` requires FF3, GS1, and CPI; **cay is optional**.
-If the published Lettau–Ludvigson CSV is unavailable, `load_cay()`
-reconstructs cay from FRED. WRDS credentials: `WRDS_USERNAME` or
-`WRDS_USER`, and `WRDS_PASSWORD`, in the environment or a `.env` file.
+Python 3.11+. Managed with `uv`. `[data]` caches under
+`~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). WRDS
+credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`.
 
-Python 3.11+. Managed with `uv`.
-
-The firm illustration is `uv run python examples/walkthrough.py`
-([Three curves](https://tlorans.github.io/varvaluation/guide/walkthrough/)).
-
-## Flat rate versus the curve
-
-Year one and year ten do not share a rate. The snippet values a
-ten-year stream of one-dollar cash flows two ways: with a different
-discount rate at each horizon (the curve), and with a single rate
-equal to today's one-year rate. No downloads. The printed `mu(1)` is
-that one-year rate; `mu(10)` is the rate the curve assigns ten years
-out.
+## The four calls
 
 ```python
-from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
-from varvaluation.news import simulate_return_var
-import numpy as np
-
-df, spec = simulate_return_var(nobs=400, seed=7)
-fit = estimate_var(df, spec)
-xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
-    spec, {"b0": 0.01}
+from varvaluation import (
+    CCAPMSpec,
+    ResidualIncome,
+    TermStructureModel,
+    estimate_var,
+    simulate_paper_state,
 )
-model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
-X = fit.X_lag[-1]
-rates = model.spot_rates(X, n=10)
-n = np.arange(1, 11)
-curve = float(np.sum(np.exp(-n * rates)))
-flat = float(np.sum(np.exp(-n * rates[0])))
-print(f"mu(1) {100*rates[0]:.2f}%   mu(10) {100*rates[-1]:.2f}%")
-print(f"flat PV vs curve {(flat/curve - 1)*100:+.1f}%")
+
+state, spec = simulate_paper_state(nobs=160, seed=11)
+fit = estimate_var(state, spec)
+model = TermStructureModel.from_var(fit, ResidualIncome(), CCAPMSpec())
+rho = model.unconditional_curve(0.055, n=30)
+print(f"ρ(1) {100*rho[0]:.2f}%   ρ(10) {100*rho[9]:.2f}%   ρ(30) {100*rho[29]:.2f}%")
 ```
 
 ```text
-mu(1) 2.37%   mu(10) 4.09%
-flat PV vs curve +8.0%
+ρ(1) 9.26%   ρ(10) 9.24%   ρ(30) 9.23%
 ```
 
-`uv run python examples/flat_vs_curve.py` prints the same three numbers.
-The synthetic check with news is `uv run python examples/quickstart.py`.
-
-## Public data (`[data]`)
-
-```python
-from varvaluation import StateSpec, estimate_var
-from varvaluation.data import load_bm_deciles, load_macro, prepare_portfolio_state
-
-total, capgains = load_bm_deciles()
-macro = load_macro()
-spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
-state = prepare_portfolio_state(
-    total, capgains, macro, spec, portfolio="D10", start="1965-07"
-)
-fit = estimate_var(state, spec)
-```
-
-`g`, `beta`, and `dpo` are built when those names are in the spec.
-Everything else is joined from `macro` by column name.
-
-## Firm panel (`[wrds]`)
-
-```python
-from varvaluation import StateSpec, estimate_var_panel
-from varvaluation.wrds import load_firm_panel, prepare_firm_state
-
-panel = load_firm_panel(start="1965-07")
-spec = StateSpec(
-    names=("g", "beta", "bm", "r", "cay", "pi"),
-    cashflow="g",
-    group="permno",
-)
-state = prepare_firm_state(panel, macro, spec, start="1965-07")
-fit = estimate_var_panel(state, spec)
-```
-
-`prepare_firm_state` also accepts a local panel (no live WRDS). `g`
-(dividend growth), `roe`, `bm`, and `beta` are built when those names
-are in the spec. With `cashflow="g"`, `value(X, C=div)` is a present
-value. `div` is trailing twelve-month dividends in CRSP thousands.
+`uv run python examples/reproduce_glz2020.py` prints Fig. 1 / Tables 2–4
+for the five paper portfolios on a synthetic state. Add `--wrds` to
+rebuild 1972Q4–2018Q4 from Compustat quarterly and CRSP daily.
 
 ## What is in 0.1
 
 | Layer | Status |
 |---|---|
-| `StateSpec`, Pandera schemas, Newey–West VAR(1) / panel VAR | shipped |
-| Spot curve, `value` (both sides from $X$), channel isolation | shipped |
-| Cash-flow news from the cash-flow equation + Treasury diagnostic | shipped |
-| `[data]` Ken French / FRED / cay | shipped |
-| `[wrds]` CRSP–Compustat panel + firm state | shipped (live query skipped in CI) |
+| Residual-income term structure (eqs. 6–9) | shipped |
+| CCAPM with the Treasury curve outside the VAR | shipped |
+| Newey–West VAR(1) / panel VAR, named `StateSpec` | shipped |
+| `[data]` FF3, FRED DEF / TERM / $y(\tau)$, MRP regression | shipped |
+| `[wrds]` quarterly Compustat, 125-day / Cosemans beta, SIC industries | shipped (live query skipped in CI) |
+| Dividend-growth Ang–Liu engine, news, pricing-to-market | still in the library, not the front of the handbook |
 
 ## License
 

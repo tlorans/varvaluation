@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 from varvaluation.exceptions import ExtraNotInstalled
 
 
@@ -20,6 +18,10 @@ def cache_dir() -> Path:
 
 def _load_env() -> None:
     """Load .env from cwd, then the package repo root if present."""
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
     load_dotenv()
     here = Path(__file__).resolve()
     for parent in here.parents:

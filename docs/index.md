@@ -1,54 +1,56 @@
 <div class="hero" markdown>
 
-<p class="hero-kicker">Open handbook · Python · A research program</p>
+<p class="hero-kicker">A joint VAR · residual income · a term structure</p>
 
-# Explain asset values from data
+# Cash flows and discount rates from one system
 
-<p class="hero-lead">The framework models cash flows and the discount rate together. When the required return is allowed to change, present value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period required returns along the way. The <strong>research program</strong> is which observed variables belong in that joint forecast.</p>
+<p class="hero-lead">A present value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the path of one-period required returns along the way. Those two paths have to come from the <strong>same</strong> forecast. A vector autoregression is the smallest system that does that. This package implements that idea as in Giacotto, Lin, and Zhao (2020), and opens it to any industry.</p>
 
-[The research program](guide/program.md){ .md-button .md-button--primary }
+[The problem](guide/problem.md){ .md-button .md-button--primary }
 [Install](install.md){ .md-button }
 
 </div>
 
-Year one and year ten do not share a rate. The snippet values a ten-year stream of one-dollar cash flows two ways: with a different discount rate at each horizon (the **curve**), and with a single rate equal to today's one-year rate. No downloads. The printed `mu(1)` is that one-year rate; `mu(10)` is the rate the curve assigns to a cash flow ten years out.
+The insurance paper is the worked example. Four names go into one VAR: profitability, book growth, market beta, and the market risk premium. Clean surplus turns the first two into expected cash. The conditional CAPM turns the last two into a required return. The term-structure cost of capital is the rate that reconciles them at each horizon.
 
 ```python
-from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
-from varvaluation.news import simulate_return_var
-import numpy as np
-
-df, spec = simulate_return_var(nobs=400, seed=7)
-fit = estimate_var(df, spec)
-xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
-    spec, {"b0": 0.01}
+from varvaluation import (
+    CCAPMSpec,
+    ResidualIncome,
+    TermStructureModel,
+    estimate_var,
+    simulate_paper_state,
 )
-model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
-X = fit.X_lag[-1]
-rates = model.spot_rates(X, n=10)
-n = np.arange(1, 11)
-curve = float(np.sum(np.exp(-n * rates)))
-flat = float(np.sum(np.exp(-n * rates[0])))
-print(f"mu(1) {100*rates[0]:.2f}%   mu(10) {100*rates[-1]:.2f}%")
-print(f"flat PV vs curve {(flat/curve - 1)*100:+.1f}%")
+
+state, spec = simulate_paper_state(nobs=160, seed=11)
+fit = estimate_var(state, spec)
+model = TermStructureModel.from_var(fit, ResidualIncome(), CCAPMSpec())
+y = 0.055  # risk-free curve, outside the VAR
+rho = model.unconditional_curve(y, n=30)
+print(f"ρ(1)  {100 * rho[0]:.2f}%")
+print(f"ρ(10) {100 * rho[9]:.2f}%")
+print(f"ρ(30) {100 * rho[29]:.2f}%")
+print(f"CCAPM {100 * model.flat_ccapm_rate(model.unconditional_mean(), y):.2f}%")
 ```
 
 ```text
-mu(1) 2.37%   mu(10) 4.09%
-flat PV vs curve +8.0%
+ρ(1)  9.26%
+ρ(10) 9.24%
+ρ(30) 9.23%
+CCAPM 9.26%
 ```
 
-<p class="snippet-caption">Today's one-year rate is 2.37%. The ten-year rate on the curve is 4.09%. Using 2.37% at every horizon overstates the claim by 8%. The gap is the object. Reproduce it with <code>uv run python examples/flat_vs_curve.py</code>.</p>
+<p class="snippet-caption">Year one is the conditional CAPM. Years further out are not. Reproduce the printed objects with <code>uv run python examples/reproduce_glz2020.py</code>. The live insurance sample is the same file with <code>--wrds</code>.</p>
 
-## Browse the handbook
+## The roadmap
 
 <div class="topic-cards">
-<a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>What we know about future cash and future required returns, and what is still open.</span></a>
-<a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why one rate is the wrong tool, then learn the words you will carry.</span></a>
-<a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>Model cash flows and the discount rate in one system. Growth of cash is not the same object as profitability.</span></a>
-<a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>
-<a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Ask what part of last period's surprise came from cash flows, and what part from discount rates.</span></a>
-<a href="guide/pricing/"><span class="part">Part 06</span><strong>Firms</strong><span>Value the names, then read the RMSE of log(model / market).</span></a>
+<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>A flat CAPM rate is the wrong rate at every horizon but one.</span></a>
+<a href="guide/system/"><span class="part">02</span><strong>One system, two readings</strong><span>Clean surplus reads cash. The CCAPM reads the required return. Both live in the same VAR.</span></a>
+<a href="guide/curve/"><span class="part">03</span><strong>From the VAR to the curve</strong><span>Expected cash and the priced strip become ρ(τ). Four calls.</span></a>
+<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>ROE, book growth, Cosemans β, the premium, the Treasury curve.</span></a>
+<a href="guide/reproduce/"><span class="part">05</span><strong>Reproduce the paper</strong><span>Insurance, P/C, life, health, and all stocks except insurers.</span></a>
+<a href="guide/industries/"><span class="part">06</span><strong>Other industries</strong><span>The same four names. A different SIC range.</span></a>
 </div>
 
-The formulas that evaluate the product without simulation are [Ang and Liu (2004)](references.md#ang-liu-2004). That is the framework. The package is the bench for asking which states move the curve. If you already have a cash-flow forecast and only need the denominator, skip to [For valuators](guide/practice.md).
+The formulas are [Giacotto, Lin, and Zhao (2020)](references.md#glz-2020), built on [Feltham and Ohlson (1995)](references.md#feltham-ohlson-1995) and [Ang and Liu (2004)](references.md#ang-liu-2004). The package is the bench that runs them.
