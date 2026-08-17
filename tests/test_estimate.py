@@ -75,3 +75,13 @@ def test_too_few_obs_raises():
     )
     with pytest.raises(EstimationError):
         estimate_var(df, spec)
+
+
+def test_phi_zeros_forces_restricted_entry():
+    X, _, _ = _sim_var()
+    n = len(X)
+    df = pl.DataFrame({"date": _month_ends(n), "g": X[:, 0], "r": X[:, 1]})
+    spec = StateSpec(names=("g", "r"), cashflow="g", horizon=1, nw_lags=2)
+    fit = estimate_var(df, spec, phi_zeros=(("g", "r"),))
+    assert fit.Phi[spec.index("g"), spec.index("r")] == 0.0
+    assert fit.Phi[spec.index("r"), spec.index("g")] != 0.0

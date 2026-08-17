@@ -15,9 +15,12 @@ the refusal to keep cash flows and expected returns in separate
 drawers
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III). The
 library calls `estimate_var` and `ExpectedReturnSpec` implement those
-stages. [Three curves](walkthrough.md) reports the numbers they
-produce on a firm panel; [Public data](data.md) is the first real
-curve, with no firm-level vendor file.
+stages. The cash-flow equation can omit selected lags:
+`phi_zeros=(("g", "r"), ("g", "pi"))` keeps the short rate and
+inflation in the state for the required return, but not as free
+predictors of dividend growth. [Three curves](walkthrough.md) uses
+that restriction. [Public data](data.md) is the first real curve,
+with no firm-level vendor file.
 
 ## 1. Build the observables
 

@@ -151,7 +151,9 @@ def main() -> int:
         .to_list()
     )
     slim = state.filter(pl.col("permno").is_in(top))
-    fit = estimate_var_panel(slim, spec)
+    # r and pi belong in the required-return side of X. They are not
+    # free predictors of dividend growth (short-sample artifact).
+    fit = estimate_var_panel(slim, spec, phi_zeros=(("g", "r"), ("g", "pi")))
     g_i = spec.cashflow_index()
     print(
         f"nobs={fit.nobs}  spectral_radius={fit.spectral_radius:.3f}  "
@@ -171,6 +173,13 @@ def main() -> int:
         return 0
     last_date = slim["date"].max()
     last = slim.filter(pl.col("date") == last_date).sort("permno")
+    me = (
+        panel.filter(pl.col("date") == last_date)
+        .select(["permno", "prc", "shrout"])
+        .with_columns((pl.col("prc").abs() * pl.col("shrout")).alias("me"))
+        .select(["permno", "me"])
+    )
+    last = last.join(me, on="permno", how="left")
     picks = [
         last.row(0, named=True),
         last.row(last.height // 2, named=True),
@@ -202,9 +211,12 @@ def main() -> int:
         )
         try:
             val = model.value(X, C=C, n=40)
+            extra = ""
+            if row.get("me") is not None:
+                extra = f"  ME={row['me']:.1f}  PV/ME={val.pv / float(row['me']):.3f}"
             print(
                 f"  pv={val.pv:.2f} CRSP thousands  "
-                f"(${val.pv / 1e3:,.1f} million; C=TTM dividends)"
+                f"(${val.pv / 1e3:,.1f} million; C=TTM dividends){extra}"
             )
         except PerpetuityDivergesError as exc:
             print(f"  value  {exc}")

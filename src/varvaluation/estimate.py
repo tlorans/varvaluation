@@ -57,11 +57,23 @@ def newey_west_se(Z: np.ndarray, Y: np.ndarray, coeffs: np.ndarray, maxlags: int
     return se
 
 
+def _zero_index_pairs(
+    spec: StateSpec, phi_zeros: tuple[tuple[str, str], ...] | None
+) -> tuple[tuple[int, int], ...]:
+    if not phi_zeros:
+        return ()
+    pairs: list[tuple[int, int]] = []
+    for row_name, col_name in phi_zeros:
+        pairs.append((spec.index(row_name), spec.index(col_name)))
+    return tuple(pairs)
+
+
 def _fit_from_pairs(
     spec: StateSpec,
     X_lag: np.ndarray,
     X_future: np.ndarray,
     future_dates: tuple[date, ...],
+    phi_zeros: tuple[tuple[str, str], ...] | None = None,
 ) -> VARFit:
     n, K = X_future.shape
     if n < K + 1:
@@ -69,13 +81,20 @@ def _fit_from_pairs(
             f"only {n} usable pairs after lag/group filtering; need at least {K + 1}"
         )
 
-    Z = np.column_stack([np.ones(n), X_lag])
-    coeffs, *_ = np.linalg.lstsq(Z, X_future, rcond=None)
+    forbidden = _zero_index_pairs(spec, phi_zeros)
+    Z_full = np.column_stack([np.ones(n), X_lag])
+    coeffs = np.zeros((K + 1, K))
+    for eq in range(K):
+        drop = {1 + j for i, j in forbidden if i == eq}
+        keep = [p for p in range(K + 1) if p not in drop]
+        Z = Z_full[:, keep]
+        beta, *_ = np.linalg.lstsq(Z, X_future[:, eq], rcond=None)
+        coeffs[keep, eq] = beta
     c = coeffs[0, :].astype(float)
     Phi = coeffs[1:, :].T.astype(float)
-    resid = X_future - Z @ coeffs
+    resid = X_future - Z_full @ coeffs
     Sigma = resid.T @ resid / (n - K - 1)
-    se = newey_west_se(Z, X_future, coeffs, maxlags=spec.nw_lags)
+    se = newey_west_se(Z_full, X_future, coeffs, maxlags=spec.nw_lags)
     return VARFit(
         spec=spec,
         Phi=Phi,
@@ -90,8 +109,17 @@ def _fit_from_pairs(
     )
 
 
-def estimate_var(df: pl.DataFrame, spec: StateSpec) -> VARFit:
-    """Estimate X_{t+h} = c + Phi X_t + u on a single series."""
+def estimate_var(
+    df: pl.DataFrame,
+    spec: StateSpec,
+    *,
+    phi_zeros: tuple[tuple[str, str], ...] | None = None,
+) -> VARFit:
+    """Estimate X_{t+h} = c + Phi X_t + u on a single series.
+
+    ``phi_zeros`` is a sequence of ``(left-hand name, lag name)`` pairs
+    forced to zero — estimated by dropping that lag from that equation.
+    """
     data = validate_state(df, spec).sort(spec.date)
     X = data.select(list(spec.names)).to_numpy().astype(float)
     dates = data[spec.date].to_list()
@@ -112,11 +140,20 @@ def estimate_var(df: pl.DataFrame, spec: StateSpec) -> VARFit:
         X_lag[finite],
         X_future[finite],
         tuple(d for d, ok in zip(future_dates, finite, strict=True) if ok),
+        phi_zeros=phi_zeros,
     )
 
 
-def estimate_var_panel(df: pl.DataFrame, spec: StateSpec) -> VARFit:
-    """Pooled VAR; lag pairs are formed only within ``spec.group``."""
+def estimate_var_panel(
+    df: pl.DataFrame,
+    spec: StateSpec,
+    *,
+    phi_zeros: tuple[tuple[str, str], ...] | None = None,
+) -> VARFit:
+    """Pooled VAR; lag pairs are formed only within ``spec.group``.
+
+    ``phi_zeros`` is as in ``estimate_var``.
+    """
     if spec.group is None:
         raise EstimationError("estimate_var_panel requires spec.group")
 
@@ -147,4 +184,5 @@ def estimate_var_panel(df: pl.DataFrame, spec: StateSpec) -> VARFit:
         np.asarray(X_lag_list, dtype=float),
         np.asarray(X_future_list, dtype=float),
         tuple(future_dates),
+        phi_zeros=phi_zeros,
     )
