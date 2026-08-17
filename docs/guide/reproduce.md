@@ -167,10 +167,55 @@ V     = model.value(X, C=1.0, n=40)
 
 ---
 
+## How the pedagogical figures are built
+
+The charts on [The problem](problem.md), [One system](system.md), and [The two recursions](curve.md) are generated offline from the **same** synthetic state (seed 7). From the package root:
+
+```text
+python examples/build_pedagogical_figures.py
+```
+
+Core of that script:
+
+```python
+from pathlib import Path
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
+from varvaluation.news import simulate_return_var
+
+OUT = Path("docs/assets/figures")
+
+df, spec = simulate_return_var(nobs=400, seed=7)
+fit = estimate_var(df, spec)
+xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
+    spec, {"b0": 0.01}
+)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
+X = fit.X_lag[-1]
+
+rates = model.spot_rates(X, n=15)
+cf    = model.cashflow_expectation(X, n=15)
+
+# 1. Simulated paths of ret and g  → simulated_state.svg
+# 2. Residual scatter (Σ)          → var_residuals.svg
+# 3. Multi-step E_t[X_{t+h}]       → var_expectations.svg
+# 4. Cash-flow ratio + spot curve  → recursions.svg
+# 5. Flat vs curve discount factors → flat_vs_curve_factors.svg
+```
+
+Each figure is written as SVG under `docs/assets/figures/`. The documentation build runs this script before `mkdocs build`, so the images on the conceptual pages always match the numbers in the terminal sprint above.
+
+---
+
 ## After this page
 
 You should be able to:
 
 1. Reproduce the five numbers in the table above with a single offline script.
 2. Point back to the figure on each conceptual page that already showed the same object.
-3. Switch the universe that enters $X_t$ without touching the recursions (next page).
+3. Rebuild the pedagogical figures from the same seed.
+4. Switch the universe that enters $X_t$ without touching the recursions (next page).
