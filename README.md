@@ -11,10 +11,10 @@ This is the public library. The teaching course lives at [tlorans/var_valuation]
 ```text
 uv add varvaluation
 uv add "varvaluation[data]"          # Ken French / FRED / cay / GISTEMP
-uv add "varvaluation[wrds,climate]"  # paper stack              (coming next)
+uv add "varvaluation[wrds,climate]"  # firm panel + climate scenarios
 ```
 
-`[data]` loaders cache downloads under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the network — that is what the tests do.
+`[data]` loaders cache downloads under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). Pass `path=` to read a local file and skip the network — that is what the tests do. WRDS credentials: `WRDS_USERNAME` (or `WRDS_USER`) and `WRDS_PASSWORD` in the environment or a `.env` file.
 
 Python 3.11+. Managed with `uv`.
 
@@ -62,6 +62,38 @@ fit = estimate_var(state, spec)
 
 `g`, `beta`, and `dpo` are built when those names are in the spec. Everything else is joined from `macro` by column name.
 
+## Climate (`[climate]`)
+
+```python
+from varvaluation import AngLiuModel
+from varvaluation.climate import build_climate_state, scenario_dynamics, override_var
+
+Y = build_climate_state(temp)                 # columns date, Y
+dyn = scenario_dynamics("Net Zero 2050")
+Phi_s, c_s, Sigma_s = override_var(fit, dyn, state="Y")
+model_s = AngLiuModel(fit.spec, Phi_s, c_s, Sigma_s, xi, Lambda, alpha)
+```
+
+`override_var` is generic: it replaces the named state's own AR(1) and zeros its innovation covariances.
+
+## Firm panel (`[wrds]`)
+
+```python
+from varvaluation import StateSpec, estimate_var_panel
+from varvaluation.wrds import load_firm_panel, prepare_firm_state
+
+panel = load_firm_panel(start="1965-07")
+spec = StateSpec(
+    names=("roe", "beta", "bm", "r", "cay", "pi"),
+    cashflow="roe",
+    group="permno",
+)
+state = prepare_firm_state(panel, macro, spec, start="1965-07")
+fit = estimate_var_panel(state, spec)
+```
+
+`prepare_firm_state` also accepts a local panel (no live WRDS). `roe`, `bm`, and `beta` are built when those names are in the spec.
+
 ## What is in 0.1
 
 | Layer | Status |
@@ -69,9 +101,9 @@ fit = estimate_var(state, spec)
 | `StateSpec`, Pandera schemas, Newey–West VAR(1) / panel VAR | shipped |
 | Ang–Liu spot curve, PV, named channel isolation | shipped |
 | Chen-aware news + Treasury diagnostic | shipped |
-| `[data]` Ken French / FRED / cay / GISTEMP | shipped (cached downloads; tests use fixtures) |
-| `[wrds]` firm panel | extra stub |
-| `[climate]` scenarios | extra stub |
+| `[data]` Ken French / FRED / cay / GISTEMP | shipped |
+| `[climate]` Y-state, NGFS scenarios, `override_var` | shipped |
+| `[wrds]` CRSP–Compustat panel + firm state | shipped (live query skipped in CI) |
 
 ## References
 

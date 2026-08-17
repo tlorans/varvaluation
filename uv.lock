@@ -1655,6 +1655,7 @@ dev = [
     { name = "ruff" },
 ]
 wrds = [
+    { name = "pyarrow" },
     { name = "python-dotenv" },
     { name = "wrds" },
 ]
@@ -1667,6 +1668,7 @@ requires-dist = [
     { name = "pandera", specifier = ">=0.20" },
     { name = "polars", specifier = ">=1.0" },
     { name = "pyarrow", marker = "extra == 'data'", specifier = ">=15.0" },
+    { name = "pyarrow", marker = "extra == 'wrds'", specifier = ">=15.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "python-dotenv", marker = "extra == 'wrds'", specifier = ">=1.0" },

@@ -1,7 +1,22 @@
-"""Climate extra: temperature state and scenario overrides.
+"""Climate extra: temperature state Y_t and scenario VAR overrides."""
 
-Implemented in a follow-up. The extra installs with no additional
-dependencies so the package imports; loader functions are not yet exported.
-"""
+from varvaluation.climate.override import override_fit, override_var
+from varvaluation.climate.scenarios import (
+    AR1Dynamics,
+    all_scenario_dynamics,
+    load_scenario_parameters,
+    scenario_dynamics,
+)
+from varvaluation.climate.state import Y_BURN_IN, Y_PERSISTENCE, build_climate_state
 
-__all__: list[str] = []
+__all__ = [
+    "AR1Dynamics",
+    "Y_BURN_IN",
+    "Y_PERSISTENCE",
+    "all_scenario_dynamics",
+    "build_climate_state",
+    "load_scenario_parameters",
+    "override_fit",
+    "override_var",
+    "scenario_dynamics",
+]

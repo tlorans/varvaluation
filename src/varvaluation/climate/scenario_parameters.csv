@@ -1,0 +1,10 @@
+scenario,nu,alpha,barp,sigma_zeta
+Counterfactual,0.999,0.9999,4.0,0.033
+Climate Breakdown,0.999,0.9999,7.0,0.0495
+Climate Destabilization,0.999,0.9999,5.7,0.0429
+Current Policies,0.999,0.9999,4.0,0.033
+Fragmented World,0.998,0.9999,2.7,0.033
+Nationally Determined Contributions (NDCs),0.998,0.9999,2.5,0.0297
+Delayed transition,0.998,0.9999,2.2,0.02475
+Below 2C,0.998,0.9999,2.1,0.01815
+Net Zero 2050,0.998,0.9999,1.55,0.00033
