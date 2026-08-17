@@ -2,16 +2,19 @@
 
 # What moved the return
 
-<p class="you-will"><strong>You will.</strong> Split last period's unexpected return into cash-flow news and discount-rate news.</p>
+<p class="you-will"><strong>You will.</strong> Split last period's surprise — the part of the return you did not expect yesterday — into a cash-flow piece and a discount-rate piece.</p>
 
 [The joint system](system.md) asks what a claim is worth at $X_t$.
 This chapter asks a different question of the same fitted VAR: what
-moved last period’s unexpected return
+moved last period’s surprise
 ([Campbell, 1991](../references.md#campbell-1991)).
-At the market the answer is mostly discount rates. At the firm it is
-mostly cash flows ([Vuolteenaho, 2002](../references.md#vuolteenaho-2002)).
-Cash-flow news is the revision in the cash-flow equation, never the
-leftover of a discount-rate model
+Call that surprise the **unexpected return**. At the market it is
+mostly discount rates. At the firm it is mostly cash flows
+([Vuolteenaho, 2002](../references.md#vuolteenaho-2002)).
+**News** means a revision: after a shock arrives, how much do you
+change your forecast of future cash flows, or of future expected
+returns? **Cash-flow news** is that revision read from the cash-flow
+equation, never the leftover of a discount-rate model
 ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
 The library function `news_decomposition` is that construction.
 [Three curves](walkthrough.md) calls it so the diagnostic is visible.

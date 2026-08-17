@@ -4,14 +4,14 @@
 
 # Explain asset values from data
 
-<p class="hero-lead">Present value is the expectation of a product: each cash flow times a path of one-period expected returns. One rate for every horizon is a degeneracy, not a method. This handbook is how you enter the research program that treats that product as something you can measure.</p>
+<p class="hero-lead">Present value is what a claim is worth today. When expected returns are allowed to change, that value is the expectation of a <strong>product</strong>: each future cash flow multiplied by the sequence of one-period expected returns along the way. Using the same rate at every horizon is a special case, not a method. This handbook is how you enter the research program that treats that product as something you can measure.</p>
 
 [The research program](guide/program.md){ .md-button .md-button--primary }
 [Install](install.md){ .md-button }
 
 </div>
 
-Year one and year ten do not share a rate. The snippet values a ten-period unit claim two ways — the fitted curve, and a flat rate equal to today's $\mu(1)$. No downloads.
+Year one and year ten do not share a rate. The snippet values a ten-year stream of one-dollar cash flows two ways: with a different discount rate at each horizon (the **curve**), and with a single rate equal to today's one-year rate. No downloads. The printed `mu(1)` is that one-year rate; `mu(10)` is the rate the curve assigns to a cash flow ten years out.
 
 ```python
 from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
@@ -38,17 +38,17 @@ mu(1) 2.37%   mu(10) 4.09%
 flat PV vs curve +8.0%
 ```
 
-<p class="snippet-caption">Using today's 2.37% for every horizon overstates the claim by 8%. The gap is the object. Reproduce it with <code>uv run python examples/flat_vs_curve.py</code>.</p>
+<p class="snippet-caption">Today's one-year rate is 2.37%. The ten-year rate on the curve is 4.09%. Using 2.37% at every horizon overstates the claim by 8%. The gap is the object. Reproduce it with <code>uv run python examples/flat_vs_curve.py</code>.</p>
 
 ## Browse the handbook
 
 <div class="topic-cards">
 <a href="guide/program/"><span class="part">Part 01</span><strong>The research program</strong><span>What would count as explaining asset values from data, and which paper you could write next.</span></a>
-<a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why a flat rate is the wrong tool, and learn the words (product, strip, spot curve).</span></a>
-<a href="guide/system/"><span class="part">Part 03</span><strong>The joint system</strong><span>Write one law of motion that carries cash flows, expected returns, and their covariance.</span></a>
-<a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on public data and print a real discount curve. No WRDS yet.</span></a>
-<a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Build cash-flow news from the cash-flow equation, not from a leftover.</span></a>
-<a href="guide/walkthrough/"><span class="part">Part 06</span><strong>Firms</strong><span>Repeat on a CRSP–Compustat panel and draw three curves.</span></a>
+<a href="guide/start/"><span class="part">Part 02</span><strong>Getting started</strong><span>Feel why one rate is the wrong tool, then learn the words you will carry.</span></a>
+<a href="guide/system/"><span class="part">Part 03</span><strong>The joint system</strong><span>Write one law of motion that carries cash flows and expected returns together.</span></a>
+<a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>
+<a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Ask what part of last period's surprise came from cash flows, and what part from discount rates.</span></a>
+<a href="guide/walkthrough/"><span class="part">Part 06</span><strong>Firms</strong><span>Repeat the same steps on individual firms and draw three curves.</span></a>
 </div>
 
-The closed forms are [Ang and Liu (2004)](references.md#ang-liu-2004). The package is the bench. A valuator who already has a cash-flow path can skip to [For valuators](guide/practice.md).
+The formulas that evaluate the product without simulation are [Ang and Liu (2004)](references.md#ang-liu-2004). The package is the bench. If you already have a cash-flow forecast and only need the denominator, skip to [For valuators](guide/practice.md).

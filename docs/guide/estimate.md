@@ -2,19 +2,22 @@
 
 # Estimate
 
-<p class="you-will"><strong>You will.</strong> Measure $\Phi$ and $(\xi,\Lambda)$ in stages, with Newey–West on overlapping pairs.</p>
+<p class="you-will"><strong>You will.</strong> Measure the persistence matrix $\Phi$ and the linear and quadratic pieces of the one-period expected return, using standard errors that allow neighbouring annual pairs to share months.</p>
 
-The closed forms of [The joint system](system.md) are useful only if
+The formulas of [The joint system](system.md) are useful only if
 every coefficient can be measured. The stages below are ordinary
-linear regressions on overlapping annual pairs, with
+linear regressions on overlapping annual pairs — monthly
+observations twelve months apart, so adjacent pairs share eleven
+months — with
 [Newey and West (1987)](../references.md#newey-west-1987) standard
-errors. What is not ordinary is the refusal to keep cash flows and
-expected returns in separate drawers
+errors, which are honest about that overlap. What is not ordinary is
+the refusal to keep cash flows and expected returns in separate
+drawers
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), §III). The
 library calls `estimate_var` and `ExpectedReturnSpec` implement those
 stages. [Three curves](walkthrough.md) reports the numbers they
 produce on a firm panel; [Public data](data.md) is the first real
-curve, with no WRDS.
+curve, with no firm-level vendor file.
 
 ## 1. Build the observables
 

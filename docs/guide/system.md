@@ -8,10 +8,11 @@ You cannot price the product from two separate forecasts. The
 expectation of a product is a property of the joint distribution
 ([Ang and Liu, 2004](../references.md#ang-liu-2004)). A vector
 autoregression is the smallest statistical object that produces both
-forecasts, and their covariance, from one state $X_t$. Separate
-models of cash flows and of expected returns omit that covariance,
+forecasts, and how they move together, from one state $X_t$. Separate
+models of cash flows and of expected returns omit that co-movement,
 need not share a horizon structure, and can contradict each other.
-The failure is one of identification, not of taste.
+The two forecasts then do not determine a unique price. That is a
+failure of **identification**, not of taste.
 
 ## What a VAR is
 
@@ -43,17 +44,18 @@ Three named objects, each with a job:
 | $\Sigma$ | which shocks arrive together |
 
 Gaussian shocks plus linear dynamics is what makes every future horizon
-computable in closed form — the same architecture as affine
-term-structure models (bond yields that are a constant plus a linear
-function of a few factors), applied to equity
+a formula you evaluate rather than a path you simulate — the same
+architecture as affine term-structure models (bond yields that are a
+constant plus a linear function of a few factors), applied to equity
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1).
 
 !!! note "In words — closed form, companion, lag pair"
     **Closed form** means you evaluate a formula. You do not draw
     random paths. A **lag pair** is $(X_t, X_{t+h})$: today’s state
     and the state $h$ periods later. On a firm panel those pairs are
-    formed only *inside* one `permno`, so firm A is never used to
-    forecast firm B. **Companion** is used in two senses. In
+    formed only *inside* one firm (one `permno`, CRSP’s permanent
+    identifier), so firm A is never used to forecast firm B.
+    **Companion** is used in two senses. In
     time-series textbooks it is a VAR($p$) rewritten as a taller
     VAR(1) by stacking lags. On this site it also means the *fitted*
     $\Phi$ on the 80-firm slice of Section 5 — one pooled law of

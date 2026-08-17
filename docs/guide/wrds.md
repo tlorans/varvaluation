@@ -2,11 +2,14 @@
 
 # WRDS / firm panel
 
-<p class="you-will"><strong>You will.</strong> Build a CRSP–Compustat state without lagging firm A into firm B.</p>
+<p class="you-will"><strong>You will.</strong> Build a firm-level state from the academic US equity files, without using one firm to forecast another.</p>
 
-Public data gave you a curve. A firm panel is the next state. Lag
-pairs are formed only inside a `permno`, so one name is never used
-to forecast another. Extra: `uv add "varvaluation[wrds]"`.
+Public files gave you a curve. A firm panel is the next state.
+**WRDS** is the academic vendor. **CRSP** is the monthly stock-return
+file; **Compustat** is the annual fundamentals file; a **permno** is
+CRSP’s permanent firm identifier. Yesterday-and-today pairs are
+formed only inside one permno, so one name is never used to forecast
+another. Extra: `uv add "varvaluation[wrds]"`.
 
 Credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`, in the environment or a `.env` file. Queries cache as parquet under `~/.cache/varvaluation/wrds`.
 

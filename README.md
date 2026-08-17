@@ -1,17 +1,20 @@
 # varvaluation
 
-Present value is the expectation of a product: each cash flow times a
-path of one-period expected returns. One rate for every horizon is a
-degeneracy, not a method. This package is the bench for the research
-program that treats that product as something you can measure. The
-closed forms are Ang and Liu (2004). Cash-flow news is the cash-flow
-equation, not the residual.
+Present value is what a claim is worth today. When expected returns
+are allowed to change, that value is the expectation of a product:
+each future cash flow multiplied by the sequence of one-period
+expected returns along the way. Using the same rate at every horizon
+is a special case, not a method. This package is the bench for the
+research program that treats that product as something you can
+measure. The formulas are Ang and Liu (2004). The cash-flow piece of
+a return surprise is read from the cash-flow equation, not from a
+leftover.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
-The firm illustration is a software demonstration on a short
-CRSP–Compustat window (2,673 prepared firms; a pooled companion on the
-80 longest histories). It reports the discount curve, not firm present
-values.
+The firm illustration is a software demonstration on a short window
+of US equity files (2,673 prepared firms; one persistence matrix
+pooled on the 80 longest histories). It reports the discount curve,
+not firm present values.
 
 ## Install
 
@@ -36,8 +39,11 @@ The firm illustration is `uv run python examples/walkthrough.py`
 ## Flat rate versus the curve
 
 Year one and year ten do not share a rate. The snippet values a
-ten-period unit claim two ways — the fitted curve, and a flat rate
-equal to today's μ(1). No downloads.
+ten-year stream of one-dollar cash flows two ways: with a different
+discount rate at each horizon (the curve), and with a single rate
+equal to today's one-year rate. No downloads. The printed `mu(1)` is
+that one-year rate; `mu(10)` is the rate the curve assigns ten years
+out.
 
 ```python
 from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var

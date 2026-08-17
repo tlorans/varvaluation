@@ -53,12 +53,25 @@ level, not merely a variance decomposition computed after the fact.
 
 The minimum statistical object is one law of motion for a state $X_t$
 that contains both cash-flow growth and the variables that move
-expected returns.
+expected returns. A **vector autoregression** (VAR) is that law:
+each variable is regressed on yesterday’s value of every variable.
+[Part 03](system.md) writes it out. Write $\Phi$ for the matrix of
+those slopes (persistence) and $\Sigma$ for the covariance of the
+shocks. [Ang and Liu (2004)](../references.md#ang-liu-2004) take the
+VAR to be Gaussian of order one and give the closed forms.
 
-[Ang and Liu (2004)](../references.md#ang-liu-2004) give that law as a
-Gaussian VAR(1) and the associated closed forms. Section 2.1 says
-what a VAR is. Two facts about the *shape* of $\mu_t$ decide the
-shape of the price.
+!!! note "In words — strip, spot curve, term structure"
+    A **strip** is one horizon’s contribution to the price: the
+    present value of the cash flow that arrives in year $n$, and
+    nothing else. A **spot rate** $\mu_t(n)$ is the single number
+    that, raised to $n$, discounts that expected cash flow correctly.
+    The **term structure** (the *curve*) is the list
+    $\mu_t(1),\mu_t(2),\ldots$, drawn as a line — the equity analogue
+    of a bond yield curve. It can slope up, down, or be humped, and
+    it moves with $X_t$.
+
+Two facts about the *shape* of $\mu_t$ decide the shape of the
+price.
 
 - If the one-period expected return is **affine** in $X_t$ — a
   constant plus a linear function, $a+b'X$, no products — each strip
@@ -73,23 +86,13 @@ shape of the price.
 
 Constant $\mu$ and constant expected growth — their special case 1 —
 nest the constant-growth formula often called Gordon (a fixed
-growth rate, a fixed discount rate, an infinite tail).
-$\Phi=\Sigma=0$ is a further degeneracy (no dynamics, no shocks),
+growth rate, a fixed discount rate, an infinite tail). Setting
+$\Phi=\Sigma=0$ is a further special case (no dynamics, no shocks),
 not that case. The same paper, following
 [Brennan (1997)](../references.md#brennan-1997), replaces a single
-rate for every maturity by a **spot curve** $\mu_t(n)$: one rate per
+rate for every maturity by the spot curve $\mu_t(n)$: one rate per
 horizon, so that a two-step workflow (forecast cash flows, then
 discount) can be kept while the rate depends on horizon and on $X_t$.
-
-!!! note "In words — strip, spot curve, term structure"
-    A **strip** is one horizon’s contribution to the price: the
-    present value of the cash flow that arrives in year $n$, and
-    nothing else. A **spot rate** $\mu_t(n)$ is the single number
-    that, raised to $n$, discounts that expected cash flow correctly.
-    The **term structure** (the *curve*) is the list
-    $\mu_t(1),\mu_t(2),\ldots$, drawn as a line — the equity analogue
-    of a bond yield curve. It can slope up, down, or be humped, and
-    it moves with $X_t$.
 
 A neighbouring question uses the same VAR. An *unexpected* return is
 the part of the realized return that was not expected yesterday.
@@ -109,18 +112,18 @@ The content of $X_t$ is not free. Profitability is forecastable and
 **mean-reverts** — when it sits above its long-run average it tends
 to fall back
 ([Fama and French, 2000](../references.md#ff-2000)).
-Expected-return instruments are contested. The short rate is a
-classical predictor ([Fama and Schwert, 1977](../references.md#fama-schwert-1977)).
+Expected-return instruments are contested. **In-sample** means: the
+predictor works on the window used to fit it. **Out-of-sample**
+means: it still works on later data that the fit did not see.
+**Look-ahead** is a different sin: using later information to
+construct a variable that is then treated as if it had been known
+earlier. The short rate is a classical predictor
+([Fama and Schwert, 1977](../references.md#fama-schwert-1977)).
 The **dividend yield** (dividends over price) is weak out of sample
 ([Goyal and Welch, 2003](../references.md#goyal-welch-2003);
 [Goyal and Welch, 2008](../references.md#goyal-welch-2008)), though
 the present-value identity can still imply return predictability
 ([Cochrane, 2008](../references.md#cochrane-2008)).
-**In-sample** means: the predictor works on the window used to fit
-it. **Out-of-sample** means: it still works on later data that the
-fit did not see. **Look-ahead** is a different sin: using later
-information to construct a variable that is then treated as if it
-had been known earlier.
 
 Consumption–wealth $\mathit{cay}$ is a strong *in-sample* quarterly
 predictor in
@@ -146,7 +149,8 @@ implemented.
 
 ## What the library adds
 
-The recursions, the spot curve, and Gordon as a nest are
+The step-by-step formulas that build the price horizon by horizon
+(the **recursions**), the spot curve, and Gordon as a nest are
 [Ang and Liu (2004)](../references.md#ang-liu-2004). The residual-income
 companion is cited, not implemented. The closed forms are not new.
 
@@ -155,18 +159,18 @@ uses as a bench:
 
 1. **Named-state binding.** `StateSpec` makes the cash-flow row a
    name (`"roe"`, `"g"`), not “whatever sits in column 0.”
-2. **A panel estimator** that forms overlapping pairs only inside
-   the firm (`estimate_var_panel`). A firm is never lagged into
-   another firm.
+2. **A panel estimator** that forms yesterday-and-today pairs only
+   inside the firm (`estimate_var_panel`). A firm is never lagged
+   into another firm.
 3. **Direct cash-flow news**, with the residual stored as a diagnostic
    ([Chen, Da, and Zhao, 2013](../references.md#chen-da-zhao-2013)).
 4. **A callable implementation** (`ValuationModel`) of the 2004
    priced and cash-flow recursions.
 
-[Three curves](walkthrough.md) runs those calls on a WRDS extract.
 **WRDS** is the academic vendor for US market and accounting data.
 **CRSP** is the monthly stock-return file; **Compustat** is the annual
 fundamentals file; a **permno** is CRSP’s permanent firm identifier.
+[Three curves](walkthrough.md) runs those calls on a WRDS extract.
 The prepared state has 2,673 firms. The *pooled companion* — one
 $\Phi$ estimated on stacked lag pairs — uses the 80 longest
 histories over March 2015–September 2019. Those are not the same
@@ -175,8 +179,9 @@ absolute eigenvalue of $\Phi$. If that number is $\ge 1$, the
 unconditional mean does not exist and the library refuses to build
 the model.
 
-The market premium regression that supplies $(\xi,\Lambda)$ uses
-returns through December 2024, after the September 2019 valuation
+The market premium regression that supplies the linear and quadratic
+pieces of $\mu_t$, written $(\xi,\Lambda)$, uses returns through
+December 2024, after the September 2019 valuation
 date — look-ahead, disclosed in [Estimation](estimate.md). The
 illustration reports $\mu_t(n)$ and
 $\mathbb{E}_t[\mathit{roe}_{t+n}]$. It does not report a present

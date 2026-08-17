@@ -2,12 +2,12 @@
 
 # Three curves
 
-<p class="you-will"><strong>You will.</strong> Draw $\mu_t(n)$ at three names on a short window, then read what the window cannot show.</p>
+<p class="you-will"><strong>You will.</strong> Draw the discount curve at three firms on a short window, then read what the window cannot show.</p>
 
-The picture on the old landing was the argument. Here you produce
-it. The script runs the calls of Parts 03–05 on a short
-CRSP–Compustat extract. What the window cannot show is collected at
-the end of this chapter.
+The landing argued with a picture of three curves. Here you produce
+that picture. The script runs the calls of Parts 03–05 on a short
+extract of the WRDS files named in the previous chapter. What the
+window cannot show is collected at the end of this chapter.
 
 !!! note "In words — the files this section opens"
     **WRDS** is the academic vendor. **CRSP** is the monthly

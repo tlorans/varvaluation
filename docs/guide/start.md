@@ -16,18 +16,20 @@ mu(10) 4.09%
 flat PV vs curve  +8.0%
 ```
 
-A ten-period unit claim — one dollar at each horizon, nothing after — is worth 8% more if you discount every date at today’s $\mu(1)$ than if you use the fitted curve. Year one wants 2.37%. Year ten wants 4.09%. A single rate is a flat line through that gap.
+A ten-year stream of one-dollar cash flows — one dollar at each year, nothing after — is worth 8% more if you discount every date at today’s one-year rate than if you use the curve. Year one wants 2.37%. Year ten wants 4.09%. A single rate is a flat line through that gap.
 
-The script is [`examples/flat_vs_curve.py`](https://github.com/tlorans/varvaluation/blob/main/examples/flat_vs_curve.py). It draws a two-state VAR, estimates it, and values the claim two ways. There is no download and no WRDS. You already have the object.
+Write $\mu(1)$ for the one-year rate and $\mu(10)$ for the ten-year rate on the curve. Those are the names in the printout.
+
+The script is [`examples/flat_vs_curve.py`](https://github.com/tlorans/varvaluation/blob/main/examples/flat_vs_curve.py). It draws two series, estimates how each depends on yesterday’s values of both, and values the claim two ways. There is no download and no firm-level vendor file. You already have the object.
 
 ## Why the gap exists
 
-Present value is not a forecast of cash flows divided by a forecast of the rate. It is the expectation of a *product*: each cash flow times a path of one-period expected returns ([Ang and Liu, 2004](../references.md#ang-liu-2004), eq. 2). $\mathbb{E}[XY]\ne\mathbb{E}[X]\,\mathbb{E}[Y]$. The covariance of cumulated growth and cumulated expected returns sits in the price. Separate models of the two sides omit it, need not share a horizon, and can contradict each other.
+Present value is not a forecast of cash flows divided by a forecast of the rate. It is the expectation of a *product*: each cash flow times a path of one-period expected returns ([Ang and Liu, 2004](../references.md#ang-liu-2004), eq. 2). The average of a product is not the product of the averages: $\mathbb{E}[XY]\ne\mathbb{E}[X]\,\mathbb{E}[Y]$. How cumulated growth and cumulated expected returns move together sits in the price. Separate models of the two sides omit that co-movement, need not share a horizon, and can contradict each other.
 
-The smallest statistical object that produces both forecasts, and their covariance, from one state $X_t$ is a vector autoregression. That is [Part 03](system.md). Before you write it down, keep the words next to you: product, strip, spot curve, term structure. They are collected in [Why a product](introduction.md#objects-and-words), with the derivation.
+The smallest statistical object that produces both forecasts, and how they move together, from one list of variables $X_t$ is a **vector autoregression**: several ordinary regressions run at the same time. That is [Part 03](system.md). Before you write it down, the next page derives the product and names the pieces (one horizon’s contribution, the rate at each horizon, the whole curve). They are collected in [Why a product](introduction.md#objects-and-words).
 
 ## Where you go next
 
-You have felt the error. The [research program](program.md) said what would count as explaining it from data. The next hour is the joint system: one law of motion, a closed form for the product, and names for every coordinate.
+You have felt the error. The [research program](program.md) said what would count as explaining it from data. The next hour is the joint system: one law of motion, a formula for the product that you evaluate rather than simulate, and names for every coordinate.
 
-Public data — Ken French, FRED, a real $\mu(n)$ — is [Part 04](data.md). Firms and WRDS are [Part 06](wrds.md). Do not start there.
+Public files — Ken French portfolios and FRED macros, then a discount curve estimated from them — are [Part 04](data.md). Individual firms are [Part 06](wrds.md). Do not start there.

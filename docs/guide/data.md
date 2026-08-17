@@ -2,11 +2,12 @@
 
 # Public data
 
-<p class="you-will"><strong>You will.</strong> Load Ken French / FRED and print a real $\mu(n)$ with no WRDS.</p>
+<p class="you-will"><strong>You will.</strong> Load freely published market and macro files and print a discount curve estimated from those files.</p>
 
-This is the first *real* discount curve. Ken French portfolios and
-FRED macros are enough to estimate $\Phi$ and print $\mu_t(n)$.
-Firm-level CRSP–Compustat work is [Part 06](wrds.md).
+This is the first *real* discount curve. Ken French’s portfolio
+returns and FRED’s macro series are enough to estimate $\Phi$ and
+print the rate at each horizon, $\mu_t(n)$. Individual firms, from
+the academic vendor introduced in [Part 06](wrds.md), come later.
 
 Extra: `uv add "varvaluation[data]"`.
 
