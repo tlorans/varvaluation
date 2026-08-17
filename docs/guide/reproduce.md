@@ -25,9 +25,9 @@ from varvaluation.news import simulate_return_var
 df, spec = simulate_return_var(nobs=400, seed=7)
 ```
 
-Two variables only: a return \(r_t\) and cash-flow growth \(g_t\). The figure shows the paths the VAR is estimated on. Both series mean-revert; the sample means are near 0.4 % and 0.25 % per month.
+Two variables only: a return \(r_t\) and cash-flow growth \(g_t\). Both series mean-revert; the sample means are near 0.4 % and 0.25 % per month.
 
-![Simulated state paths (ret, g)](../assets/figures/simulated_state.svg)
+> **Figure (simulated state).** Paths of \(r_t\) and \(g_t\) from `simulate_return_var(..., seed=7)`. Both mean-revert. Generate with `python examples/build_pedagogical_figures.py`.
 
 ---
 
@@ -61,9 +61,7 @@ c               : [0.0027 0.0015]
 
 Both eigenvalues sit well inside the unit circle. The off-diagonal entries of \(\Phi\) and of \(\Sigma\) are the concrete carriers of the covariance the product identity needs.
 
-The residual scatter makes the contemporaneous piece of \(\Sigma\) visible:
-
-![VAR residuals — shock covariance](../assets/figures/var_residuals.svg)
+> **Figure (VAR residuals).** Scatter of \((u^g, u^{ret})\). The slope is the contemporaneous piece of \(\Sigma\). Generate with the same script.
 
 A separate growth model and a separate return model would never produce this joint residual cloud. That is why step 3 of the mental map insists on **one** system.
 
@@ -83,7 +81,7 @@ Map the state into the one-period expected return
 E_t[X_{t+h}] = (I-\Phi^h)(I-\Phi)^{-1}c + \Phi^h X_t.
 \]
 
-![Conditional expectations from the VAR](../assets/figures/var_expectations.svg)
+> **Figure (multi-step expectations).** \(E_t[r_{t+h}]\), \(E_t[g_{t+h}]\), \(E_t[\mu_{t+h}]\) from the estimated \(\Phi\), starting at the last lag. Dashed = unconditional means.
 
 The dashed lines are the unconditional means. Because \(\Phi\) is stable, every path glides back. That mean reversion is already enough to make the spot curve \(\mu_t(n)\) rise with maturity (next steps).
 
@@ -107,7 +105,7 @@ The cash-flow side of the product is closed-form:
   15       1.034
 ```
 
-![Cash-flow recursion and spot curve](../assets/figures/recursions.svg)
+> **Figure (recursions).** Left: cash-flow recursion \(E_t[C_{t+n}]/C_t\). Right: spot curve \(\mu_t(n)\) rising from 2.37 % to 4.19 %.
 
 ---
 
@@ -151,7 +149,7 @@ The curve is **not** flat. A single WACC locked at \(\mu_t(1)\) therefore mispri
 
 On this state the strip-sum value is **24.07**. For a pure 15-year unit annuity the gap between the curve-consistent PV and a flat rate at \(\mu_t(1)\) is **+12.8 %**.
 
-![Flat versus curve discount factors](../assets/figures/flat_vs_curve_factors.svg)
+> **Figure (flat vs curve).** Discount factors \(e^{-n\mu_t(n)}\) vs flat at \(\mu_t(1)\). The shaded gap produces the +12.8 % annuity mispricing.
 
 The shaded region is exactly the mispricing channel the handbook is about: rising \(\mu_t(n)\) discounts distant cash harder than a constant short rate does. That slope itself comes from mean reversion in the joint VAR (step 2) and from the covariance that lives in \(\Phi\) and \(\Sigma\) (step 1).
 

@@ -1,6 +1,6 @@
 """Offline pedagogical figures for the worked-example page (synthetic state only).
 
-Produces SVG (text) so the figures can be versioned without binary blobs.
+Produces SVG so the figures can be versioned cleanly.
 Run from the package root:
 
     uv run python examples/build_pedagogical_figures.py
@@ -54,7 +54,6 @@ def main() -> None:
     rates = model.spot_rates(X, n=n)
     cf = model.cashflow_expectation(X, n=n)
 
-    # ── 1. Simulated state paths ────────────────────────────────────
     ret = df["ret"].to_numpy()
     g = df["g"].to_numpy()
     t = np.arange(len(ret))
@@ -70,12 +69,12 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "simulated_state.svg")
 
-    # ── 2. Residual scatter = contemporaneous covariance in Σ ───────
     u = fit.residuals
-    fig, ax = plt.subplots(figsize=(4.8, 4.2))
-    ax.scatter(100 * u[:, 1], 100 * u[:, 0], s=12, alpha=0.55, color="#1d4e89", edgecolors="none")
-    slope = np.linalg.lstsq(u[:, 1:2], u[:, 0], rcond=None)[0][0]
-    xs = np.linspace(u[:, 1].min(), u[:, 1].max(), 50)
+    idx = np.linspace(0, len(u) - 1, 120).astype(int)
+    fig, ax = plt.subplots(figsize=(4.6, 4.0))
+    ax.scatter(100 * u[idx, 1], 100 * u[idx, 0], s=14, alpha=0.6, color="#1d4e89", edgecolors="none")
+    slope = float(np.linalg.lstsq(u[:, 1:2], u[:, 0], rcond=None)[0][0])
+    xs = np.linspace(u[:, 1].min(), u[:, 1].max(), 40)
     ax.plot(100 * xs, 100 * slope * xs, color="#b04a3a", lw=1.5, label=rf"slope ≈ {slope:.2f}")
     ax.axhline(0, color="0.6", lw=0.6)
     ax.axvline(0, color="0.6", lw=0.6)
@@ -85,7 +84,6 @@ def main() -> None:
     ax.legend(frameon=False, loc="upper left")
     _save(fig, "var_residuals.svg")
 
-    # ── 3. Multi-step conditional expectations ──────────────────────
     K = fit.Phi.shape[0]
     eye = np.eye(K)
     Phi = fit.Phi
@@ -98,7 +96,7 @@ def main() -> None:
         else:
             Phi_h = np.linalg.matrix_power(Phi, h)
             EX[i] = (eye - Phi_h) @ np.linalg.solve(eye - Phi, c) + Phi_h @ X
-    mu_path = alpha + EX @ xi  # Lambda = 0
+    mu_path = alpha + EX @ xi
 
     fig, axes = plt.subplots(3, 1, figsize=(6.2, 5.4), sharex=True)
     axes[0].plot(horizons, 100 * EX[:, 0], "o-", color="#1d4e89", ms=3, lw=1.2)
@@ -115,7 +113,6 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "var_expectations.svg")
 
-    # ── 4. Cash-flow recursion + spot curve ─────────────────────────
     mat = np.arange(1, n + 1)
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4))
     axes[0].plot(mat, cf, "o-", color="#1d4e89", ms=4, lw=1.4)
@@ -132,7 +129,6 @@ def main() -> None:
     fig.tight_layout()
     _save(fig, "recursions.svg")
 
-    # ── 5. Flat vs curve annuity factors ────────────────────────────
     curve_disc = np.exp(-mat * rates)
     flat_disc = np.exp(-mat * rates[0])
     fig, ax = plt.subplots(figsize=(6.0, 3.6))
