@@ -1,21 +1,7 @@
-# Reproduce the paper
+# Worked example
 
-[Giacotto, Lin, and Zhao (2020)](../references.md#glz-2020),
-*Insurance: Mathematics and Economics* 95, 147–158.
-Sample: 1972 Q4 – 2018 Q4. Five portfolios.
-
-| Portfolio | SIC | What to check |
-|---|---|---|
-| All insurers | 6300–6399 | Hump. $\rho(1)\approx 9.6$, $\rho(10)\approx 10.5$, $\rho(30)\approx 9.0$. CAPM $\approx 11.7$. |
-| P/C | 6330–6331 | Same shape, a little lower. |
-| Life | 6310–6319 | Higher level than P/C and health. |
-| Health | 6320–6329 | Close to P/C. |
-| All stocks excl. insurers | not 6300–6399 | Higher still. Average $\beta\approx 0.97$ vs $0.65$. |
-
-Those cells are Table 2. We will not hit them to the basis point
-(link-table vintage, Cosemans priors, log-versus-simple ROE). The
-check is the same industries, the same objects, the same ranking, and
-a hump on the insurance curve.
+Estimate a VAR, run the two Ang–Liu recursions, read the spot curve
+$\mu_t(n)$.
 
 ## Offline (no downloads)
 
@@ -23,12 +9,39 @@ a hump on the insurance curve.
 uv run python examples/reproduce_glz2020.py
 ```
 
-This draws a synthetic four-state VAR, one per paper portfolio, and
-prints Fig. 1 points, Tables 2–3, and a Table 4 annuity. It is the
-API, not the sample. $\tau=1$ equals the CCAPM. Life sits above P/C
-because its $\beta$ is higher. That is all the simulator is for.
+(The script name is historical; it draws a synthetic state, fits the
+VAR, and prints the curve and a strip-sum valuation. No external data.)
 
-## Live (WRDS)
+Minimal path in code:
+
+```python
+from varvaluation import (
+    AngLiuModel,
+    estimate_var,
+    simulate_paper_state,
+)
+
+state, spec = simulate_paper_state(nobs=160, seed=11)
+fit = estimate_var(state, spec)
+model = AngLiuModel.from_var(fit)   # supply xi, Lambda, alpha as needed
+
+X = model.unconditional_mean() if hasattr(model, "unconditional_mean") else None
+# preferred, once loadings are set:
+# spots = model.spot_rates(X, n=30)
+# cf    = model.cashflow_expectation(X, n=30)
+# V     = model.value(X, C0=1.0)
+```
+
+Checks that should hold inside the model class:
+
+| Check | Why |
+|---|---|
+| $\mu_t(1)$ equals the one-period $\mu_t$ | Definition of the spot curve |
+| $\Lambda = 0$ ⇒ $H(n)\equiv 0$ | Affine special case |
+| Spectral radius of $\Phi$ $< 1$ | Otherwise `from_var` refuses |
+| Tail of `value` uses $\mu_t(N)$, not a hand-set $(r,g)$ | Gordon only as special case 1 |
+
+## Live data
 
 ```text
 uv add "varvaluation[data,wrds]"
@@ -36,43 +49,20 @@ uv add "varvaluation[data,wrds]"
 uv run python examples/reproduce_glz2020.py --wrds
 ```
 
-The script loads Compustat quarterly (`ibq`, `ceqq`), CRSP monthly for
-the CCM link, CRSP daily for the 125-day beta, FRED Treasuries and
-corporate yields, and Ken French T-bills. Queries cache under
-`~/.cache/varvaluation`. The first daily pull is large; later runs
-read parquet.
+Compustat quarterly, CRSP daily for rolling betas, FRED Treasuries and
+credit spreads, Ken French factors. Queries cache under
+`~/.cache/varvaluation`.
 
-The body of the live path is the same four calls as the offline path:
+## Reading the output
 
-```python
-from varvaluation import (
-    CCAPMSpec, INSURANCE, ResidualIncome, TermStructureModel,
-    capm_tests, estimate_var, paper_state_spec, prepare_industry_state,
-    slope_tests,
-)
-from varvaluation.industry import curve_panel
+- **`cashflow_expectation(X, n)`** — the cash-flow recursion:
+  $E_t[C_{t+k}]/C_t$ for $k=1,\ldots,n$.
+- **`spot_rates(X, n)`** — $\mu_t(1),\ldots,\mu_t(n)$.
+- **`value(X, C)`** — sum of strips under both recursions, plus the
+  geometric tail at $\mu_t(N)$.
 
-spec = paper_state_spec()                    # horizon=4
-state = prepare_industry_state(panel, macro, spec, sic=INSURANCE["all"])
-fit = estimate_var(state, spec)
-model = TermStructureModel.from_var(fit, ResidualIncome(), CCAPMSpec())
-rho_bar = model.unconditional_curve(y_bar, n=30)
-rho_ts = curve_panel(model, state, y_bar, n=30)
-capm_ts = y_bar + state["beta"] * state["mrp"]
-capm_tests(rho_ts, capm_ts)
-slope_tests(rho_ts)
-```
+Compare the curve to a flat CAPM rate at the same date. The gap *is*
+the object Ang and Liu quantify: how much a constant-rate DCF misses
+when expected returns move.
 
-## What “close” means
-
-| Check | Paper | Pass |
-|---|---|---|
-| $\rho(1)$ equals the CCAPM at every date | identity | exact, offline |
-| Insurance curve hump-shaped at $\bar x$ | Fig. 1A | qualitative, live |
-| Life above P/C and health | Fig. 1C vs 1B, 1D | ranking, live |
-| All-ex-insurers above insurance | Fig. 1E; $\beta$ 0.97 vs 0.65 | ranking, live |
-| Mean $\rho(\tau)$ below CAPM for insurers | Table 2, all $t<0$ | sign, live |
-| Slope $\rho(5)-\rho(1)>0$ for insurers | Table 3 | sign, live |
-| 30-year annuity discrepancy | Table 4 | same formula |
-
-The next page changes one argument — `sic=` — and keeps everything else.
+The next page changes only the universe that is averaged into $X_t$.

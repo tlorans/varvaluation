@@ -1,22 +1,28 @@
-# One system, two readings
+# One system
 
-The state is four numbers:
-
-$$
-x_t' = \bigl(\mathrm{ROE}_t,\; g_t,\; \beta_t,\; \mathrm{MRP}_t\bigr).
-$$
-
-A VAR(1) is four ordinary regressions run at the same time — each
-variable on a lag of all four:
+[Ang and Liu (2004)](../references.md#ang-liu-2004) summarise cash flows
+and expected returns by a state vector $X_t$. In the leading case
 
 $$
-x_{t+1} = c + \Phi x_t + \varepsilon_{t+1},
+X_t = (g_t,\; \beta_t,\; z_t')',
+$$
+
+where $g_t$ is cash-flow growth, $\beta_t$ is the conditional beta, and
+$z_t$ holds instruments that predict growth, betas, or the market
+premium (short rate, $\mathit{cay}$, inflation, …).
+
+A VAR(1) is the law of motion:
+
+$$
+X_{t+1} = c + \Phi X_t + u_{t+1},
 \qquad
-\varepsilon \sim N(0,\Sigma).
+u \sim N(0,\Sigma).
 $$
 
 Nothing in that system is labelled “numerator” or “denominator”.
-The two readings come from **which coordinates you ask about**.
+The two readings come from **which coordinates you ask about**, and
+from how the one-period expected return is written as a function of
+$X_t$.
 
 ## What a VAR is, concretely
 
@@ -29,7 +35,7 @@ y_{t+1} &= a_2 + b_{21}x_t + b_{22}y_t + v_{t+1}.
 \end{aligned}
 $$
 
-Stacked into matrices, that is $X_{t+1} = c + \Phi X_t + \varepsilon_{t+1}$.
+Stacked into matrices: $X_{t+1} = c + \Phi X_t + \varepsilon_{t+1}$.
 Three named objects, each with a job:
 
 | Object | Job |
@@ -39,104 +45,91 @@ Three named objects, each with a job:
 | $\Sigma$ | Shock covariance: which variables get hit together |
 
 Forecasting is recursive bookkeeping. One step ahead:
-$E_t[X_{t+1}] = c + \Phi X_t$. Two steps: plug that back in.
-By $j$ steps, today's state dies out at the speed of $\Phi^j$.
-The unconditional mean is $(I-\Phi)^{-1}c$, provided the eigenvalues
-of $\Phi$ lie inside the unit circle.
+$E_t[X_{t+1}] = c + \Phi X_t$. By $j$ steps, today's state dies out at
+the speed of $\Phi^j$. The unconditional mean is $(I-\Phi)^{-1}c$,
+provided every eigenvalue of $\Phi$ lies inside the unit circle.
 
 !!! note "Why a VAR is the right tool here"
-    Four requirements, four matches:
-
     1. **Jointness by construction.** One $\Sigma$ generates shocks to
        cash flows *and* expected returns together. The covariance the
        price needs cannot be set to zero by accident.
     2. **Mean reversion for free.** A stable $\Phi$ delivers rates that
        glide back to their long-run mean. The flat-forever discount rate
        is the special case $\Phi = 0$.
-    3. **Predictability is testable.** Do premiums forecast growth?
-       Does ROE forecast beta? These are coefficients of $\Phi$, with
-       standard errors.
+    3. **Predictability is testable.** Coefficients of $\Phi$ have
+       standard errors; cross-forecasts can be rejected.
     4. **Gaussian linearity makes the price closed-form.** Linear
        dynamics + normal shocks ⇒ every cumulated sum is conditionally
-       normal ⇒ $E[e^{\cdot}]$ is a two-line formula.
+       normal ⇒ $E[e^{\cdot}]$ is analytic.
 
-## Reading 1 — cash, from clean surplus
+## Cash-flow growth
 
-[Feltham and Ohlson (1995)](../references.md#feltham-ohlson-1995)
-require that cash equal earnings minus the change in book. In logs,
+Write cash flows in growth form:
 
 $$
-g_{t+1} = \ln(B_{t+1}/B_t),
+g_{t+i} = \log\frac{C_{t+i}}{C_{t+i-1}},
 \qquad
-\mathrm{ROE}_{t+1} = \ln\bigl(1 + \mathrm{NI}_{t+1}/B_t\bigr),
+C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
 $$
 
-and the identity is
+Then
 
 $$
-C_{t+1} = B_t\bigl(e^{\mathrm{ROE}_{t+1}} - e^{g_{t+1}}\bigr).
+\frac{E_t[C_{t+n}]}{C_t}
+  = E_t\!\left[\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr)\right].
 $$
 
-A cash flow $\tau$ years out is the same identity at a future book:
+This is **not** $\exp(E_t[\sum g])$. Because $g$ is random, Jensen
+adds a variance term. Under the Gaussian VAR that expectation is
+exponential-affine in today’s state — the **cash-flow recursion** of
+the next page.
+
+$g_t$ is one coordinate of $X_t$ (or an affine function of $X_t$).
+Every other coordinate can forecast it through $\Phi$.
+
+## Expected returns
+
+The one-period expected return is a conditional CAPM:
 
 $$
-\frac{C_{t+\tau}}{B_t}
-= \exp\bigl(g_{t+1}+\cdots+g_{t+\tau-1}+\mathrm{ROE}_{t+\tau}\bigr)
-- \exp\bigl(g_{t+1}+\cdots+g_{t+\tau}\bigr).
+\mu_t = \alpha + r_t + \beta_t\,\lambda_t.
 $$
 
-Both exponentials are functions of $x$. Their expectations are closed
-form because $x$ is Gaussian. That is `expected_cashflow`.
-
-Profitability (`roe`) is a *level*. Book growth (`g`) is a *growth
-rate*. Neither one alone is the cash-flow path. The **difference** is.
-
-## Reading 2 — the required return, from the CCAPM
-
-The one-period equilibrium rate is
+When $\beta_t$ and $\lambda_t$ both move with $X_t$, the product
+$\beta_t\lambda_t$ is **quadratic** in the state:
 
 $$
-\mu_t = R_{f,t} + \beta_t \cdot \mathrm{MRP}_t.
+\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t.
 $$
 
-$\beta_t$ and $\mathrm{MRP}_t$ are the other two coordinates of $x$.
-$R_{f,t}$ is **not**. The paper keeps the Treasury curve $y(\tau)_t$
-outside the VAR. That is a modelling choice: it drops many parameters
-and lets $y(\tau)$ come from FRED. The risk in $\mu_t$ is the
-quadratic form $x_t'\Theta x_t$, with $\Theta$ zero except the
-symmetric $\beta$–MRP cell.
+If either beta or the premium is constant, $\Lambda = 0$ and $\mu_t$
+is affine — the earlier affine present-value class. Letting **both**
+move at once is what the $H(n)$ recursion in the next page is for.
 
-Year one's cost of capital is then just
+$r_t$ (the short rate) may sit inside $X_t$, or a full Treasury curve
+may be kept outside the VAR and supplied as data. The package supports
+both.
 
-$$
-\rho(1)_t = y(1)_t + \beta_t \cdot \mathrm{MRP}_t.
-$$
+## Why they share the VAR
 
-That is `flat_ccapm_rate`. Years further out are **not** this number,
-because $\beta$ and the premium mean-revert and because cash and the
-rate move together.
-
-## Why they have to share the VAR
-
-The first reading uses the ROE and $g$ equations of $\Phi$. The second
-uses the $\beta$ and MRP equations. Off-diagonal cells of $\Phi$ are
-the covariances: how a shock to the premium today changes expected book
-growth next year, how a shock to ROE changes expected beta. Those cells
-are identified only if the four regressions are estimated **together**.
+The cash-flow reading uses the $g$ row of $\Phi$. The discount-rate
+reading uses the rows that drive $\beta$ and $\lambda$. Off-diagonal
+cells are the covariances: how a shock to the premium changes expected
+growth, how a shock to growth changes expected beta. Those cells are
+identified only if the regressions are estimated **together**.
 
 Estimate cash in one model and the rate in another, and those cells are
 gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance.
 
-## The four names in code
+## In code
 
 ```python
-from varvaluation import paper_state_spec
+from varvaluation import StateSpec, estimate_var
 
-spec = paper_state_spec()          # names = (roe, g, beta, mrp)
-# quarterly observations of annualized variables;
-# horizon=4 makes each VAR step one year.
+# name the coordinates of X_t; mark which row is cash-flow growth
+spec = StateSpec(names=("g", "beta", "mrp", ...), cashflow="g", horizon=1)
+fit = estimate_var(state, spec)   # → Φ, c, Σ
 ```
 
-`ResidualIncome(roe="roe", book_growth="g")` is the first reading.
-`CCAPMSpec(beta="beta", premium="mrp")` is the second.
-The next page turns a fitted `spec` into $\rho(\tau)$.
+The next page turns $(\Phi, c, \Sigma)$ and $(\alpha, \xi, \Lambda)$ into
+the two Ang–Liu recursions and the spot curve $\mu_t(n)$.

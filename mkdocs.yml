@@ -1,5 +1,5 @@
 site_name: Cash flows and discount rates from one VAR
-site_description: Term structure of discount rates. Cash-flow expectations and required returns come from the same system.
+site_description: Ang and Liu (2004) recursions — cash-flow expectations and spot discount rates μ_t(n) from one system.
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -34,11 +34,11 @@ theme:
 nav:
   - Home: index.md
   - The problem: guide/problem.md
-  - One system, two readings: guide/system.md
-  - From the VAR to the curve: guide/curve.md
+  - One system: guide/system.md
+  - The two recursions: guide/curve.md
   - Building the state: guide/state.md
-  - Reproduce the paper: guide/reproduce.md
-  - Other industries: guide/industries.md
+  - Worked example: guide/reproduce.md
+  - Other portfolios: guide/industries.md
   - Software:
       - Install: install.md
       - API: api.md

@@ -1,62 +1,48 @@
-# Other industries
+# Other portfolios
 
-The paper is an insurance paper. The model is not. The state is still
+The state is still
 
 $$
-x' = (\mathrm{ROE},\; g,\; \beta,\; \mathrm{MRP}),
+X_t = (g_t,\; \beta_t,\; \ldots)',
 $$
 
-the cash-flow map is still clean surplus, the required return is still
-the CCAPM, and $y(\tau)$ is still the Treasury curve. What changes is
-**which firms are averaged into $x$**.
+the cash-flow recursion is still Ang and Liu’s $\bar a(n),\bar b(n)$,
+the priced recursion is still $a(n),b(n),H(n)$, and the spot curve is
+still $\mu_t(n)$. What changes is **which names are averaged into
+$X_t$**.
 
 ```python
 from varvaluation import prepare_industry_state
 
-# paper
-state = prepare_industry_state(panel, macro, spec, sic=((6300, 6399),))
-
-# banks
-state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))
-
-# anything except insurers
-state = prepare_industry_state(panel, macro, spec, sic="ex")
-
-# two ranges at once
-state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836), (8731, 8731)))
+state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))  # banks
+state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836),))  # drugs
+state = prepare_industry_state(panel, macro, spec, sic="ex")             # exclude a range
 ```
-
-`INSURANCE["all"]`, `["pc"]`, `["life"]`, `["health"]` are just those
-tuples, named.
 
 ## What is common and what is not
 
-| Object | Common across industries | Industry-specific |
+| Object | Common across portfolios | Portfolio-specific |
 |---|---|---|
-| MRP series | yes | |
-| Treasury curve $y(\tau)$ | yes | |
-| Cosemans characteristics (size, BM, lag β) | pooled in the beta step | |
-| Firm macro slopes of β | | yes |
-| Value-weighted (ROE, $g$, β) | | yes |
-| The VAR $\Phi, c, \Sigma$ | | yes |
-| $\rho(\tau)$ | | yes |
+| Premium series $\lambda_t$ | often yes | |
+| Treasury curve (if outside the VAR) | yes | |
+| Value-weighted $(g,\beta,\ldots)$ | | yes |
+| The VAR $\Phi,c,\Sigma$ | | yes |
+| $\mu_t(n)$ | | yes |
 
-Estimate **one** premium and **one** yield curve. Re-estimate the VAR
-for each industry. That is why life and property/casualty can have
-different shapes in the same month: their $\Phi$ and their average
-$\beta$ differ, not their $y(\tau)$.
+Estimate shared instruments once if you choose to. Re-estimate the VAR
+for each portfolio. Different $\Phi$ and different average $\beta$
+produce different curves in the same month.
 
-## A checklist that does not depend on insurance
+## Checklist
 
-1. Build the firm-quarter panel (ROE, $g$, β, size, BM).
-2. Value-weight inside the SIC filter; attach the common MRP.
-3. `estimate_var` on that single series.
-4. `TermStructureModel.from_var` with `ResidualIncome` and `CCAPMSpec`.
-5. Read `expected_cashflow` and `cost_of_capital` from the **same** `fit`.
-6. Compare $\rho(\tau)$ to the flat CAPM and the one-period CCAPM.
-   Report the annuity discrepancy.
+1. Build the panel (growth, beta, instruments).
+2. Value-weight inside the filter; attach shared instruments.
+3. `estimate_var` on that series.
+4. Build `AngLiuModel` (or `ValuationModel`) with $(\alpha,\xi,\Lambda)$.
+5. Read `cashflow_expectation` and `spot_rates` from the **same** fit.
+6. `value` as the sum of strips; compare to a flat CAPM at the same date.
 
 !!! warning "The one rule"
     If step 5 ever takes cash from one estimated system and rates from
     another, stop. That is the mistake the whole package exists to
-    prevent.
+    prevent. Both recursions must share $(\Phi,c,\Sigma)$.

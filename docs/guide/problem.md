@@ -14,63 +14,66 @@ assumptions are buried inside that line:
 2. **Cash flows and discount rates are independent.** The discount
    factor slides out of the expectation: $E[XY] = E[X]\,E[Y]$.
 
-Both are wrong once expected returns move. That is the whole paper
-in one sentence.
+Both are wrong once expected returns move.
 
-## What a flat rate gets wrong
+## The correct definition
 
-Write $V(\tau)_t$ for the price today of a single cash flow that
-arrives in $\tau$ years. If a rate $\rho(\tau)_t$ exists,
-
-$$
-V(\tau)_t = e^{-\tau\,\rho(\tau)_t}\,E_t[C_{t+\tau}].
-$$
-
-That is a **zero-coupon equity yield** — the equity analogue of a
-Treasury zero. Nobody discounts a thirty-year principal at the
-one-year bill rate. Equity practice still does the equivalent: the
-CAPM (or a conditional CAPM) supplies one number
-$\mu_t = R_{f,t} + \beta_t\lambda_t$ and uses it at every maturity.
-Then $\rho(\tau)_t = \mu_t$ for all $\tau$. The curve is a horizontal
-line.
-
-[Giacotto, Lin, and Zhao (2020)](../references.md#glz-2020) asked what
-the curve actually looks like for insurers. At the long-run mean of
-the state, the insurance industry curve starts near 9.6%, rises to
-about 10.2% at ten years, and falls back toward 9% at thirty. The
-unconditional CAPM sits near 11.7%. Using that one number overstates
-the long-run cost of capital by roughly 275 basis points.
-
-Life insurers sit above property/casualty and health. Firms outside
-insurance sit higher still (average beta ≈ 0.97 versus ≈ 0.65 for
-insurers). The *shape* is similar across groups. The *level* is not.
-
-!!! note "Punchline"
-    A flat CAPM rate is the right rate at **one** horizon — the
-    one-period rate itself. At every other horizon it is an
-    approximation, and the error compounds for long-duration claims.
-
-## Why the two sides have to be estimated together
-
-The path form of the same price is
+[Ang and Liu (2004)](../references.md#ang-liu-2004) start from the
+definition of the one-period expected (log) return $\mu_t$:
 
 $$
-V(\tau)_t
-  = E_t\Bigl[
-      e^{-(\mu_t + \cdots + \mu_{t+\tau-1})}\,C_{t+\tau}
-    \Bigr].
+e^{\mu_t}
+  = E_t\!\left[\frac{P_{t+1}+C_{t+1}}{P_t}\right].
 $$
 
-Present value is the expectation of a **product**. The average of a
-product is not the product of the averages:
+$\mu_t$ is known today. Iterate the identity forward. Value is the
+expectation of a **product**:
+
+$$
+V_t
+  = \sum_{s=1}^{\infty}
+    E_t\!\left[
+      \exp\!\Bigl(-\sum_{k=0}^{s-1} \mu_{t+k}\Bigr)\,C_{t+s}
+    \right].
+$$
+
+That is their equation (2). The average of a product is not the product
+of the averages:
 
 $$
 E[XY] \ne E[X]\,E[Y].
 $$
 
 How future cash and future required returns move together is part of
-the price itself — not a variance decomposition computed after the
-fact.
+the price itself.
+
+!!! note "Punchline"
+    Damodaran’s formula pulls the discount factor out of the
+    expectation. That is legitimate only if $\mu$ is deterministic.
+    Once expected returns move, you need the joint distribution.
+
+## What a flat rate gets wrong
+
+Write $V_t(n)$ for the contribution of horizon $n$ to value — the
+**strip**. If a single spot rate $\mu_t(n)$ exists for that horizon,
+
+$$
+V_t(n)
+  = \frac{E_t[C_{t+n}]}{\exp\bigl(n\,\mu_t(n)\bigr)}.
+$$
+
+That is the equity analogue of a Treasury zero. The usual practice
+still takes one CAPM number $\mu_t = r_t + \beta_t\lambda_t$ and uses
+it at every maturity: $\mu_t(n) = \mu_t$ for all $n$. The curve is a
+horizontal line.
+
+Ang and Liu show that the curve is not flat. At short horizons it is
+driven mainly by the market risk premium; at long horizons by the risk-
+free rate and by time-varying betas. Using a constant rate produces
+large misvaluations — in their portfolio data, often more than 15% on
+a unit perpetuity, and much larger in the worst industries.
+
+## Why the two sides have to be estimated together
 
 If you forecast cash in one model and the required return in another,
 three things go wrong:
@@ -79,22 +82,21 @@ three things go wrong:
 2. They can contradict each other (cash grows; the rate does not know).
 3. You miss the covariance that sits inside the product.
 
-A **vector autoregression** is the smallest statistical object that
-produces both forecasts, and how they move together, from one list of
-variables $X_t$. That is the rest of this handbook.
+A **vector autoregression** for a state $X_t$ that contains both
+cash-flow growth and the variables that move expected returns is the
+smallest statistical object that produces both forecasts, and how they
+move together, from one list of variables. That is the rest of this
+handbook.
 
-## What this package computes
+## What we will compute
 
-For an industry portfolio
-$X_t = (\mathrm{ROE}_t,\, g_t,\, \beta_t,\, \mathrm{MRP}_t)$:
+Given a fitted VAR for $X_t$ and a one-period expected return
+$\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t$:
 
-- the **expected cash-flow path** from clean surplus,
-- the **term-structure cost of capital** $\rho(1),\ldots,\rho(30)$,
-- the same objects under a flat CAPM and a flat one-period CCAPM,
-- the present value of a thirty-year $1 annuity under each rule.
+- the **cash-flow recursion** — $E_t[C_{t+n}]/C_t$ horizon by horizon,
+- the **priced recursion** — each strip of the price–cash-flow ratio,
+- the **spot curve** $\mu_t(1),\ldots,\mu_t(N)$ that reconciles them,
+- the **present value** as the sum of those strips (plus a tail at the
+  terminal spot, not a hand-set Gordon pair).
 
-Insurance first, so the numbers can be checked against the paper.
-Then any SIC range, with the same four names.
-
-The next page writes the two readings of $X_t$ — cash, and the
-required return — and the VAR that holds them.
+The next page writes the VAR and the two sides of $X_t$.
