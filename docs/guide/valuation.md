@@ -1,17 +1,11 @@
 # 2.2 Present value
 
-Bonds already have a yield curve. Since 2012 so does equity, in the
-narrow sense that next year’s index dividend trades separately from
-the rest of the market
-([van Binsbergen, Brandt, and Koijen, 2012](../references.md#vbbk-2012)).
-[Brennan (1997)](../references.md#brennan-1997) had asked for a term
-structure of *discount* rates on cash-flow strips. [Ang and Liu
-(2004)](../references.md#ang-liu-2004) give that curve in closed
-form from the VAR of Section 2.1. Given
+Given the VAR of Section 2.1 and a one-period expected return
 $\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t$, the numerator
 $\mathbb{E}_t[C_{t+n}]/C_t$ and the spot curve $\mu_t(n)$ are exact
-functions of $X_t$ (Propositions I.1 and II.1). Three library calls
-use those objects differently.
+functions of $X_t$
+([Ang and Liu, 2004](../references.md#ang-liu-2004), Propositions I.1
+and II.1). Three library calls use those objects differently.
 
 - `value` multiplies the VAR numerator by the curve. That product *is*
   the present value of the [Introduction](introduction.md) **when**

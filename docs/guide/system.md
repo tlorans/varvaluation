@@ -1,13 +1,8 @@
 # 2.1 The joint system
 
-The facts of Section 1 are joint facts. The market’s price–dividend
-ratio moves with expected returns
-([Campbell and Shiller, 1988](../references.md#campbell-shiller-1988)).
-Firm profitability fades
-([Fama and French, 2000](../references.md#ff-2000)). Those are
-statements about *two* series that live in the same economy. Value is
-the conditional expectation of their product
-([Ang and Liu, 2004](../references.md#ang-liu-2004)). A vector
+Value is the conditional expectation of a product
+([Ang and Liu, 2004](../references.md#ang-liu-2004)). The expectation
+of a product is a property of the joint distribution. A vector
 autoregression is the smallest statistical object that produces both
 forecasts, and their covariance, from one state $X_t$. Separate
 models of cash flows and of expected returns omit that covariance,

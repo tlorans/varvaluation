@@ -1,12 +1,10 @@
 # varvaluation
 
-Most of the movement in the stock market is news about discount rates,
-not cash flows (Cochrane 2011). At the firm that reverses (Vuolteenaho
-2002). Profitability fades (Fama and French 2000). Present value is then
-the expectation of a product. This package is a named-state implementation
-of Ang and Liu (2004): one VAR identifies both sides and their covariance.
-`value` multiplies them when the cash-flow name is log growth. Cash-flow
-news is the cash-flow equation, not the residual.
+When expected returns move, year one and year ten should not share a
+single rate. Present value is the expectation of a product. This package
+implements Ang and Liu (2004): one named-state VAR identifies both sides
+and their covariance. `value` multiplies them when the cash-flow name is
+log growth. Cash-flow news is the cash-flow equation, not the residual.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 Section 5 is a software demonstration on a short CRSP–Compustat window
