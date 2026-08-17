@@ -21,10 +21,18 @@ claim to future cash flows worth today — with different objects.
 
 If expected returns sit above their long-run mean and mean-revert, then
 $\mu_t(10)$ is already close to the unconditional mean while $\mu_t(1)$
-is high. A flat WACC at today’s rate discounts every horizon too hard
-and **systematically undervalues**. The reverse in a low-rate regime:
-today’s low rate forever overvalues. The error scales with duration —
-worst exactly for the growth names where a DCF is already most fragile.
+is high. A flat WACC at *today’s* high rate discounts every horizon too
+hard and **undervalues**. The reverse, a flat WACC at today’s *low*
+rate, overvalues the long strip.
+
+A different mistake is just as common: a historical-average WACC on a
+date when the fitted curve sits *below* that average (a low-premium
+state). The flat rate is then too high at the short end, so the
+constant-rate DCF **undervalues**. Signed error
+$(\text{wrong}-\text{correct})/\text{correct}$ is negative when the
+wrong model produces the smaller present value. The error scales with
+duration — worst exactly for the growth names where a DCF is already
+most fragile.
 
 ![Spot discount curves](../assets/figures/spot_curves.png)
 <p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. A single WACC is a flat line through this picture.</p>

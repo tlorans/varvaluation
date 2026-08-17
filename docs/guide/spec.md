@@ -86,18 +86,18 @@ come from improving those two maps.
 The cash-flow side is the profitability-forecasting literature.
 
 - **Profitability mean-reverts, and is forecastable.** Fama and French
-  (2000) show that earnings on book equity revert toward economy-wide
-  levels over five to ten years, and that value firms have persistently
-  higher expected profitability than growth firms. That is the AR
-  structure the VAR imposes on `g` or `roe`: persistence $\Phi$, pull
-  $c$.
-- **ROE has internal structure, linked to rates.** Nissim and Penman
-  (2001) decompose ROE into margin and turnover, each with its own
-  dynamics, and document that interest rates predict subsequent
-  profitability with a *negative* sign.
+  (2000) show that earnings on book equity are highly forecastable and
+  revert toward economy-wide levels. That is the AR structure the VAR
+  imposes on `g` or `roe`: persistence $\Phi$, pull $c$.
+- **ROE has internal structure.** Nissim and Penman (2001) decompose
+  ROCE into profit margin, asset turnover, and a leverage spread, and
+  document multi-year fade in those pieces. They do **not** estimate a
+  negative rates-to-profitability regression; do not hang
+  $\Phi[\texttt{roe}, r]<0$ on that paper.
 - **At the firm, cash-flow news dominates.** Vuolteenaho (2002)
   decomposes firm-level stock returns and finds cash-flow news, not
-  expected-return news, drives most of the variance. The joint
+  expected-return news, drives most of the variance (for a typical
+  stock, more than twice the expected-return-news variance). The joint
   distribution the VAR prices is first-order for firms — not a
   refinement.
 - **Persistence prices into multiples.** More mean-reverting
@@ -112,27 +112,29 @@ honest survivorship story.
 
 | Predictor | Standing | In a typical $X_t$? |
 |---|---|---|
-| Dividend yield | Weak since the 1990s | No — deliberately dropped |
-| Short rate | Strong at short horizons | Yes — `r` |
-| Term spread | Robust for bonds, mixed for equity | No |
-| Default spread | Robust | No (parsimony) |
-| $\mathit{cay}$ | Significant in- and out-of-sample at quarterly frequency | Yes — `cay` |
-| Inflation | Robust negative relation | Yes — `pi` |
-| Beta dynamics | Loadings move, hard to estimate precisely | Yes — `beta` (rolling) |
+| Dividend yield | Weak by 2000 in- and out-of-sample (Goyal and Welch) | No — deliberately dropped |
+| Short rate | The robust short-horizon instrument (Fama and Schwert) | Yes — `r` |
+| Term spread | More a bond result than an equity one | No |
+| Default spread | Used in some return systems | No (parsimony) |
+| $\mathit{cay}$ | Strong quarterly predictor, including out of sample | Yes — `cay` |
+| Inflation | Negative relation with stock returns | Yes — `pi` |
+| Beta dynamics | Loadings move (Fama and French 1997) | Yes — `beta` (rolling) |
 
 Selecting $X_t$ is applied predictability research, not free taste.
 Dividend yield — the most famous predictor — was dropped because its
 power collapsed; the short rate and $\mathit{cay}$ were kept because
-they survive.
+they survive. Citations for this table sit on
+[References](../references.md).
 
 ### Why the two sides share a border
 
 Long-run risk (Bansal and Yaron 2004) and productivity as a common
 source (Croce 2014) are why the same macro state can drive both cash
 flows and discount rates. Cochrane (2011) is the field-level statement:
-discount-rate variation is the organizing question. Dividend strips
-(van Binsbergen and Koijen 2017) later measured the term structure of
-discount rates this system computes.
+discount-rate variation is the organizing question of the field.
+Traded dividend claims (van Binsbergen and Koijen 2017) later
+measured a term structure of *returns* on the cash-flow strip — a
+cousin of $\mu_t(n)$, not a direct test of a fitted curve.
 
 Read in one sentence: the profitability literature tells you what
 forecasts $g_t$; the predictability literature tells you what forecasts
