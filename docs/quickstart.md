@@ -1,27 +1,45 @@
 # Offline check
 
-No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$. This is a check on the implementation.
-
-```python
-from varvaluation import (
-    AngLiuModel,
-    estimate_var,
-    simulate_paper_state,
-)
-
-state, spec = simulate_paper_state(nobs=160, seed=11)
-fit = estimate_var(state, spec)
-model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha as needed
-
-# Once the model carries expected-return loadings:
-# X     = ...
-# spots = model.spot_rates(X, n=30)            # μ_t(n)
-# cf    = model.cashflow_expectation(X, n=30)  # cash-flow recursion
-# V     = model.value(X, C0=1.0)               # sum of strips + tail
-```
-
-Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the definition of the spot curve. The same path on live data is the [worked example](guide/reproduce.md).
+No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$.
 
 ```text
-uv run python examples/reproduce_glz2020.py
+python examples/quickstart.py
 ```
+
+## What you get
+
+```text
+Mental map
+  1. Product     value = E[discount path × cash flow]
+  2. Covariance  Cov(∑g, ∑μ) enters the *price level*
+  3. One VAR     both forecasts share (Φ, c, Σ)
+
+Step 1 — Estimate one joint VAR
+  spectral radius : 0.409  (< 1 ⇒ stationary)
+  Φ:
+     ret  +0.295  +0.124
+       g  +0.006  +0.402
+
+Step 3 — Cash-flow recursion
+     n      E[C]/C
+     1       0.999
+     5       1.008
+    10       1.021
+    15       1.034
+
+Step 4 — Spot curve μ_t(n)
+  identity check: μ_t(1) = 2.3709% = α+ξ'X+X'ΛX  ✓
+     n    μ_t(n) %
+     1        2.37
+     5        3.78
+    10        4.09
+    15        4.19
+
+Step 5 — Present value
+  strip-sum value (C=1, n=40) : 24.07
+  flat PV vs curve            : +12.8%
+```
+
+Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the definition of the spot curve.
+
+The full annotated sprint lives on the [worked example](guide/reproduce.md) page. The same path on live data is `examples/reproduce_glz2020.py --wrds`.
