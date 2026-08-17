@@ -3,7 +3,7 @@
 ## Where this sits on the map
 
 1. Value is $E[\text{product}]$.
-2. The product expands to a covariance term that moves the price level.
+2. The product carries a covariance term that moves the price level.
 3. **Cash-flow growth and expected returns must share one law of motion** — or that covariance has nowhere to come from.
 
 This page is step 3.
@@ -33,7 +33,7 @@ $$
 \mathrm{Cov}_t\Bigl[\sum g,\;\sum \mu\Bigr]
 $$
 
-from those two objects. The covariance is a property of the **joint** distribution. Without it, the lognormal strip
+from those two objects alone. The covariance is a property of the **joint** distribution of growth and expected returns. Without it, the formula from the previous page
 
 $$
 E_t[e^{S_n}]
@@ -48,21 +48,34 @@ A single VAR closes the gap by construction.
 
 ## The VAR
 
-Ang and Liu (2004) summarise cash flows and expected returns by a state vector $X_t$. In the leading case
+A **state vector** $X_t$ is a list of variables observed at date $t$. Ang and Liu summarise cash flows and expected returns by such a list. In the leading case
 
 $$
 X_t = (g_t,\; \beta_t,\; z_t')',
 $$
 
-where $g_t$ is cash-flow growth, $\beta_t$ is the conditional beta, and $z_t$ holds instruments that predict growth, betas, or the market premium.
+where
 
-The law of motion is a VAR(1):
+- $g_t$ is cash-flow growth,
+- $\beta_t$ is the **conditional beta** (sensitivity of the asset’s return to the market),
+- $z_t$ holds **instruments** — predictors of growth, betas, or the market premium.
+
+The **law of motion** is a VAR of order 1, written VAR(1):
 
 $$
 X_{t+1} = c + \Phi X_t + u_{t+1},
 \qquad
-u \sim N(0,\Sigma).
+u_{t+1} \sim N(0,\Sigma).
 $$
+
+Each symbol has a job:
+
+| Symbol | Name | Job |
+|---|---|---|
+| $c$ | intercept vector | Pulls the system toward long-run averages |
+| $\Phi$ | companion matrix | Persistence (diagonal) and cross-forecasts (off-diagonal) |
+| $u_{t+1}$ | shock (innovation) | Unexpected move at $t+1$ |
+| $\Sigma$ | shock covariance matrix | Which variables are hit together |
 
 **In plain English:** with two variables this is simply two ordinary regressions run at the same time:
 
@@ -73,19 +86,13 @@ y_{t+1} &= a_2 + b_{21}x_t + b_{22}y_t + v_{t+1}.
 \end{aligned}
 $$
 
-| Object | Job |
-|---|---|
-| $c$ | Pulls the system toward long-run averages |
-| $\Phi$ | Persistence (diagonal) and cross-forecasts (off-diagonal) |
-| $\Sigma$ | **Shock covariance** — which variables are hit together |
-
 The off-diagonal cells of $\Phi$ and of $\Sigma$ *are* the covariance structure the product identity requires. Estimate the system once; both recursions on the next page read from the same matrices.
 
 !!! note "Four reasons the VAR is the minimum object"
     1. **Jointness.** One $\Sigma$ generates growth and discount-rate shocks together. The covariance cannot be zeroed by accident.
-    2. **Mean reversion.** A stable $\Phi$ delivers rates that glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
-    3. **Testable cross-forecasts.** Does the premium forecast growth? Coefficients of $\Phi$, with standard errors.
-    4. **Closed form.** Linear dynamics + Gaussian shocks ⇒ every cumulated sum is conditionally normal ⇒ $E[e^{\cdot}]$ is analytic.
+    2. **Mean reversion.** If all eigenvalues of $\Phi$ have absolute value less than 1 (the **spectral radius** of $\Phi$ is $<1$), rates glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
+    3. **Testable cross-forecasts.** Does the premium forecast growth? Those are coefficients of $\Phi$, with standard errors.
+    4. **Closed form.** Linear dynamics plus normal shocks imply that every cumulated sum is conditionally normal, so $E[e^{\cdot}]$ has an analytic formula.
 
 ---
 
@@ -101,7 +108,7 @@ Phi:
 c: [0.0027 0.0015]
 ```
 
-Both eigenvalues of $\Phi$ sit well inside the unit circle. The off-diagonal entries are small but non-zero — they are exactly the cross-forecast channels that carry part of the covariance into the product.
+Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero — they are exactly the cross-forecast channels that carry part of the covariance into the product.
 
 The data the VAR is estimated on:
 
@@ -127,21 +134,25 @@ $$
 C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
 $$
 
-$g_t$ is one coordinate of $X_t$ (or affine in $X_t$). Every other coordinate can forecast it through $\Phi$. The cash-flow recursion on the next page turns that row into $E_t[C_{t+n}]/C_t$.
+$g_t$ is one coordinate of $X_t$ (or an affine function of $X_t$). Every other coordinate can forecast it through $\Phi$. The cash-flow recursion on the next page turns that row into $E_t[C_{t+n}]/C_t$.
 
-**Expected returns.** A conditional CAPM,
+**Expected returns.** A conditional CAPM writes the one-period expected return as
 
 $$
-\mu_t = \alpha + r_t + \beta_t\,\lambda_t.
+\mu_t = \alpha + r_t + \beta_t\,\lambda_t,
 $$
 
-When both $\beta_t$ and $\lambda_t$ move with $X_t$, the product is quadratic:
+where $r_t$ is the risk-free rate, $\beta_t$ is conditional beta, and $\lambda_t$ is the **market risk premium**. When both $\beta_t$ and $\lambda_t$ move with $X_t$, the product $\beta_t\lambda_t$ is quadratic in the state:
 
 $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t.
 $$
 
-If either factor is constant, $\Lambda=0$ and $\mu_t$ is affine. Letting **both** move is what the $H(n)$ recursion is for.
+- $\alpha$ = constant
+- $\xi$ = linear loadings on $X_t$
+- $\Lambda$ = quadratic loadings
+
+If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is **affine** (linear plus constant) in $X_t$. Letting **both** move is what the matrix $H(n)$ in the priced recursion is for.
 
 The short rate may sit inside $X_t$, or a Treasury curve may be kept outside the VAR and supplied as data. The package supports both.
 

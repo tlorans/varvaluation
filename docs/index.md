@@ -37,19 +37,19 @@ flowchart LR
 </div>
 
 From that joint system Ang and Liu give two recursions (expected cash,
-priced strip) and the spot curve $\mu_t(n)$ that makes the usual
-two-step workflow exact inside the model.
+priced strip) and the **spot curve** $\mu_t(n)$ — one discount rate per maturity — that makes the usual two-step workflow exact inside the model.
 
 ## From the flat DCF you know
 
-Standard practice writes
+**Discounted cash flow (DCF)** is the standard valuation formula. In practice it is often written with one constant rate $r$ for every horizon:
 
 $$
 V_t = \sum_{j=1}^{\infty} \frac{E_t[C_{t+j}]}{(1+r)^j}.
 $$
 
-One rate, all horizons; discount factor pulled out of the expectation.
-The correct identity keeps the product inside:
+Here $V_t$ is today's value, $C_{t+j}$ is the cash flow $j$ periods ahead, and $E_t[\cdot]$ means expectation given information at $t$. The discount factor $1/(1+r)^j$ has been pulled **outside** the expectation. That step is valid only if the discount rate does not move with the state of the economy.
+
+When the one-period expected return $\mu_t$ can change over time, the correct identity keeps the product **inside** the expectation:
 
 $$
 V_t = \sum_{s=1}^{\infty}
@@ -69,10 +69,7 @@ flowchart TB
   ratio -.->|"valid only if r deterministic"| product
 ```
 
-Expand the lognormal strip and the covariance between cumulated growth
-and cumulated expected returns appears with a minus sign. Positive
-comovement lowers value. Separate models of the two sides set that term
-to zero by construction.
+Because the object inside is a product, the usual identity $E[XY]=E[X]E[Y]+\mathrm{Cov}(X,Y)$ applies. The covariance between cumulated cash-flow growth and cumulated expected returns enters the **price level**. When the two comove positively, value is lower than any formula that ignores the interaction. Separate models of “cash” and “rate” set that term to zero by construction. The next pages develop this step by step.
 
 ## A numerical glimpse (offline, no data)
 
@@ -98,14 +95,15 @@ The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts t
 ## Four calls
 
 ```python
-from varvaluation import AngLiuModel, estimate_var, simulate_paper_state
+from varvaluation import ValuationModel, estimate_var
+from varvaluation.news import simulate_return_var
 
-state, spec = simulate_paper_state(nobs=160, seed=11)
+state, spec = simulate_return_var(nobs=400, seed=7)
 fit = estimate_var(state, spec)
-model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
+model = ValuationModel.from_var(fit, xi=..., Lambda=..., alpha=...)
 # spots = model.spot_rates(X, n=30)
 # cf    = model.cashflow_expectation(X, n=30)
-# V     = model.value(X, C0)
+# V     = model.value(X, C=1.0)
 ```
 
 ## Roadmap

@@ -17,22 +17,27 @@ flowchart LR
 
 ## 1. Value is the expectation of a product
 
-You already know the workhorse formula:
+You already know the workhorse formula used in practice:
 
 $$
 V_t = \sum_{j=1}^{\infty} \frac{E_t[C_{t+j}]}{(1+r)^j}.
 $$
 
-One rate $r$ for every horizon. The discount factor has been pulled out of the expectation. That step is legitimate only if the discount rate is deterministic.
+- $V_t$ = value of the claim today
+- $C_{t+j}$ = cash flow $j$ periods ahead
+- $E_t[\cdot]$ = expectation given information at date $t$
+- $r$ = one constant discount rate for every horizon
 
-Start instead from the definition of the one-period expected (log) return $\mu_t$:
+The factor $1/(1+r)^j$ has been taken **outside** the expectation. That is legitimate only if the discount rate is known in advance (deterministic).
+
+Start instead from the definition of the **one-period expected return** $\mu_t$. Let $P_t$ be the ex-dividend price. Then
 
 $$
 e^{\mu_t}
   = E_t\!\left[\frac{P_{t+1}+C_{t+1}}{P_t}\right].
 $$
 
-$\mu_t$ is known today. Iterate forward. Ang and Liu (2004), equation (2):
+$\mu_t$ is known today; future $\mu_{t+1},\mu_{t+2},\ldots$ are random. Iterating this definition forward gives Ang and Liu (2004), equation (2):
 
 $$
 V_t
@@ -42,7 +47,7 @@ V_t
     \right].
 $$
 
-**In plain English:** the object inside the expectation is a **product** — a cash flow multiplied by a path of one-period discount factors. You cannot price it from two separate forecasts of “cash” and “rate”.
+**In plain English:** the object inside the expectation is a **product** — a cash flow multiplied by a sequence of one-period discount factors $e^{-\mu}$. You cannot replace $E[\text{product}]$ by a ratio of two separate forecasts without an extra term.
 
 ```mermaid
 flowchart TB
@@ -56,13 +61,29 @@ flowchart TB
 ```
 
 !!! note "Punchline"
-    Damodaran’s formula replaces $E[\text{product}]$ by a ratio of expectations. Once expected returns move, that replacement is an error — not an approximation of secondary order.
+    The constant-rate formula replaces $E[\text{product}]$ by a ratio of expectations. Once expected returns move, that replacement is an error — not a second-order approximation.
 
 ---
 
 ## 2. The covariance term {#the-covariance-term}
 
-Write cash flows in growth form, $C_{t+n} = C_t\exp(\sum_{i=1}^{n} g_{t+i})$, and a single strip of the price–cash-flow ratio becomes
+### Step A — write cash flows in growth form
+
+Define **cash-flow growth** as the log change
+
+$$
+g_{t+i} = \log\bigl(C_{t+i}/C_{t+i-1}\bigr).
+$$
+
+Then the cash flow $n$ periods ahead is
+
+$$
+C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
+$$
+
+### Step B — one strip of the price–cash-flow ratio
+
+A **strip** is the contribution of a single horizon $n$ to the price–cash-flow ratio. Substituting the growth form into the product identity, that contribution is proportional to
 
 $$
 E_t\!\left[
@@ -70,7 +91,23 @@ E_t\!\left[
 \right].
 $$
 
-Under a Gaussian law the sum $S_n = \sum(g-\mu)$ is normal, so
+Call the sum inside the exponential
+
+$$
+S_n = \sum_{i=1}^{n}(g_{t+i}-\mu_{t+i}).
+$$
+
+So the strip is $E_t[e^{S_n}]$.
+
+### Step C — expectation of an exponential of a normal sum
+
+Assume the shocks that drive $g$ and $\mu$ are jointly normal (Gaussian). Then $S_n$, being a linear combination of those shocks, is also normal. For a normal random variable $S$,
+
+$$
+E[e^{S}] = \exp\!\Bigl( E[S] + \tfrac12\mathrm{Var}(S) \Bigr).
+$$
+
+Applied conditionally at date $t$:
 
 $$
 E_t[e^{S_n}]
@@ -79,7 +116,9 @@ E_t[e^{S_n}]
     \Bigr).
 $$
 
-Expand the variance:
+### Step D — open the variance
+
+Write $S_n = \sum g - \sum \mu$. The variance of a difference is
 
 $$
 \mathrm{Var}_t[S_n]
@@ -88,12 +127,12 @@ $$
   - 2\,\mathrm{Cov}_t\Bigl[\sum g,\;\sum \mu\Bigr].
 $$
 
-Four pieces enter the price level:
+Four pieces therefore enter the **level** of the price:
 
 | Term | Effect on value |
 |---|---|
-| $E_t[\sum g]$ | point-forecast growth (the Damodaran part) |
-| $\tfrac12\mathrm{Var}(\sum g)$ | growth uncertainty *raises* value (convexity) |
+| $E_t[\sum g]$ | point-forecast growth (the usual DCF part) |
+| $\tfrac12\mathrm{Var}(\sum g)$ | growth uncertainty *raises* value (convexity of the exponential) |
 | $\tfrac12\mathrm{Var}(\sum \mu)$ | discount-rate uncertainty *raises* value |
 | $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ | **the economically important one** |
 
@@ -119,20 +158,20 @@ If you forecast cash in one model and the required return in another:
 2. They can contradict each other.
 3. There is nowhere for $\mathrm{Cov}(\sum g,\sum \mu)$ to live.
 
-A **vector autoregression** for a state $X_t$ that contains both cash-flow growth and the variables that move expected returns is the smallest statistical object that produces both forecasts *and* their comovement from one list of variables. One shock covariance matrix $\Sigma$ generates the joint surprises; one companion $\Phi$ carries the cross-forecasts. That is the next page.
+A **vector autoregression (VAR)** is a system of regressions in which every variable is explained by lags of every variable in the list. For a state vector $X_t$ that contains both cash-flow growth and the variables that move expected returns, one shock covariance matrix $\Sigma$ generates the joint surprises and one companion matrix $\Phi$ carries the cross-forecasts. That is the next page.
 
 ---
 
 ## What a flat rate gets wrong
 
-Even given the right joint model, practice often collapses the curve to one CAPM number $\mu_t = r_t + \beta_t\lambda_t$ used at every maturity. Write $V_t(n)$ for the strip at horizon $n$. A spot rate $\mu_t(n)$ is defined by
+Even given the right joint model, practice often collapses the curve to one number $\mu_t$ used at every maturity. Write $V_t(n)$ for the strip at horizon $n$. A **spot rate** $\mu_t(n)$ is defined by
 
 $$
 V_t(n)
   = \frac{E_t[C_{t+n}]}{\exp\bigl(n\,\mu_t(n)\bigr)}.
 $$
 
-A flat rule sets $\mu_t(n)=\mu_t$ for all $n$. Ang and Liu show the curve is not flat: at short horizons the market risk premium dominates; at long horizons the risk-free rate and time-varying betas do. Using a constant rate produces large misvaluations.
+In words: $\mu_t(n)$ is the constant rate that, applied over $n$ periods, recovers the correct strip value from expected cash alone. A **flat** rule sets $\mu_t(n)=\mu_t(1)$ for all $n$. Ang and Liu show the curve is not flat: at short horizons the market risk premium dominates; at long horizons mean reversion in rates and betas matters. Using a constant rate produces large misvaluations.
 
 Mean reversion in the expected return already produces a non-flat curve:
 
@@ -146,7 +185,13 @@ The shaded region is exactly the mispricing that appears when the product identi
 
 ## What we will compute
 
-Given a fitted VAR for $X_t$ and $\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t$:
+Given a fitted VAR for $X_t$ and a map from the state into the one-period expected return
+
+$$
+\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t,
+$$
+
+(where $\alpha$ is a constant, $\xi$ is a vector of linear loadings, and $\Lambda$ is a matrix of quadratic loadings) we will compute:
 
 - the **cash-flow recursion** — $E_t[C_{t+n}]/C_t$,
 - the **priced recursion** — each strip of the price–cash-flow ratio,
