@@ -48,7 +48,7 @@ flat PV vs curve +8.0%
 <a href="guide/system/"><span class="part">Part 03</span><strong>The framework</strong><span>Model cash flows and the discount rate in one system. Growth of cash is not the same object as profitability.</span></a>
 <a href="guide/data/"><span class="part">Part 04</span><strong>Measurement</strong><span>Estimate that system on freely published files and print a discount curve from data.</span></a>
 <a href="guide/news/"><span class="part">Part 05</span><strong>What moved the return</strong><span>Ask what part of last period's surprise came from cash flows, and what part from discount rates.</span></a>
-<a href="guide/walkthrough/"><span class="part">Part 06</span><strong>Firms</strong><span>Repeat the same steps on individual firms and draw three curves.</span></a>
+<a href="guide/pricing/"><span class="part">Part 06</span><strong>Firms</strong><span>Value the names, then read the RMSE of log(model / market).</span></a>
 </div>
 
 The formulas that evaluate the product without simulation are [Ang and Liu (2004)](references.md#ang-liu-2004). That is the framework. The package is the bench for asking which states move the curve. If you already have a cash-flow forecast and only need the denominator, skip to [For valuators](guide/practice.md).

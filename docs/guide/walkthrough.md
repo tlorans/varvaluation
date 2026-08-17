@@ -28,8 +28,9 @@ value of the equity. Compare it to market equity on the same date
 (often the discount intercept). After choosing that intercept so
 the median ratio is one, the remaining question is the
 cross-section: do expensive model names have expensive market
-prices? The extract is 2000–2019 payers. Treat the dollars as a
-fit diagnostic, not as a claim that a name is cheap.
+prices? The extract is 2000–2019 payers. The headline score is the RMSE of
+$\log(PV/ME)$ — see [Fit to the market](pricing.md). Treat the
+dollars as a fit diagnostic, not as a claim that a name is cheap.
 
 The script is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
@@ -39,10 +40,9 @@ uv add "varvaluation[data,wrds]"
 uv run python examples/walkthrough.py
 ```
 
-WRDS credentials live in `.env`. The extract is CRSP 2014–2019
-because that is the cached window used to write these pages. A
-research sample would start in 1965 or 1973. After a twelve-month
-beta burn-in the prepared state is March 2015–September 2019.
+WRDS credentials live in `.env`. The extract is CRSP 2000–2019.
+A research sample would start in 1965 or 1973. After a sixty-month
+beta window the prepared state starts in 2005.
 
 ## 5.1 Macro and the firm panel
 

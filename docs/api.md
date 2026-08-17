@@ -51,6 +51,18 @@ raises `NonStationaryVARError` if the spectral radius is $\ge 1$.
 `isolate_channels(model, X, shut, on=)` rebuilds a counterfactual
 model. `on` is `"cashflow"`, `"discount"`, or `"both"`.
 
+## Fit to the market
+
+| Call | What it does |
+|---|---|
+| `pricing_errors(model, state)` | Value every row; score $PV$ against `me` |
+| `calibrate_alpha(fit, xi, Lambda, state)` | Pick the discount intercept so median $PV/ME$ is nearest 1 |
+| `as_of(state, panel, on)` | State on one date, with `me` from `prc × shrout` |
+
+`PricingFit` fields: `n`, `n_failed`, `median_pv_me`, `mean_log_pv_me`,
+`rmse_log_pv_me` (the headline miss), `corr_log`, `share_within_2x`,
+`frame`. The argument is on [Fit to the market](guide/pricing.md).
+
 ## News
 
 | Call | What it does |

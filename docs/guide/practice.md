@@ -15,7 +15,11 @@ chapter and below.
 
 ## What a valuator can take
 
-The object Section 5 identifies is $\mu_t(n)$, a maturity-specific
+When both sides come from the joint system, the check is whether
+those present values sit next to market equity. The headline is the
+RMSE of $\log(PV/ME)$ — [Fit to the market](pricing.md).
+
+The object the curve-only path identifies is $\mu_t(n)$, a maturity-specific
 spot curve
 ([Brennan, 1997](../references.md#brennan-1997);
 [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1).

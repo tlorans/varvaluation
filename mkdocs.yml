@@ -48,6 +48,7 @@ nav:
   - 06 Firms:
       - WRDS / panel: guide/wrds.md
       - Three curves: guide/walkthrough.md
+      - Fit to the market: guide/pricing.md
       - For valuators: guide/practice.md
   - Software:
       - Install: install.md
