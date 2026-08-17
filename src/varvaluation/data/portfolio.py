@@ -1,4 +1,4 @@
-"""Ang–Liu portfolio-level state construction."""
+"""Portfolio-level state construction (growth, beta, payout, macro)."""
 
 from __future__ import annotations
 

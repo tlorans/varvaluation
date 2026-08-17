@@ -15,9 +15,9 @@ import polars as pl
 import statsmodels.api as sm
 
 from varvaluation import (
-    AngLiuModel,
     ExpectedReturnSpec,
     StateSpec,
+    ValuationModel,
     estimate_var,
     news_decomposition,
 )
@@ -132,7 +132,7 @@ def main():
             total, cap, macro, spec, portfolio=name, start=START, end=END
         )
         fit = estimate_var(state, spec)
-        model = AngLiuModel.from_var(fit, xi, Lambda, _alpha(total, macro, name))
+        model = ValuationModel.from_var(fit, xi, Lambda, _alpha(total, macro, name))
         X = state.select(list(spec.names)).to_numpy()[-1]
         models[name] = dict(state=state, fit=fit, model=model, X=X)
 

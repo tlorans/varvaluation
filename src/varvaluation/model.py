@@ -1,4 +1,4 @@
-"""Quadratic-Gaussian valuation model of Ang and Liu (2004)."""
+"""Quadratic-Gaussian valuation: cash-flow and discount-rate forecasts from one VAR."""
 
 from __future__ import annotations
 
@@ -11,7 +11,11 @@ from varvaluation.spec import StateSpec
 
 
 class AngLiuModel:
-    """Ang–Liu (2004) valuation model with time-varying expected returns.
+    """Valuation model with time-varying expected returns.
+
+    Cash-flow expectations and the discount curve are both functions of the
+    same state ``X``. ``value`` is the default (both sides live);
+    ``perpetuity`` freezes the numerator at 1 as a diagnostic.
 
     Parameters
     ----------
@@ -208,11 +212,20 @@ class AngLiuModel:
         return (bar_a[n_max] - a[n_max]) / n_max
 
     def value(self, X, C: float = 1.0, n: int = 100, min_tail_rate: float = 1e-4):
+        """Present value: expected cash flows and the discount curve from ``X``.
+
+        This is the default valuation. Both sides of every strip come from
+        the same fitted system.
+        """
         from varvaluation.valuation import full_value
 
         return full_value(self, X, C=C, n=n, min_tail_rate=min_tail_rate)
 
     def perpetuity(self, X, n: int = 100, min_tail_rate: float = 1e-4):
+        """Unit-cash-flow diagnostic: freeze the numerator at 1.
+
+        Use this to isolate the discount curve, not as the default value.
+        """
         from varvaluation.valuation import perpetuity_value
 
         return perpetuity_value(self, X, n=n, min_tail_rate=min_tail_rate)

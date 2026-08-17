@@ -11,6 +11,7 @@ def test_public_names():
         "estimate_var_panel",
         "VARFit",
         "AngLiuModel",
+        "ValuationModel",
         "isolate_channels",
         "news_decomposition",
         "treasury_test",
@@ -19,3 +20,4 @@ def test_public_names():
         "ValuationResult",
     ):
         assert hasattr(v, name), name
+    assert v.ValuationModel is v.AngLiuModel

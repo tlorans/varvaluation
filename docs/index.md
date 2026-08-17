@@ -1,59 +1,90 @@
-# varvaluation
+# Cash flows and discount rates from one system
 
-A Python library for **VAR-based valuation** and **cash-flow / discount-rate
-news**.
+A valuation is a sum of future cash flows, each shrunk to today. Two things
+enter every term: **what you expect to receive**, and **the rate at which you
+shrink it**. Call the first the *numerator* and the second the *denominator*.
 
-A price is a sum of future cash flows, each shrunk to today. Two things
-enter every term: what you expect to receive (the **numerator**) and the
-rate at which you shrink it (the **denominator**). When expected returns
-move, those two objects are not independent. They have to come from **one
-joint model**. That model is a VAR of cash-flow growth and expected-return
-states.
+The textbook DCF writes
 
-You name the state, estimate the VAR, and get three things from the same
-fit:
+$$
+V_t = \sum_{j=1}^{\infty} \frac{\mathbb{E}_t[D_{t+j}]}{(1+r)^j}.
+$$
 
-1. An Ang and Liu (2004) **spot discount curve** $\mu_t(n)$
-2. An expected cash-flow path $\mathbb{E}_t[C_{t+n}]/C_t$ from the cash-flow
-   **equation**, not from a spreadsheet
-3. **News**: last period’s unexpected return split into cash-flow news and
-   discount-rate news
+Two assumptions are buried in that line. The denominator is **one** $r$ at
+every horizon. The numerator is whatever cash-flow path you typed into the
+spreadsheet, treated as if it were statistically independent of $r$.
 
-Ang and Liu derived (1) and (2), then in the published application froze
-the numerator at $1$ (a unit perpetuity) and reported only the curve. This
-library exposes both choices: `perpetuity` is their design; `value`
-switches the cash-flow recursion on. The [Valuation](guide/valuation.md)
-page is written as a short course on that distinction.
+When expected returns move, neither assumption survives. The right definition
+of value is the expectation of a **product**,
 
-Cash-flow **news** is never the leftover after discount-rate news. That
-residual is a diagnostic (Chen, Da, Zhao 2013). See [News](guide/news.md).
+$$
+V_t = \sum_{j=1}^{\infty}
+\mathbb{E}_t\!\left[
+  D_{t+j}\,\exp\!\Bigl(-\sum_{i=1}^{j} r_{t+i}\Bigr)
+\right].
+$$
+
+You cannot take $\mathbb{E}_t[D]$ and $\mathbb{E}_t[r]$ separately and then
+divide. The joint distribution is the minimum required object. That is why a
+VAR of cash-flow growth **and** expected-return states is the right tool: it
+is one system that produces both forecasts, and their covariance, from the
+same state $X_t$ and the same $(\Phi, c, \Sigma)$.
+
+## The default: both sides live
+
+Write cash flows in growth form, $g_{t+i} = \log(C_{t+i}/C_{t+i-1})$. Each
+strip is then an exponential of cumulated growth minus cumulated discount
+rates. Under a Gaussian VAR those expectations have closed forms.
+
+| Side | What it is | From $X_t$ | Method |
+|---|---|---|---|
+| Numerator | $\mathbb{E}_t[C_{t+n}]/C_t$ | the cash-flow row of $\Phi$ | `cashflow_expectation` |
+| Denominator | spot rate $\mu_t(n)$ | the priced recursion | `spot_rates` |
+| Value | their product, summed | **both**, always | `value` |
+
+**That pairing is the default.** `model.value(X, C)` forecasts expected cash
+flows *and* the discount curve from the same $X_t$. You do not paste a
+spreadsheet into the numerator and you do not apply one WACC to every
+horizon.
 
 ```python
-from varvaluation import StateSpec, estimate_var, AngLiuModel, news_decomposition
+from varvaluation import StateSpec, estimate_var, ValuationModel, news_decomposition
 
 spec = StateSpec(names=("g", "beta", "dpo", "r", "cay", "pi"), cashflow="g")
 fit = estimate_var(df, spec)
-model = AngLiuModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-rates = model.spot_rates(X_t, n=30)           # denominator
-cf    = model.cashflow_expectation(X_t, n=30) # numerator
-perp  = model.perpetuity(X_t)                 # Ang–Liu: numerator = 1
-val   = model.value(X_t, C=1.0)               # both sides live
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
+X = fit.X_lag[-1]
+rates = model.spot_rates(X, n=30)            # denominator
+cf    = model.cashflow_expectation(X, n=30)  # numerator
+val   = model.value(X, C=1.0)                # default: both from X
 news  = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 ```
 
-![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
-<p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles, 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons. These curves are the <em>denominator</em>.</p>
+`perpetuity(X)` is an optional diagnostic: it freezes the numerator at $1$
+so that only the curve can move. Use it when you want to isolate the
+denominator, or when the cash-flow own-lag is near a unit root and the
+growth forecast is not yet trustworthy. It is not the default.
 
-Start at [The idea](guide/idea.md), then [Valuation](guide/valuation.md).
-The teaching course that walks the derivation from Damodaran to the VAR is
-[Dynamic DCF](https://github.com/tlorans/var_valuation). This site is the
-library.
+The cash-flow growth variable is whatever you pass as `spec.cashflow`
+(log dividend growth `g` on a portfolio, log ROE `roe` at a firm). The
+engine never assumes “column 0 is $g$.” See [StateSpec](guide/spec.md).
+
+The [Valuation](guide/valuation.md) page walks the two recursions line by
+line. [News](guide/news.md) asks a different question — what moved last
+period’s unexpected return — of the **same** fitted VAR.
+
+![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
+<p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles, 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons. These curves are the <em>denominator</em>. The default valuation also multiplies each strip by the VAR’s expected cash flow at that horizon.</p>
+
+A longer derivation, equation by equation, is the
+[Dynamic DCF course](https://github.com/tlorans/var_valuation). Citations
+for the closed forms sit on [References](references.md).
 
 ## Extras
 
 | Extra | What it adds |
 |---|---|
-| *(default)* | Named-state VAR, both recursions, Chen-aware news |
+| *(default)* | Named-state VAR; cash-flow and discount-rate forecasts from $X$; news |
 | `[data]` | Ken French, FRED, cay, portfolio state |
 | `[wrds]` | CRSP–Compustat firm panel and firm-level state |
 

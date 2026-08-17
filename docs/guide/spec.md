@@ -35,10 +35,10 @@ StateSpec(
 Unknown, duplicate, or empty names raise `StateSpecError`. There is no
 integer index in the public API.
 
-`horizon=12` on monthly data is the Ang–Liu overlapping-annual design.
-Pairs are $(X_t, X_{t+12})$. Standard errors use `nw_lags` Newey–West lags
-(twelve, to match the overlap). `estimate_var_panel` forms those pairs
-only *inside* `group`.
+`horizon=12` on monthly data is an overlapping annual design. Pairs are
+$(X_t, X_{t+12})$. Standard errors use `nw_lags` Newey–West lags (twelve,
+to match the overlap). `estimate_var_panel` forms those pairs only
+*inside* `group`.
 
 ## Expected return
 
@@ -52,7 +52,7 @@ $$
 The product $\beta_t\lambda_t$ is why $\mu_t$ is **quadratic** in $X_t$,
 and why the priced recursion has an $H(n)$ matrix. `ExpectedReturnSpec`
 turns named coefficients into the arrays $(\xi, \Lambda)$ that
-`AngLiuModel` consumes:
+`ValuationModel` consumes:
 
 ```python
 from varvaluation import ExpectedReturnSpec

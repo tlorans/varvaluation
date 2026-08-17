@@ -18,9 +18,9 @@ import polars as pl
 import statsmodels.api as sm
 
 from varvaluation import (
-    AngLiuModel,
     ExpectedReturnSpec,
     StateSpec,
+    ValuationModel,
     estimate_var,
     estimate_var_panel,
     news_decomposition,
@@ -69,7 +69,7 @@ def load_inputs():
     if macro is None:
         raise SystemExit("could not load macro state")
     # Overlay the published Lettau–Ludvigson file when present so the
-    # 1965–2019 Ang–Liu sample is the official cay, not only the FRED reconstruction.
+    # 1965–2019 sample is the official cay, not only the FRED reconstruction.
     if PAPER_DATA.exists() and (PAPER_DATA / "cay_current.csv").exists():
         published = _ok(
             "published cay overlay",
@@ -158,7 +158,7 @@ def report_portfolio(name, total, capgains, macro, spec, xi, Lambda):
 
     alpha = capm_alpha(total, macro, name)
     try:
-        model = AngLiuModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
+        model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
     except Exception as exc:
         print(f"  model failed: {type(exc).__name__}: {exc}")
         return None

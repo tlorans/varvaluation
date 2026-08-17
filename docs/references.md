@@ -1,5 +1,10 @@
 # References
 
+The closed-form recursions implemented here are those of Ang and Liu
+(2004, 2001). The news identity and the residual critique are Campbell
+(1991) and Chen, Da, and Zhao (2013). This page is the only place the
+docs name those papers.
+
 - Ang, A. and J. Liu (2004), “How to Discount Cash Flows with Time-Varying Expected Returns,” *Journal of Finance* 59(6), 2745–2783.
 - Ang, A. and J. Liu (2001), “A General Affine Earnings Valuation Model,” *Review of Accounting Studies* 6, 397–425.
 - Campbell, J. Y. (1991), “A Variance Decomposition for Stock Returns,” *Economic Journal* 101, 157–179.

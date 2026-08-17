@@ -1,5 +1,5 @@
 site_name: varvaluation
-site_description: VAR-based valuation and Chen-aware cash-flow / discount-rate news
+site_description: Cash-flow and discount-rate forecasts from one VAR
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation
@@ -35,7 +35,6 @@ nav:
   - Install: install.md
   - Quickstart: quickstart.md
   - Guide:
-      - The idea: guide/idea.md
       - StateSpec: guide/spec.md
       - Valuation: guide/valuation.md
       - News: guide/news.md

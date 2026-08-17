@@ -56,10 +56,11 @@ invariant, and it is tested.
 
 $\lambda$ is chosen in exactly one of two ways:
 
-1. **Expected-return gradient** (the Ang–Liu path). Pass `xi` and `Lambda`.
-   Then $\lambda = \xi + 2\Lambda\bar X$ with $\bar X$ the unconditional
-   mean. The usual Ang–Liu state `(g, beta, dpo, r, cay, pi)` has **no**
-   equity-return equation. Discount-rate news is the revision in
+1. **Expected-return gradient** (the default when the VAR has no return
+   equation). Pass `xi` and `Lambda`. Then
+   $\lambda = \xi + 2\Lambda\bar X$ with $\bar X$ the unconditional mean.
+   A typical state `(g, beta, dpo, r, cay, pi)` contains no equity return.
+   Discount-rate news is the revision in
    $\mu_t = \alpha + \xi'X + X'\Lambda X$, linearized.
 2. **Named return equation** (Campbell–Shiller). Pass `return_state` as a
    name in `spec.names`. Then $\lambda = e_{\mathrm{return}}$. Use this

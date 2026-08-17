@@ -1,10 +1,10 @@
 # Valuation
 
-This page is the heart of the library. Read it slowly. The code at the bottom
-is a thin wrapper around the two recursions derived here.
+The default is that **both** sides of every strip come from the same state
+$X_t$. This page derives the two recursions and then shows the optional
+special case that freezes the numerator.
 
-`AngLiuModel` is the quadratic-Gaussian engine of Ang and Liu (2004). Given a
-fitted VAR and a one-period expected return
+Given a fitted VAR and a one-period expected return
 
 $$
 \mu_t = \alpha + \xi' X_t + X_t' \Lambda X_t,
@@ -14,13 +14,12 @@ every object below is exact. The cash-flow basis vector is
 `spec.cashflow`, not “whatever happens to sit in column 0.”
 
 ```python
-from varvaluation import AngLiuModel
+from varvaluation import ValuationModel
 
-model = AngLiuModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
-rates = model.spot_rates(X, n=30)          # μ_t(1), …, μ_t(30)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
+rates = model.spot_rates(X, n=30)            # μ_t(1), …, μ_t(30)
 cf    = model.cashflow_expectation(X, n=30)  # E_t[C_{t+n}] / C_t
-value = model.value(X, C=1.0, n=80)        # both recursions + tail
-perp  = model.perpetuity(X, n=80)          # numerator frozen at 1
+value = model.value(X, C=1.0, n=80)          # default: both from X
 ```
 
 `from_var` refuses a companion with spectral radius $\ge 1$
@@ -40,54 +39,23 @@ A present value is a sum of strips. Each strip has a **numerator** (what you
 expect to receive $n$ years from now) and a **denominator** (how hard you
 discount that receipt).
 
-Damodaran writes the denominator as $(1+r)^n$ with one $r$ for all $n$, and
-takes the numerator from a spreadsheet. Ang and Liu replace the single $r$
-with a **term structure** $\mu_t(n)$ produced by a VAR of expected returns.
-They also write down a recursion for the numerator — and then, in the
-published paper, they do not use it.
+A constant-rate DCF writes the denominator as $(1+r)^n$ with one $r$ for
+all $n$, and takes the numerator from a spreadsheet. Here both objects are
+forecasts from the VAR of $X_t$. The default call is `value`, which
+multiplies them.
 
-That unused recursion is the subject of this page.
-
-!!! note "The two methods"
-    `perpetuity(X)` is Ang and Liu’s published design: the numerator is $1$
-    at every horizon. `value(X, C)` is the same machinery with the cash-flow
-    recursion **switched on**. Both use the same $\mu_t(n)$. They differ
-    only in what sits above the line.
+!!! note "Default versus diagnostic"
+    `value(X, C)` is the default: expected cash flows *and* the discount
+    curve from $X_t$. `perpetuity(X)` freezes the numerator at $1$ so only
+    the curve can move. Use that when you want to isolate the denominator.
 
 ---
 
-## 2. What Ang and Liu actually valued
+## 2. Cash flows in growth form
 
-Their application is a **unit perpetuity**. At every maturity,
-
-$$
-\mathbb{E}_t[D_{t+n}] = 1.
-$$
-
-The valuation collapses to
-
-$$
-V_t^{\text{perp}}
-  = \sum_{n=1}^{N} \exp\!\bigl(-n\,\mu_t(n)\bigr)
-  + \text{geometric tail at }\mu_t(N).
-$$
-
-That is `model.perpetuity(X)`. Every number they report — the December 2000
-upward-sloping curve, the mispricing of a constant WACC — is a statement
-about the **denominator**. The numerator is a constant by construction. It
-cannot move, so it cannot explain any of the variation.
-
-They did this on purpose. Isolating the discount curve is a clean
-experiment. It is also why a value-portfolio $g$ that barely mean-reverts
-never blows up their tables: that $g$ never enters the sum.
-
----
-
-## 3. Cash flows in growth form
-
-The course (Step 02) writes the cash flow as a product of growth rates.
-Let $g$ stand for whatever you named as `spec.cashflow` — log dividend
-growth on a portfolio, log ROE at a firm:
+Write the cash flow as a product of growth rates. Let $g$ stand for
+whatever you named as `spec.cashflow` — log dividend growth on a
+portfolio, log ROE at a firm:
 
 $$
 g_{t+i} = \log\frac{C_{t+i}}{C_{t+i-1}},
@@ -110,9 +78,9 @@ $$
   = \exp\!\bigl(\mathbb{E}_t[S_n] + \tfrac12\mathrm{Var}_t[S_n]\bigr).
 $$
 
-The first piece is Damodaran’s point forecast of growth. The second piece
-is new: uncertainty about growth **raises** expected cash flow in levels.
-Both pieces are produced by the VAR. You do not type them in.
+The first piece is a point forecast of growth. The second is new:
+uncertainty about growth **raises** expected cash flow in levels. Both
+pieces are produced by the VAR. You do not type them in.
 
 !!! tip "A modelling object, not a spreadsheet"
     Nothing in this construction says “paste next year’s consensus EPS.”
@@ -123,7 +91,7 @@ Both pieces are produced by the VAR. You do not type them in.
 
 ---
 
-## 4. The cash-flow recursion
+## 3. The cash-flow recursion
 
 $g$ is one row of a Gaussian VAR,
 
@@ -185,7 +153,7 @@ purpose, so you can see the numerator channel by itself.
 
 ---
 
-## 5. Putting the two sides together
+## 4. Putting the two sides together
 
 The spot rate $\mu_t(n)$ is defined so that
 
@@ -198,7 +166,7 @@ coefficients, $A(n) = (\bar a(n)-a(n))/n$, and likewise for $B$ and $G$.
 The $a,b,H$ recursion is the **priced** (discounted) counterpart of
 $\bar a,\bar b$; their difference *is* the curve.
 
-`model.value(X, C)` is then
+`model.value(X, C)` — the default — is then
 
 $$
 V_t
@@ -218,39 +186,57 @@ rate, or the rate but not cash flows, is a half-valuation.
 |---|---|---|
 | `spot_rates(X, n)` | — | $\mu_t(1),\ldots,\mu_t(n)$ |
 | `cashflow_expectation(X, n)` | $\mathbb{E}_t[C_{t+k}]/C_t$ | — |
-| `perpetuity(X)` | $1$ | the curve |
-| `value(X, C)` | $C$ times the recursion | the curve |
+| **`value(X, C)`** | $C$ times the recursion | the curve |
+| `perpetuity(X)` | $1$ (diagnostic) | the curve |
 | `isolate_channels(..., on="cashflow")` | $\Phi[\texttt{cf},s]$ zeroed | unchanged |
 | `isolate_channels(..., on="discount")` | unchanged | those names zeroed in $\Phi$ and $\Lambda$ except the cf row |
 
 ---
 
-## 6. When the numerator explodes
+## 5. When the growth forecast is not yet usable
 
-On Ken French **value** portfolios, $\Phi_{g,g}$ is often near one.
-Then $\bar b(n)$ keeps stacking growth that barely mean-reverts,
-$\mathbb{E}_t[C_{t+n}]/C_t$ grows without bound, and `value` returns a
-fantasy. That is not a bug in the recursion. It is the recursion telling
-you the $g$ equation is not a usable cash-flow model at the portfolio
-level.
+On some Ken French **value** portfolios, $\Phi_{g,g}$ is near one. Then
+$\bar b(n)$ keeps stacking growth that barely mean-reverts,
+$\mathbb{E}_t[C_{t+n}]/C_t$ grows without bound, and `value` is not a
+price you should publish. That is not a bug in the recursion. It is the
+recursion telling you the $g$ equation is not a usable cash-flow model at
+that aggregation.
 
-This is exactly why Ang and Liu froze the numerator. `perpetuity` is the
-object to trust for portfolios. The recursion becomes usable at the
-**firm**, where cash-flow growth is ROE and mean-reverts (Vuolteenaho;
-Lyle–Wang). Check $\Phi[\texttt{cashflow},\texttt{cashflow}]$ before you
-believe a full PV.
+The default is still `value`. Check
+$\Phi[\texttt{cashflow},\texttt{cashflow}]$ first. If the own-lag is near
+a unit root, either improve the cash-flow specification (firm-level ROE
+mean-reverts more reliably) or use `perpetuity` as a **denominator-only**
+diagnostic until the numerator is trustworthy.
 
-!!! warning "Portfolio versus firm"
-    Portfolio path: `prepare_portfolio_state` → `estimate_var` →
-    `perpetuity`. Firm path: `prepare_firm_state` → `estimate_var_panel`
-    → `value`, after you have looked at the ROE own-lag.
+!!! warning "Inspect the own-lag"
+    Before you report a full PV, print
+    `fit.Phi[spec.cashflow_index(), spec.cashflow_index()]`.
+    Near $1$: do not trust `value` yet. Comfortably inside the unit
+    circle: `value` is the object you came for.
+
+---
+
+## 6. Freezing the numerator (optional)
+
+Sometimes you want only the curve: “what is a dollar a year worth under
+this $\mu_t(n)$?” Then set $\mathbb{E}_t[C_{t+n}] = 1$ and sum
+
+$$
+V_t^{\text{perp}}
+  = \sum_{n=1}^{N} \exp\!\bigl(-n\,\mu_t(n)\bigr)
+  + \text{geometric tail at }\mu_t(N).
+$$
+
+That is `model.perpetuity(X)`. It is a special case of `value` with the
+cash-flow recursion switched off. It cannot tell you anything about
+expected cash flows, because they do not enter.
 
 ---
 
 ## 7. The curve, in pictures
 
 ![Spot discount curves](../assets/figures/spot_curves.png)
-<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. They do not use the cash-flow recursion.</p>
+<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. The default valuation also multiplies each strip by $\mathbb{E}_t[C_{t+n}]/C_t$.</p>
 
 ![Variance decomposition, D10](../assets/figures/variance_decomp_d10.png)
 <p class="figure-caption">Share of <em>spot-rate</em> variance by state, value decile. $\mathit{cay}$ and $\beta$ dominate the <em>discount curve</em>. That $g$ is negligible here does <em>not</em> mean cash flows do not matter for prices — it means they do not drive $\mu_t(n)$. They drive the numerator, which this figure does not show.</p>
@@ -260,14 +246,14 @@ believe a full PV.
 ## 8. Channel isolation
 
 Isolation is a **counterfactual**, not news. You shut a named state on one
-side, revalue, and compare.
+side, revalue with `value`, and compare.
 
 ```python
 from varvaluation import isolate_channels
 
 iso = isolate_channels(model, X, shut=("cay",), on="cashflow")
 iso = isolate_channels(model, X, shut=("cay",), on="discount")
-iso = isolate_channels(model, X, shut=("cay",), on="both")  # unmodified
+iso = isolate_channels(model, X, shut=("cay",), on="both")  # unmodified value
 ```
 
 - `on="cashflow"` zeros $\Phi[\texttt{cashflow}, s]$ for each shut name.
