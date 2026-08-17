@@ -21,14 +21,14 @@ $$
 
 | Name | What it is | How this library builds it |
 |---|---|---|
-| `g` | log cash-flow growth | Hodrick (1992) trailing dividends from total vs. ex-div returns |
+| `g` | log cash-flow growth | Trailing twelve-month dividends from the gap between total and ex-dividend returns ([Hodrick, 1992](../references.md#hodrick-1992)), then $g_t=\log(D_t/D_{t-1})$ |
 | `roe` | log profitability *level* | $\log(\mathrm{NI}_t / \mathrm{BE}_{t-1})$; not Vuolteenaho $e_t$ |
-| `beta` | rolling CAPM slope | 60-month window; Section 5 uses 12 |
-| `dpo` | payout | log dividends minus log earnings, when both exist |
-| `bm` | book-to-market | firm panel |
-| `r` | one-year rate | FRED GS1, continuously compounded |
-| `cay` | consumption–wealth gap | Lettau–Ludvigson, or a FRED reconstruction |
-| `pi` | inflation | 12-month log CPI |
+| `beta` | rolling CAPM slope | 60-month window of log excess returns on the market; Section 5 uses 12 |
+| `dpo` | payout | $\log D-\log$ earnings, when both exist and earnings are positive |
+| `bm` | log book-to-market | $\log(\mathrm{BE}/\mathrm{ME})$; a reading of $-1.47$ is a high multiple, not a negative ratio |
+| `r` | one-year rate | FRED GS1 (one-year Treasury yield), converted to a continuously compounded rate, $\log(1+y)$ |
+| `cay` | consumption–wealth gap | Lettau–Ludvigson, or a FRED reconstruction (Section 2.3) |
+| `pi` | inflation | 12-month log change in CPI |
 
 `roe`, `bm`, and `beta` are built only when those names sit in
 `spec.names`. Everything else is joined from the macro frame by column.
@@ -195,9 +195,20 @@ rather than assumed away.
 
 You have traded a rate you can argue about over coffee for statistical
 assumptions that are harder to interrogate and just as consequential.
-[Stambaugh (1999)](../references.md#stambaugh-1999) bias guarantees that
-persistence is overstated in short samples with persistent predictors;
-the priced recursion then compounds that bias into $\Phi^n$. Use the
-system to read the *shape* of the curve and the *sign* of the
+
+!!! note "In words — $t$-stat, date-clustered, Stambaugh"
+    A **$t$-statistic** is coefficient over standard error. Roughly
+    $\lvert t\rvert>2$ is the usual “detectable at 5%” rule of thumb
+    in large samples. $b_r$ and $b_{\mathit{cay}}$ in Section 5 miss
+    that bar. **Date-clustered** standard errors treat all firms on
+    the same month as one shock; stacked Newey–West on the 80-firm
+    panel does **not** do that, which is why no SEs are printed
+    there. **Stambaugh (1999) bias**: if a predictor is persistent
+    and its innovations are correlated with returns (the dividend
+    yield is the textbook case), the OLS slope on that predictor is
+    biased upward in small samples. Persistence is overstated, and
+    the priced recursion compounds that bias into $\Phi^n$.
+
+Use the system to read the *shape* of the curve and the *sign* of the
 growth–rate interaction. Be skeptical of the third decimal place.
 [What changes](practice.md) returns to this caveat.

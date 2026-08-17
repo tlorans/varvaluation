@@ -57,6 +57,16 @@ narrower.
 | Terminal value | Gordon or a fade to a long-run $(r,g)$ | The tail of the same recursion, when the cash-flow name is growth |
 | Duration | Sensitivity tables | $b(n)$ and $H(n)$ that vary with horizon |
 
+!!! note "In words — duration, implied premium, fade"
+    **Duration** is how much value moves when the discount rate
+    moves. Long-dated cash flows have more of it, so a wrong rate
+    at year ten hurts a growth name more than a short-cash-flow
+    name. An **implied equity premium** is the $r$ that equates a
+    DCF to the market price; a **historical** premium is an average
+    of past excess returns. **Fade** is a hand-set speed at which
+    growth or the premium is assumed to revert. The VAR replaces
+    that fade with $\Phi^n$, estimated rather than typed.
+
 The comparison that matters is not “spreadsheet versus VAR.” It is
 whether the rate at year ten is today’s short rate, a historical
 average, or a forecast that mean-reverts at an estimated speed

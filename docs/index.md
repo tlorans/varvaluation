@@ -5,12 +5,14 @@ An exposition of the joint VAR, implemented in `varvaluation`
 !!! abstract "Abstract"
 
     Once expected returns move, a constant-rate DCF is a different
-    random variable from the present value. The well-defined object is
-    the conditional expectation of a product: cash flows times a path
-    of one-period expected returns
+    random variable from the present value: dividing $\mathbb{E}_t[C]$
+    by a path of rates is not the same object as
+    $\mathbb{E}_t[C\times\text{discount path}]$. The well-defined
+    object is that conditional expectation of a product
     ([Ang and Liu, 2004](references.md#ang-liu-2004), eq. 2). This
     document is an exposition of that framework and a named-state
-    implementation in Python. It does not derive a new closed form.
+    implementation in Python (`StateSpec` binds names to columns).
+    It does not derive a new closed form.
     What is not in the 2004 paper is the public binding of names to
     positions (`StateSpec`), a panel VAR that forms lag pairs only
     inside the firm, and a news routine that takes cash-flow news from
@@ -35,10 +37,12 @@ quadratic-Gaussian valuation; time-varying expected returns
 This site is a handbook plus a library. The closed forms are
 [Ang and Liu (2004)](references.md#ang-liu-2004). The package is the
 subject of the software sections and the vehicle of Section 5.
+Symbols and first-use words sit in
+[Section 1, Objects and words](guide/introduction.md#objects-and-words).
 
 | Section | Content |
 |---|---|
-| [1. Introduction](guide/introduction.md) | The product, the 2004 law, and what this document adds |
+| [1. Introduction](guide/introduction.md) | The product, the 2004 law, the lexicon, and what this document adds |
 | [2. Framework](guide/system.md) | The joint VAR, the two recursions, and the content of $X_t$ |
 | [3. Estimation](guide/estimate.md) | Staged measurement of $(\Phi,c,\Sigma,\xi,\Lambda)$ |
 | [4. Return news](guide/news.md) | Direct cash-flow news on the same companion |

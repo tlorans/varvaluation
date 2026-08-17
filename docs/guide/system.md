@@ -40,8 +40,20 @@ Three named objects, each with a job:
 
 Gaussian shocks plus linear dynamics is what makes every future horizon
 computable in closed form — the same architecture as affine
-term-structure models, applied to equity
+term-structure models (bond yields that are a constant plus a linear
+function of a few factors), applied to equity
 ([Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1).
+
+!!! note "In words — closed form, companion, lag pair"
+    **Closed form** means you evaluate a formula. You do not draw
+    random paths. A **lag pair** is $(X_t, X_{t+h})$: today’s state
+    and the state $h$ periods later. On a firm panel those pairs are
+    formed only *inside* one `permno`, so firm A is never used to
+    forecast firm B. **Companion** is used in two senses. In
+    time-series textbooks it is a VAR($p$) rewritten as a taller
+    VAR(1) by stacking lags. On this site it also means the *fitted*
+    $\Phi$ on the 80-firm slice of Section 5 — one pooled law of
+    motion. `VARFit` is that fitted object.
 
 In the library the companion is a `VARFit`. On a firm panel the call
 is `estimate_var_panel`; lag pairs are formed only inside
@@ -119,10 +131,25 @@ information. $g_{t+1}$ is realized at $t+1$. That asymmetry is what
 makes the model a model of expected-return variation rather than
 realized-return noise.
 
-The product $\beta_t\lambda_t$ inside a conditional CAPM is why $\mu_t$
-is **quadratic** in $X_t$ whenever both beta and the premium move. If
-either is constant, $\Lambda=0$ and the priced solution collapses to
-exponential-affine. Same class; see [Valuation](valuation.md).
+The product $\beta_t\lambda_t$ inside a **conditional CAPM** is why
+$\mu_t$ is **quadratic** in $X_t$ whenever both beta and the premium
+move.
+
+!!! note "In words — CAPM, beta, premium, quadratic"
+    The CAPM says expected excess return equals beta times a market
+    premium. **Beta** $\beta_t$ is the slope of the firm’s excess
+    return on the market’s, here a *rolling* slope, so it is a data
+    series. The **premium** $\lambda_t$ is itself a function of the
+    state (short rate, $\mathit{cay}$). Their product
+    $\beta_t\lambda_t$ contains terms like $\beta_t\times\mathit{cay}_t$
+    — a product of two elements of $X_t$. That is why $\mu_t$ is
+    quadratic, and why the priced strip needs a matrix $H(n)$ rather
+    than a vector $b(n)$ alone. If *either* beta or the premium is
+    constant, $\Lambda=0$, $H(n)\equiv 0$, and the solution collapses
+    to exponential-affine. Same class; see
+    [Valuation](valuation.md). $\alpha$, $\xi$, and $\Lambda$ are just
+    the intercept, the linear coefficients, and the quadratic
+    coefficients of that $\mu_t$.
 
 ## Why a VAR is the right tool
 
@@ -140,7 +167,8 @@ $\Phi=0$, $X$ frozen.
 
 **Predictability is symmetric and testable.** Do short rates forecast
 dividend growth? Does $\mathit{cay}$ forecast betas? Those are
-coefficients of $\Phi$, with Newey–West standard errors. The dynamic
+coefficients of $\Phi$, with Newey–West standard errors (Section 3:
+standard errors honest about overlapping annual pairs). The dynamic
 relations are estimated and can be rejected.
 
 **Gaussian linearity makes the price closed-form.** Linear dynamics
@@ -168,8 +196,10 @@ does not exist, and the recursions have nowhere to settle.
 ## Where the joint distribution enters the price
 
 Because $X$ is Gaussian and $g$, $\mu$ are (at most) quadratic in $X$,
-the sum $S_n$ is conditionally normal given $X_t$. If $S$ is normal,
-$e^S$ is lognormal and
+the sum $S_n$ is **conditionally normal** given $X_t$: given what we
+know today, the uncertain quantity is a bell curve whose mean and
+variance depend on $X_t$. If $S$ is normal, $e^S$ is **lognormal**
+(always positive, right-skewed) and
 
 $$
 \mathbb{E}_t[e^{S_n}]

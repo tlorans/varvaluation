@@ -18,9 +18,19 @@ r_{t+1} - \mathbb{E}_t r_{t+1}
   = N_{\mathrm{CF},t+1} - N_{\mathrm{DR},t+1}.
 $$
 
-$N_{\mathrm{DR}}$ is the revision in expected **future** returns.
-$N_{\mathrm{CF}}$ is the revision in expected **future** cash flows (plus
-the current cash-flow surprise).
+!!! note "In words — unexpected return, news, revision"
+    The **unexpected return** is the part of what you earned that you
+    did not expect yesterday: realized minus $\mathbb{E}_t r_{t+1}$.
+    **News** is a *revision of a forecast*. A shock $u_{t+1}$ arrives.
+    You update $\mathbb{E}_{t+1}$ of every future cash flow and every
+    future expected return. $N_{\mathrm{CF}}$ is the present value of
+    those cash-flow revisions (plus the current cash-flow surprise).
+    $N_{\mathrm{DR}}$ is the present value of the revisions in future
+    $\mu$. Good cash-flow news raises the return; good discount-rate
+    news (higher future $\mu$) *lowers* it, which is why the identity
+    subtracts $N_{\mathrm{DR}}$. The identity **closes** when
+    unexpected $= N_{\mathrm{CF}}-N_{\mathrm{DR}}$. If it does not,
+    the leftover is a diagnostic, not a third kind of news.
 
 ## The residual trap
 
@@ -45,7 +55,7 @@ This library never uses the residual as the definition of cash-flow news.
 
 Let $u_{t+1}$ be the VAR residual at the estimation horizon, $e_{\mathrm{cf}}$
 the unit vector for `spec.cashflow`, and $\rho\in(0,1)$ the Campbell–Shiller
-linearization parameter (default $0.96$).
+linearization parameter (library value $0.96$).
 
 $$
 N_{\mathrm{DR},t+1}
@@ -56,6 +66,16 @@ $$
 N_{\mathrm{CF},t+1}^{\mathrm{direct}}
   = e_{\mathrm{cf}}'(I-\rho\Phi)^{-1}u_{t+1}
 $$
+
+!!! note "In words — $\rho$ and $(I-\rho\Phi)^{-1}$"
+    $\rho$ comes from the log-linear price–dividend identity. If the
+    typical ratio of price to (price + dividend) is $0.96$, then a
+    revision $k$ years out is discounted by $\rho^k$ before it
+    enters today’s return. $(I-\rho\Phi)^{-1}u_{t+1}$ is the
+    discounted sum of how that shock propagates through the VAR at
+    every future horizon — a present-value of revisions. $0.96$ is
+    the usual *dividend-price* constant. It is not a book-to-market
+    linearization, and it is not estimated on the Section 5 panel.
 
 The second line is a revision in the **cash-flow equation**, the same row
 that feeds $\bar b(n)$ on the [valuation](valuation.md) page. Mutating the
@@ -109,9 +129,17 @@ is not the object this VAR prices — typical when the VAR has no
 return equation and you hand in a return series the companion does
 not price.
 
-The returns frame must be **simple** returns in $(-1, 5)$. Use compounded
-twelve-month simple returns, $\exp(\sum \log(1+r))-1$, not a raw sum of
-logs (that sum can fall below $-1$ and fail the schema).
+The returns frame must be **simple** returns in $(-1, 5)$.
+
+!!! note "In words — simple versus log returns"
+    A **simple** return is $(P_{t+1}+C_{t+1})/P_t-1$. A **log**
+    return is $\log(1+\text{simple})$. Campbell’s identity is written
+    in logs; the library still asks for simple returns and converts
+    internally. To annualize a year of monthly simple returns, use
+    $\exp(\sum\log(1+r))-1$, the compounded simple return. A raw sum
+    of logs can fall below $-1$ and fail the schema, because a
+    simple return cannot be less than $-100\%$. The cap at $5$
+    ($+500\%$) is a sanity bound, not a model feature.
 
 ## Treasury test
 

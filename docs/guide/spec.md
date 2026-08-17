@@ -37,13 +37,35 @@ $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$: a profitability
 growth, and it is not [Vuolteenaho’s](../references.md#vuolteenaho-2002)
 $e_t=\log(1+X_t/B_{t-1})$ (clean-surplus earnings, return units).
 
+!!! note "In words — clean surplus, level versus growth"
+    **Clean surplus** is the accounting identity
+    $B_t=B_{t-1}+X_t-D_t$: the change in book equals earnings minus
+    dividends (no gains or losses booked straight to equity).
+    Vuolteenaho’s $e_t=\log(1+X_t/B_{t-1})$ is then in the same
+    *units as a return*. This library’s `roe` is
+    $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$, a log *ratio of
+    levels*, built only when $\mathrm{NI}>0$. A reading of $-2.08$
+    is an ROE of about $12.5\%$, not a $-208\%$ growth rate. Feeding
+    that series to `value` treats it as log growth and is the wrong
+    call.
+
 Unknown, duplicate, or empty names raise `StateSpecError`. There is no
 integer index in the public API.
 
-`horizon=12` on monthly data is an overlapping annual design. Pairs are
-$(X_t, X_{t+12})$. Standard errors use `nw_lags` Newey–West lags (twelve,
-to match the overlap). `estimate_var_panel` forms those pairs only
-*inside* `group`.
+`horizon=12` on monthly data is an **overlapping annual** design.
+
+!!! note "In words — overlapping annual, Newey–West, group"
+    You want *annual* dynamics (how this year forecasts next year)
+    but you observe the state every *month*. So you pair January
+    with next January, February with next February, and so on.
+    Adjacent pairs share eleven months: their errors are
+    mechanically correlated. Ordinary standard errors would pretend
+    those pairs were independent and overstate confidence.
+    **Newey–West** standard errors estimate that overlap and inflate
+    the uncertainty. `nw_lags=12` means “honest about twelve months
+    of shared data.” `estimate_var_panel` forms those pairs only
+    *inside* `group` (here `permno`): a firm needs more than
+    `horizon` months or it contributes no pairs.
 
 ## Expected return
 
@@ -55,9 +77,21 @@ $$
 $$
 
 The product $\beta_t\lambda_t$ is why $\mu_t$ is **quadratic** in $X_t$,
-and why the priced recursion has an $H(n)$ matrix. `ExpectedReturnSpec`
-turns named coefficients into the arrays $(\xi, \Lambda)$ that
-`ValuationModel` consumes:
+and why the priced recursion has an $H(n)$ matrix.
+
+!!! note "In words — from $(b_0,b_r,b_{\mathit{cay}})$ to $(\xi,\Lambda)$"
+    Expand $\mu_t=\alpha+r_t+\beta_t(b_0+b_r r_t+b_{\mathit{cay}}\mathit{cay}_t)$.
+    The terms that are linear in one state ($r_t$, $\beta_t$) land in
+    the vector $\xi$. The product $\beta_t\mathit{cay}_t$ lands in the
+    matrix $\Lambda$ (symmetrized, so the $(i,j)$ and $(j,i)$ entries
+    each carry half the coefficient). `ExpectedReturnSpec` does that
+    bookkeeping from names. Keys are `b0`, `br`, and `b{name}`
+    (`cay` $\to$ `bcay`). Missing keys are $0$. If you already have
+    $\xi$ and $\Lambda$ from another model of $\mu_t$, skip the
+    builder and pass the arrays.
+
+`ExpectedReturnSpec` turns named coefficients into the arrays
+$(\xi, \Lambda)$ that `ValuationModel` consumes:
 
 ```python
 from varvaluation import ExpectedReturnSpec
@@ -66,17 +100,15 @@ er = ExpectedReturnSpec(rate="r", beta="beta", premium=("cay",))
 xi, Lambda = er.xi_lambda(spec, {"b0": 0.05, "br": -0.2, "bcay": 2.0})
 ```
 
-Keys are `b0`, `br`, and `b{name}` for each premium state (`cay` →
-`bcay`). Missing keys default to 0. If you already have $\xi$ and
-$\Lambda$ from another model of $\mu_t$, skip the builder and pass the
-arrays.
-
 ## Inbound frames
 
 `estimate_var` validates with `state_schema(spec)`: a date column, an
 optional group, one float column per name. News validates returns with
 `returns_schema` (simple returns in $(-1, 5)$). Failures raise
-`SchemaError` and name the schema.
+`SchemaError` and name the schema. The schemas are Pandera contracts
+— typed checks on the inbound frame — so a missing column or a
+return of $-1.2$ fails with a named error rather than a silent
+`NaN` downstream.
 
 ## Where the names come from
 
@@ -97,10 +129,11 @@ The cash-flow side is the profitability-forecasting literature.
   `g` or `roe`: persistence $\Phi$, pull $c$.
 - **ROE has internal structure.**
   [Nissim and Penman (2001)](../references.md#nissim-penman-2001)
-  decompose ROCE into profit margin, asset turnover, and a leverage
-  spread, and document multi-year fade in those pieces. They do
-  **not** estimate a negative rates-to-profitability regression; do
-  not hang $\Phi[\texttt{roe}, r]<0$ on that paper.
+  decompose return on common equity (ROCE) into profit margin, asset
+  turnover, and a leverage spread, and document multi-year fade in
+  those pieces. They do **not** estimate a negative
+  rates-to-profitability regression; do not hang
+  $\Phi[\texttt{roe}, r]<0$ on that paper.
 - **Vuolteenaho’s object is different.**
   [Vuolteenaho (2002)](../references.md#vuolteenaho-2002) decomposes
   firm-level returns using clean-surplus
@@ -122,8 +155,8 @@ honest survivorship story.
 |---|---|---|
 | Dividend yield | Weak in- and out-of-sample ([Goyal and Welch, 2003](../references.md#goyal-welch-2003); [Goyal and Welch, 2008](../references.md#goyal-welch-2008)). The present-value identity can still imply return predictability ([Cochrane, 2008](../references.md#cochrane-2008); [van Binsbergen and Koijen, 2010](../references.md#vbk-2010)) | No — deliberately dropped |
 | Short rate | The robust short-horizon instrument ([Fama and Schwert, 1977](../references.md#fama-schwert-1977)) | Yes — `r` |
-| Term spread | More a bond result than an equity one | No |
-| Default spread | Used in some return systems | No (parsimony) |
+| Term spread | Long minus short yield; more a bond result than an equity one | No |
+| Default spread | Risky minus safe corporate yield; used in some return systems | No (parsimony) |
 | $\mathit{cay}$ | Strong *in-sample* quarterly predictor ([Lettau and Ludvigson, 2001](../references.md#lettau-ludvigson-2001)). Whether it survives look-ahead-free and out-of-sample tests is disputed ([Goyal and Welch, 2008](../references.md#goyal-welch-2008)) | Yes — `cay`, with that caveat |
 | Inflation | Negative relation with stock returns ([Fama and Schwert, 1977](../references.md#fama-schwert-1977)) | Yes — `pi` |
 | Beta dynamics | Loadings move ([Fama and French, 1997](../references.md#ff-1997)). Short-window slopes are noisy ([Lewellen and Nagel, 2006](../references.md#lewellen-nagel-2006)) | Yes — `beta` (rolling) |
@@ -134,16 +167,34 @@ forecasting power collapsed out of sample. The short rate is kept
 because the short-horizon relation is robust. $\mathit{cay}$ is kept
 as an in-sample state, not as a settled out-of-sample predictor.
 Section 5’s FRED reconstruction is not Lettau and Ludvigson’s
-cointegrating residual. Citations for this table sit on
+cointegrating residual.
+
+!!! note "In words — $\mathit{cay}$, cointegration, FRED"
+    Lettau and Ludvigson estimate a long-run relation
+    $c_t=\alpha+\beta_a a_t+\beta_y y_t+$ residual among log
+    consumption, asset wealth, and labour income. If those three
+    series share a trend (**cointegration**), the residual
+    $\mathit{cay}_t$ is a gap that should close — and that gap
+    forecasts returns in sample. **FRED** is the St. Louis Fed’s
+    public data service. When the published $\mathit{cay}$ file is
+    missing, this library rebuilds a residual from FRED series
+    (consumption, household net worth, wages) on 1952–2019Q3. That
+    is a cousin of their residual, not the published series.
+
+Citations for this table sit on
 [References](../references.md).
 
 ### Why the two sides share a border
 
-Long-run risk
-([Bansal and Yaron, 2004](../references.md#bansal-yaron-2004)) and
-productivity as a common source
-([Croce, 2014](../references.md#croce-2014)) are why the same macro
-state can drive both cash flows and discount rates.
+**Long-run risk**
+([Bansal and Yaron, 2004](../references.md#bansal-yaron-2004)) is
+the idea that a slowly moving component of consumption growth is
+what a long-horizon investor fears; productivity as a common source
+([Croce, 2014](../references.md#croce-2014)) is a production-based
+version of the same thought. Both are reasons the same macro
+state *can* drive cash flows and discount rates. They are not
+estimated here.
+
 [Cochrane (2011)](../references.md#cochrane-2011) is the field-level
 statement: discount-rate variation is the organizing question of the
 field. Traded dividend claims

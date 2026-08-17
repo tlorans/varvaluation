@@ -64,6 +64,16 @@ A constant-rate DCF writes the denominator as $(1+r)^n$ with one $r$ for
 all $n$, and takes the numerator from a spreadsheet. Here both objects are
 forecasts from the VAR of $X_t$. `value` multiplies them.
 
+!!! note "In words — strip"
+    Think of the claim as a bundle of zero-coupon equity claims, one
+    per year. Each **strip** is “the cash flow that arrives in year
+    $n$, and nothing else.” The present value is the sum of the
+    strips. The **numerator** of strip $n$ is how large you expect
+    that cash flow to be. The **denominator** is how hard you
+    discount it. The spot rate $\mu_t(n)$ is defined so that
+    dividing the expected cash flow by $e^{n\mu_t(n)}$ recovers the
+    strip — including the covariance corrections of Section 2.1.
+
 !!! note "Three numerators"
     `value(X, C)` takes expected cash flows *and* the discount curve from
     $X_t$. `perpetuity(X)` freezes the numerator at $1$ so only the curve
@@ -196,18 +206,28 @@ b(1) = -\xi + \Phi'e_1, \qquad
 H(1) = -\Lambda,
 $$
 
-and the rest is a matrix Riccati. If $\det(I-2\Sigma H(n))$ leaves the
-positive reals, `RecursionDivergedError` is raised: the quadratic term
-has blown up.
+and the rest is a matrix Riccati.
 
-There is **no log-linearization**.
-[Campbell and Shiller (1988)](../references.md#campbell-shiller-1988)
-approximate a curved price–dividend identity by a first-order Taylor
-expansion, accurate near a typical ratio and drifting when prices or
-growth are far from typical. Here the relations are written in logs
-from the start, so the closed form is exact inside the class — which
-is why it does not break for high-growth or extreme-multiple names the
-way a log-linear identity does.
+!!! note "In words — Riccati, log-linearization"
+    A **Riccati** recursion is a matrix iteration that contains a
+    quadratic term in the previous matrix — here, $H(n)$ feeds
+    $H(n+1)$ through $\Sigma$. Bond models use the same device
+    whenever yields are quadratic in the state. If
+    $\det(I-2\Sigma H(n))$ leaves the positive reals,
+    `RecursionDivergedError` is raised: the quadratic term has blown
+    up and the strip is no longer a well-defined expectation.
+
+    A **log-linearization**
+    ([Campbell and Shiller, 1988](../references.md#campbell-shiller-1988))
+    is a different trick: replace a curved identity
+    $\log(1+e^{x})\approx\text{constant}+\rho\,x$ by a first-order
+    Taylor expansion around a typical price–dividend ratio. It is
+    accurate near that typical ratio and drifts when prices or
+    growth are far from typical. Here the relations are written in
+    logs from the start, so the closed form is exact *inside the
+    Gaussian-VAR class* — which is why it does not break for
+    high-growth or extreme-multiple names the way a log-linear
+    identity does. Exact inside the class is not exact in the world.
 
 When $\Lambda=0$, $H(n)\equiv 0$ and the strip is exponential-affine:
 a constant beta with a moving premium, or a moving beta with a constant
@@ -235,9 +255,11 @@ replaced by a curve.
 
 In coefficients, $A(n) = (\bar a(n)-a(n))/n$, and likewise for $B$ and
 $G$. The $a,b,H$ recursion is the priced counterpart of
-$\bar a,\bar b$; their difference *is* the curve. Under stationarity,
-$\mu_t(n)\to\bar\mu$ as $n\to\infty$. The curve can slope up, down, or
-be humped, and it moves with $X_t$.
+$\bar a,\bar b$; their difference *is* the curve: the cash-flow
+recursion ignores discounting, the priced recursion includes it, and
+dividing by $n$ turns a cumulated object into a per-period spot rate.
+Under stationarity, $\mu_t(n)\to\bar\mu$ as $n\to\infty$. The curve
+can slope up, down, or be humped, and it moves with $X_t$.
 
 `model.value(X, C)` is then
 
@@ -289,8 +311,11 @@ not the statement of special case 1
 the general case requires the eigenvalues of $\Phi$ inside the unit
 circle *and* the priced strip eventually declining — the analogue of
 $\mu>g$, but now a condition on the **dynamics** rather than on two
-point estimates. The tail of `value` / `perpetuity` is a geometric
-remainder at $\mu_t(N)$, not a hand-set $(r,g)$ bolted on at year ten.
+point estimates. The tail of `value` / `perpetuity` is a **geometric
+remainder** at $\mu_t(N)$: once the spot rate has settled near its
+long-run value, the leftover sum
+$\sum_{k>N}e^{-k\mu_t(N)}$ is a Gordon-like closed form at that
+terminal spot, not a hand-set $(r,g)$ bolted on at year ten.
 
 ---
 
@@ -325,10 +350,19 @@ The two-step workflow
 flows however you forecast them, then discount at $\mu_t(n)$. The VAR
 is required for the curve. It is not required for the numerator if you
 already have $C_{t+1},\ldots,C_{t+N}$ — an analyst schedule, a
-residual-income path
-([Ohlson, 1995](../references.md#ohlson-1995);
-[Ang and Liu, 2001](../references.md#ang-liu-2001)), or an internal
-model.
+residual-income path, or an internal model.
+
+!!! note "In words — residual income"
+    **Residual income** (abnormal earnings) is
+    $(\mathrm{ROE}_{t+j}-k_{t+j})B_{t+j-1}$: earnings minus a charge
+    $k$ on beginning book $B$. Clean-surplus accounting then writes
+    price as book plus the present value of those residual earnings
+    ([Ohlson, 1995](../references.md#ohlson-1995);
+    [Feltham and Ohlson, 1995](../references.md#feltham-ohlson-1995);
+    [Ang and Liu, 2001](../references.md#ang-liu-2001)). That is a
+    *numerator* you can bring to `spot_rates`. This library does not
+    compute it. Section 5’s $\mathbb{E}_t[\mathit{roe}_{t+n}]$ is an
+    AR path of $\log(\mathrm{NI}/\mathrm{BE})$, not residual income.
 
 ```python
 import numpy as np
@@ -360,8 +394,10 @@ $$
 
 That is `model.perpetuity(X)`. It is a special case of `value` with the
 cash-flow recursion switched off. Section 5 prints it as
-`unit_curve_pv`. It cannot tell you anything about expected cash
-flows, because they do not enter.
+`unit_curve_pv`: the present value of receiving $1$ at every horizon
+under this curve, a denominator diagnostic. $24.70$ is that object
+at permno 10026, not an equity value. It cannot tell you anything
+about expected cash flows, because they do not enter.
 
 ---
 

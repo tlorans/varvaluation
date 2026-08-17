@@ -2,7 +2,20 @@
 
 This section is a **software demonstration**, not an empirical
 contribution. It runs the calls of Sections 2–4 on a short
-CRSP–Compustat extract. The cash-flow slot is
+CRSP–Compustat extract.
+
+!!! note "In words — the files this section opens"
+    **WRDS** is the academic vendor. **CRSP** is the monthly
+    stock-return file (prices, returns, shares). **Compustat** is
+    the annual fundamentals file (net income, book equity). A
+    **permno** is CRSP’s permanent security identifier — it does not
+    change when a ticker does. **GAAP** net income is the reported
+    earnings number, not clean-surplus earnings. **CCM** is the
+    CRSP–Compustat Merged link that joins the two files. Credentials
+    live in `.env`; queries cache as parquet under
+    `~/.cache/varvaluation/wrds`.
+
+The cash-flow slot is
 $\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$, GAAP net
 income over lagged book. That is a profitability *level*. It is not
 log dividend growth, and it is not
@@ -72,11 +85,15 @@ names=('roe', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=roe  cashflow_index=0  g
 state  67884 firm-months  2673 firms  2015-03-31 → 2019-09-30
 ```
 
-`prepare_firm_state` drops financials and utilities, requires
-positive book, and builds `roe` only when $\mathrm{NI}>0$ (so
-$\log(\mathrm{NI}/\mathrm{BE})$ is defined). Monthly `roe` is the
-annual ratio, forward-filled. The beta window is 12 months because
-the extract is short. The library convention is 60 months
+`prepare_firm_state` drops financials and utilities (SIC 6000–6999
+and 4900–4999), requires positive book, and builds `roe` only when
+$\mathrm{NI}>0$ (so $\log(\mathrm{NI}/\mathrm{BE})$ is defined).
+Monthly `roe` is the annual ratio, **forward-filled**: the same
+fiscal-year number is repeated until the next filing. The beta
+window is 12 months because the extract is short. A twelve-month
+**burn-in** is the first year of returns consumed to produce the
+first beta, which is why the prepared state starts in March 2015,
+not January 2014. The library convention is 60 months
 (`BETA_WINDOW`).
 
 ## 5.3 The premium, as $(\xi,\Lambda)$
@@ -99,17 +116,21 @@ b0=+0.095 (t=+3.41)  br=-0.737 (t=-1.49)  bcay=+0.708 (t=+1.72)
 xi[r]=+1.000  xi[beta]=+0.095  Lambda[beta,cay]=+0.354
 ```
 
-$b_0$ is precise. The two slopes that make $\lambda_t$ *move* have
+$R^2=0.053$ is the fraction of annual market excess-return variance
+this regression fits in sample — five percent, the usual order of
+magnitude for a return prediction. $b_0$ is precise. The two slopes that make $\lambda_t$ *move* have
 $|t|<2$. On this vintage the quadratic term $H(n)$ is not identified.
 $\alpha=0.02$ in the next call is a calibration intercept, not an
 estimate. It shifts every spot rate by about two percentage points.
 
 ## 5.4 The panel VAR
 
-Lag pairs are formed only inside `permno`. The companion is pooled
+Lag pairs are formed only inside `permno`. The companion is **pooled**
 on the **80** firms with the longest histories in this window, not
-on the 2,673 firms in the prepared state. The common columns
-$(r,\mathit{cay},\pi)$ are one calendar path, copied eighty times.
+on the 2,673 firms in the prepared state: one $\Phi$ is estimated on
+the stacked pairs, as if the 80 names shared a law of motion. The
+common columns $(r,\mathit{cay},\pi)$ are one calendar path, copied
+eighty times — they are not 80 independent macro histories.
 
 ```python
 from varvaluation import estimate_var_panel
@@ -195,8 +216,11 @@ A linear attribution of $\mathrm{var}(\mu_t(10))$ on this window:
 var share of mu(n=10): roe=-5.1%  beta=57.4%  bm=47.5%  r=0.1%  cay=0.0%  pi=-0.0%
 ```
 
-These are $v_i(\Sigma v)_i/(v'\Sigma v)$ and add to 100 within
-rounding. Negative cells are covariance, not double-counting.
+These are $v_i(\Sigma v)_i/(v'\Sigma v)$: each state’s contribution
+to $\mathrm{var}(\mu_t(10))$ if you attribute the quadratic form
+state by state. They add to 100 within rounding. Negative cells are
+**covariance**, not double-counting: a state that moves *against*
+the curve can receive a negative share.
 $\mathit{cay}$ contributes 0.0% of curve variance: the premium
 state the design kept after dropping the dividend yield does not
 move $\mu_t(10)$ here. $\mathit{bm}$ is not in $\mu_t$ and still
@@ -220,7 +244,8 @@ var(cf)=5.3563  var(dr)=0.0011  residual_share=2433.69  rho=0.96
 
 `residual_share` is $\mathrm{var}(\text{residual})/\mathrm{var}(\text{unexpected})$.
 A value of $2434$ means the unexpected-return series (monthly
-equal-weighted simple returns of the 80 firms) is not the object
+**equal-weighted** simple returns: each of the 80 firms gets weight
+$1/80$, not weight by market cap) is not the object
 this overlapping annual VAR prices. There is no return equation.
 $\rho=0.96$ is the Campbell–Shiller dividend-price constant, not a
 book-to-market linearization. $\mathrm{var}(\mathrm{dr})=0.0011$
