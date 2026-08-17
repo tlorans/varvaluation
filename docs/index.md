@@ -78,17 +78,6 @@ to zero by construction.
 
 ```text
 $ python examples/quickstart.py
-spectral radius: 0.409
-spot mu(n) %      n=1, 5, 10: 2.37, 3.78, 4.09
-E[C]/C            n=1, 5, 10: 0.999, 1.008, 1.021
-value: 24.07
-```
-
-```text
-$ python examples/flat_vs_curve.py
-mu(1)  2.37%
-mu(10) 4.09%
-flat PV vs curve  +8.0%
 ```
 
 | Maturity $n$ | $\mu_t(n)$ (%) | $E_t[C_{t+n}]/C_t$ |
@@ -98,7 +87,13 @@ flat PV vs curve  +8.0%
 | 10 | 4.09 | 1.021 |
 | 15 | 4.19 | 1.034 |
 
-The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat present value is about **8 % higher** than the curve-consistent value.
+```text
+spectral radius : 0.409
+strip-sum value : 24.07
+flat PV vs curve: +12.8%
+```
+
+The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat 15-year present value is about **13 % higher** than the curve-consistent value. The full annotated sprint is on the [worked example](guide/reproduce.md) page.
 
 ## Four calls
 

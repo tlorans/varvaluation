@@ -140,7 +140,7 @@ Numerator and denominator share $(\Phi,c,\Sigma)$. The covariance is estimated o
 V = model.value(X, C0)   # sum of strips + tail
 ```
 
-On the same synthetic state: **value = 24.07**. A flat rate locked at $\mu_t(1)$ produces a present value about **8 % higher**.
+On the same synthetic state: **value = 24.07**. A flat rate locked at $\mu_t(1)$ produces a 15-year present value about **13 % higher**.
 
 The tail is a geometric remainder at the terminal spot $\mu_t(N)$, not a hand-set $(r,g)$.
 
