@@ -8,7 +8,7 @@ Top-level imports (`import varvaluation as v`):
 | `ExpectedReturnSpec` | $\xi$, $\Lambda$ from $b_0, b_r, b_z$ |
 | `estimate_var` / `estimate_var_panel` | Newey–West VAR(1) |
 | `VARFit` | Companion, intercept, $\Sigma$, residuals |
-| `ValuationModel` | Cash-flow and priced recursions; `value` is the default |
+| `ValuationModel` | Cash-flow and priced recursions from the same $X$ |
 | `isolate_channels` | Named counterfactual PV |
 | `ValuationResult` | `pv`, `n_used`, `tail_rate` |
 | `news_decomposition` | Chen-aware CF / DR news |

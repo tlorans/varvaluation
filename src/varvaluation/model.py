@@ -14,8 +14,8 @@ class AngLiuModel:
     """Valuation model with time-varying expected returns.
 
     Cash-flow expectations and the discount curve are both functions of the
-    same state ``X``. ``value`` is the default (both sides live);
-    ``perpetuity`` freezes the numerator at 1 as a diagnostic.
+    same state ``X``. ``value`` multiplies them; ``perpetuity`` freezes the
+    numerator at 1 so only the curve can move.
 
     Parameters
     ----------
@@ -214,17 +214,16 @@ class AngLiuModel:
     def value(self, X, C: float = 1.0, n: int = 100, min_tail_rate: float = 1e-4):
         """Present value: expected cash flows and the discount curve from ``X``.
 
-        This is the default valuation. Both sides of every strip come from
-        the same fitted system.
+        Both sides of every strip come from the same fitted system.
         """
         from varvaluation.valuation import full_value
 
         return full_value(self, X, C=C, n=n, min_tail_rate=min_tail_rate)
 
     def perpetuity(self, X, n: int = 100, min_tail_rate: float = 1e-4):
-        """Unit-cash-flow diagnostic: freeze the numerator at 1.
+        """Unit-cash-flow present value: freeze the numerator at 1.
 
-        Use this to isolate the discount curve, not as the default value.
+        Isolates the discount curve; expected cash flows do not enter.
         """
         from varvaluation.valuation import perpetuity_value
 

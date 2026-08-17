@@ -56,7 +56,7 @@ invariant, and it is tested.
 
 $\lambda$ is chosen in exactly one of two ways:
 
-1. **Expected-return gradient** (the default when the VAR has no return
+1. **Expected-return gradient** (when the VAR has no return
    equation). Pass `xi` and `Lambda`. Then
    $\lambda = \xi + 2\Lambda\bar X$ with $\bar X$ the unconditional mean.
    A typical state `(g, beta, dpo, r, cay, pi)` contains no equity return.

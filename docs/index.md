@@ -30,7 +30,7 @@ VAR of cash-flow growth **and** expected-return states is the right tool: it
 is one system that produces both forecasts, and their covariance, from the
 same state $X_t$ and the same $(\Phi, c, \Sigma)$.
 
-## The default: both sides live
+## Both sides from $X_t$
 
 Write cash flows in growth form, $g_{t+i} = \log(C_{t+i}/C_{t+i-1})$. Each
 strip is then an exponential of cumulated growth minus cumulated discount
@@ -40,12 +40,11 @@ rates. Under a Gaussian VAR those expectations have closed forms.
 |---|---|---|---|
 | Numerator | $\mathbb{E}_t[C_{t+n}]/C_t$ | the cash-flow row of $\Phi$ | `cashflow_expectation` |
 | Denominator | spot rate $\mu_t(n)$ | the priced recursion | `spot_rates` |
-| Value | their product, summed | **both**, always | `value` |
+| Value | their product, summed | **both** | `value` |
 
-**That pairing is the default.** `model.value(X, C)` forecasts expected cash
-flows *and* the discount curve from the same $X_t$. You do not paste a
-spreadsheet into the numerator and you do not apply one WACC to every
-horizon.
+`model.value(X, C)` forecasts expected cash flows *and* the discount curve
+from the same $X_t$. You do not paste a spreadsheet into the numerator and
+you do not apply one WACC to every horizon.
 
 ```python
 from varvaluation import StateSpec, estimate_var, ValuationModel, news_decomposition
@@ -56,14 +55,14 @@ model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
 X = fit.X_lag[-1]
 rates = model.spot_rates(X, n=30)            # denominator
 cf    = model.cashflow_expectation(X, n=30)  # numerator
-val   = model.value(X, C=1.0)                # default: both from X
+val   = model.value(X, C=1.0)                # both from X
 news  = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 ```
 
-`perpetuity(X)` is an optional diagnostic: it freezes the numerator at $1$
-so that only the curve can move. Use it when you want to isolate the
-denominator, or when the cash-flow own-lag is near a unit root and the
-growth forecast is not yet trustworthy. It is not the default.
+`perpetuity(X)` freezes the numerator at $1$ so that only the curve can
+move. Use it when you want to isolate the denominator, or when the
+cash-flow own-lag is near a unit root and the growth forecast is not yet
+trustworthy.
 
 The cash-flow growth variable is whatever you pass as `spec.cashflow`
 (log dividend growth `g` on a portfolio, log ROE `roe` at a firm). The
@@ -74,7 +73,7 @@ line. [News](guide/news.md) asks a different question — what moved last
 period’s unexpected return — of the **same** fitted VAR.
 
 ![Spot discount curves for BE/ME deciles](assets/figures/spot_curves.png)
-<p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles, 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons. These curves are the <em>denominator</em>. The default valuation also multiplies each strip by the VAR’s expected cash flow at that horizon.</p>
+<p class="figure-caption">Spot discount rates at the last sample state for Ken French book-to-market deciles, 1965–2024. The curve slopes up: a single WACC is the wrong rate at long horizons. These curves are the <em>denominator</em>. The present value multiplies each strip by the VAR’s expected cash flow at that horizon.</p>
 
 A longer derivation, equation by equation, is the
 [Dynamic DCF course](https://github.com/tlorans/var_valuation). Citations
@@ -84,7 +83,7 @@ for the closed forms sit on [References](references.md).
 
 | Extra | What it adds |
 |---|---|
-| *(default)* | Named-state VAR; cash-flow and discount-rate forecasts from $X$; news |
+| core | Named-state VAR; cash-flow and discount-rate forecasts from $X$; news |
 | `[data]` | Ken French, FRED, cay, portfolio state |
 | `[wrds]` | CRSP–Compustat firm panel and firm-level state |
 

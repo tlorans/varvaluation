@@ -1,8 +1,8 @@
 # Valuation
 
-The default is that **both** sides of every strip come from the same state
-$X_t$. This page derives the two recursions and then shows the optional
-special case that freezes the numerator.
+**Both** sides of every strip come from the same state $X_t$. This page
+derives the two recursions and then shows the special case that freezes
+the numerator.
 
 Given a fitted VAR and a one-period expected return
 
@@ -19,7 +19,7 @@ from varvaluation import ValuationModel
 model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=alpha)
 rates = model.spot_rates(X, n=30)            # μ_t(1), …, μ_t(30)
 cf    = model.cashflow_expectation(X, n=30)  # E_t[C_{t+n}] / C_t
-value = model.value(X, C=1.0, n=80)          # default: both from X
+value = model.value(X, C=1.0, n=80)          # both from X
 ```
 
 `from_var` refuses a companion with spectral radius $\ge 1$
@@ -41,13 +41,12 @@ discount that receipt).
 
 A constant-rate DCF writes the denominator as $(1+r)^n$ with one $r$ for
 all $n$, and takes the numerator from a spreadsheet. Here both objects are
-forecasts from the VAR of $X_t$. The default call is `value`, which
-multiplies them.
+forecasts from the VAR of $X_t$. `value` multiplies them.
 
-!!! note "Default versus diagnostic"
-    `value(X, C)` is the default: expected cash flows *and* the discount
-    curve from $X_t$. `perpetuity(X)` freezes the numerator at $1$ so only
-    the curve can move. Use that when you want to isolate the denominator.
+!!! note "Value versus a frozen numerator"
+    `value(X, C)` takes expected cash flows *and* the discount curve from
+    $X_t$. `perpetuity(X)` freezes the numerator at $1$ so only the curve
+    can move. Use that when you want to isolate the denominator.
 
 ---
 
@@ -166,7 +165,7 @@ coefficients, $A(n) = (\bar a(n)-a(n))/n$, and likewise for $B$ and $G$.
 The $a,b,H$ recursion is the **priced** (discounted) counterpart of
 $\bar a,\bar b$; their difference *is* the curve.
 
-`model.value(X, C)` — the default — is then
+`model.value(X, C)` is then
 
 $$
 V_t
@@ -202,11 +201,10 @@ price you should publish. That is not a bug in the recursion. It is the
 recursion telling you the $g$ equation is not a usable cash-flow model at
 that aggregation.
 
-The default is still `value`. Check
-$\Phi[\texttt{cashflow},\texttt{cashflow}]$ first. If the own-lag is near
-a unit root, either improve the cash-flow specification (firm-level ROE
-mean-reverts more reliably) or use `perpetuity` as a **denominator-only**
-diagnostic until the numerator is trustworthy.
+Check $\Phi[\texttt{cashflow},\texttt{cashflow}]$ first. If the own-lag is
+near a unit root, either improve the cash-flow specification (firm-level
+ROE mean-reverts more reliably) or use `perpetuity` as a
+**denominator-only** diagnostic until the numerator is trustworthy.
 
 !!! warning "Inspect the own-lag"
     Before you report a full PV, print
@@ -236,7 +234,7 @@ expected cash flows, because they do not enter.
 ## 7. The curve, in pictures
 
 ![Spot discount curves](../assets/figures/spot_curves.png)
-<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. The default valuation also multiplies each strip by $\mathbb{E}_t[C_{t+n}]/C_t$.</p>
+<p class="figure-caption">Term structure of $\mu_t(n)$ for growth (D1), mid (D6), and value (D10) at the last state in the 1965–2024 sample. These curves are the denominator. The present value multiplies each strip by $\mathbb{E}_t[C_{t+n}]/C_t$.</p>
 
 ![Variance decomposition, D10](../assets/figures/variance_decomp_d10.png)
 <p class="figure-caption">Share of <em>spot-rate</em> variance by state, value decile. $\mathit{cay}$ and $\beta$ dominate the <em>discount curve</em>. That $g$ is negligible here does <em>not</em> mean cash flows do not matter for prices — it means they do not drive $\mu_t(n)$. They drive the numerator, which this figure does not show.</p>

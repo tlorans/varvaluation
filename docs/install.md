@@ -21,7 +21,7 @@ uv run pytest -q
 
 | Extra | Extra dependencies |
 |---|---|
-| default | numpy, scipy, polars, pandera, statsmodels |
+| core | numpy, scipy, polars, pandera, statsmodels |
 | `[data]` | pandas-datareader, pyarrow, openpyxl |
 | `[wrds]` | wrds, python-dotenv, pyarrow |
 

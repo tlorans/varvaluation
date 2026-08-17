@@ -2,8 +2,7 @@
 
 ## From a prepared state frame
 
-The default is `value`: expected cash flows and the discount curve from the
-same $X_t$.
+Expected cash flows and the discount curve come from the same $X_t$.
 
 ```python
 from varvaluation import (

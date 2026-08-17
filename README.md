@@ -3,10 +3,10 @@
 Cash-flow and discount-rate forecasts from one VAR.
 
 You name a state $X_t$, estimate a VAR(1), and get expected cash flows
-**and** a discount curve from the same system. The default valuation
-(`value`) uses both. Unexpected returns can be split into cash-flow news
-and discount-rate news; cash-flow news is taken from the cash-flow
-equation, not from the residual.
+**and** a discount curve from the same system. `value` multiplies them.
+Unexpected returns can be split into cash-flow news and discount-rate
+news; cash-flow news is taken from the cash-flow equation, not from the
+residual.
 
 **Docs:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 The teaching course is [tlorans/var_valuation](https://github.com/tlorans/var_valuation).
@@ -47,7 +47,7 @@ xi, Lambda = ExpectedReturnSpec().xi_lambda(
 )
 model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.002)
 X = fit.X_lag[-1]
-value = model.value(X, n=80)   # default: cash flows and rates from X
+value = model.value(X, n=80)   # cash flows and rates from X
 news  = news_decomposition(fit, returns, xi=xi, Lambda=Lambda)
 ```
 
