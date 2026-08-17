@@ -20,15 +20,14 @@ window cannot show is collected at the end of this chapter.
     live in `.env`; queries cache as parquet under
     `~/.cache/varvaluation/wrds`.
 
-The cash-flow slot is
-$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$, GAAP net
-income over lagged book. That is a profitability *level*. It is not
-log dividend growth, and it is not
-[Vuolteenaho’s](../references.md#vuolteenaho-2002)
-$e_t=\log(1+X_t/B_{t-1})$ (clean-surplus earnings, return units).
-The objects this section can report are the discount curve and the
-VAR path of $\mathit{roe}$. It does not report a present value of
-the equity.
+The cash-flow slot is `g`: log growth of trailing twelve-month
+dividends implied by CRSP returns with and without dividends. That
+is growth of cash paid to owners, so `value(X, C=div)` is a present
+value of the equity. The sample is firms that pay; a firm with no
+trailing dividends has no growth rate. The window is still short
+(the extract below is 2014–2019). Treat the number as the object
+the framework identifies, not as a published valuation of those
+three names.
 
 The script is
 [`examples/walkthrough.py`](https://github.com/tlorans/varvaluation/blob/main/examples/walkthrough.py).
@@ -74,8 +73,8 @@ from varvaluation import StateSpec
 from varvaluation.wrds import prepare_firm_state
 
 spec = StateSpec(
-    names=("roe", "beta", "bm", "r", "cay", "pi"),
-    cashflow="roe",
+    names=("g", "beta", "bm", "r", "cay", "pi"),
+    cashflow="g",
     group="permno",
     horizon=12,
     nw_lags=12,
@@ -86,18 +85,21 @@ state = prepare_firm_state(
 ```
 
 ``` text title="Terminal"
-names=('roe', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=roe  cashflow_index=0  group=permno
+names=('g', 'beta', 'bm', 'r', 'cay', 'pi')  cashflow=g  cashflow_index=0  group=permno
 state  67884 firm-months  2673 firms  2015-03-31 → 2019-09-30
 ```
 
 `prepare_firm_state` drops financials and utilities (SIC 6000–6999
-and 4900–4999), requires positive book, and builds `roe` only when
-$\mathrm{NI}>0$ (so $\log(\mathrm{NI}/\mathrm{BE})$ is defined).
-Monthly `roe` is the annual ratio, **forward-filled**: the same
-fiscal-year number is repeated until the next filing. The beta
+and 4900–4999) and, with `g` in the spec, keeps only firm-months
+with a trailing year of positive implied dividends. The beta
 window is 12 months because the extract is short. A twelve-month
 **burn-in** is the first year of returns consumed to produce the
-first beta, which is why the prepared state starts in March 2015,
+first beta. Dividend growth needs a further year of trailing cash,
+so the prepared state is shorter than a profitability-only state,
+and it is only payers. The counts printed below are from an earlier
+profitability spec; re-run the script after a CRSP pull that
+includes `retx` for the dividend-growth sample and present values.
+A twelve-month burn-in is why a typical 2014 start becomes 2015,
 not January 2014. The library convention is 60 months
 (`BETA_WINDOW`).
 

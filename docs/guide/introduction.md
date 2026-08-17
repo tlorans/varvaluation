@@ -183,13 +183,9 @@ The market premium regression that supplies the linear and quadratic
 pieces of $\mu_t$, written $(\xi,\Lambda)$, uses returns through
 December 2024, after the September 2019 valuation
 date — look-ahead, disclosed in [Estimation](estimate.md). The
-illustration reports $\mu_t(n)$ and
-$\mathbb{E}_t[\mathit{roe}_{t+n}]$. It does not report a present
-value of those equities, because
-$\mathit{roe}=\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$
-(GAAP net income over lagged book equity) is a profitability
-*level*, not log cash-flow growth, and not Vuolteenaho’s
-$e_t=\log(1+X_t/B_{t-1})$ (clean-surplus earnings in return units).
+illustration puts dividend growth in the cash-flow slot and
+reports `value`. Profitability remains an optional named state; it
+is not the cash-flow path.
 
 [The joint system](system.md) states the VAR. [Estimation](estimate.md)
 records staged measurement, including the seam between a market

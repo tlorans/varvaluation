@@ -7,7 +7,7 @@ import polars as pl
 from varvaluation.wrds.connect import get_wrds_connection, load_or_cache
 
 _CRSP_SQL = """
-    SELECT permno, date, ret, prc, shrout, hsiccd AS siccd
+    SELECT permno, date, ret, retx, prc, shrout, hsiccd AS siccd
     FROM crsp.msf
     WHERE date >= '{start}'
       AND date <= '{end}'
@@ -62,12 +62,13 @@ def load_crsp_monthly(
             pl.col("date").cast(pl.Date),
             pl.col("permno").cast(pl.Int64),
             pl.col("ret").cast(pl.Float64),
+            pl.col("retx").cast(pl.Float64),
             pl.col("prc").cast(pl.Float64),
             pl.col("shrout").cast(pl.Float64),
             pl.col("siccd").cast(pl.Int64),
         )
 
-    return load_or_cache(f"crsp_{start_s}_{end_s}", _build, use_cache=use_cache)
+    return load_or_cache(f"crsp_retx_{start_s}_{end_s}", _build, use_cache=use_cache)
 
 
 def load_compustat_annual(
@@ -137,4 +138,4 @@ def load_firm_panel(
         link = load_ccm_link(use_cache=use_cache)
         return merge_firm_panel(crsp, comp, link)
 
-    return load_or_cache(f"firm_panel_{start}_{end_s}", _build, use_cache=use_cache)
+    return load_or_cache(f"firm_panel_retx_{start}_{end_s}", _build, use_cache=use_cache)

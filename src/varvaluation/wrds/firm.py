@@ -1,13 +1,15 @@
-"""Firm-level state construction (roe, bm, rolling beta).
+"""Firm-level state construction (g, roe, bm, rolling beta).
 
-``roe`` is log(NI / lagged book equity), not Vuolteenaho's
-``e_t = log(1 + X/B)``.
+``g`` is log growth of trailing twelve-month dividends implied by
+CRSP ``ret`` and ``retx``. ``roe`` is log(NI / lagged book equity),
+not Vuolteenaho's ``e_t = log(1 + X/B)``.
 """
 
 from __future__ import annotations
 
 from datetime import date
 
+import numpy as np
 import polars as pl
 
 from varvaluation.betas import BETA_WINDOW, compute_rolling_betas
@@ -52,6 +54,51 @@ def filter_firms(
     if "ret" in df.columns:
         df = df.filter(pl.col("ret").is_not_null())
     return df
+
+
+def compute_firm_dividend_growth(panel: pl.DataFrame) -> pl.DataFrame:
+    """Hodrick trailing-year log dividend growth and the dollar TTM level.
+
+    Monthly dollars are ``(ret - retx) * lagged |prc| * shrout``. ``g`` is
+    ``log(TTM_t / TTM_{t-12})`` when both TTM levels are positive.
+    ``div`` is that TTM level, in CRSP units (thousands of dollars).
+    """
+    if "retx" not in panel.columns:
+        raise ValueError("panel must contain retx (ex-dividend return) to build g")
+    if "ret" not in panel.columns or "prc" not in panel.columns or "shrout" not in panel.columns:
+        raise ValueError("panel must contain ret, prc, and shrout to build g")
+
+    parts: list[pl.DataFrame] = []
+    for pn in panel["permno"].unique().sort().to_list():
+        sub = panel.filter(pl.col("permno") == pn).sort("date")
+        ret = sub["ret"].to_numpy().astype(float)
+        retx = sub["retx"].to_numpy().astype(float)
+        me = (sub["prc"].abs() * sub["shrout"]).to_numpy().astype(float)
+        n = len(ret)
+        me_lag = np.concatenate([[np.nan], me[:-1]])
+        monthly = (ret - retx) * me_lag
+        ttm = np.full(n, np.nan)
+        g = np.full(n, np.nan)
+        for i in range(11, n):
+            window = monthly[i - 11 : i + 1]
+            if np.isfinite(window).all():
+                ttm[i] = float(window.sum())
+        for i in range(23, n):
+            now, prev = ttm[i], ttm[i - 12]
+            if np.isfinite(now) and np.isfinite(prev) and now > 0 and prev > 0:
+                g[i] = float(np.log(now / prev))
+        parts.append(
+            pl.DataFrame(
+                {
+                    "permno": [pn] * n,
+                    "date": sub["date"].to_list(),
+                    "g": g,
+                    "div": ttm,
+                }
+            )
+        )
+    built = pl.concat(parts)
+    return panel.join(built, on=["permno", "date"], how="left")
 
 
 def compute_roe(panel: pl.DataFrame) -> pl.DataFrame:
@@ -129,9 +176,10 @@ def prepare_firm_state(
 ) -> pl.DataFrame:
     """Build the named firm-level state panel.
 
-    Constructs ``roe``, ``bm``, and ``beta`` when those names are in
-    ``spec.names``. Other names are joined from ``macro`` by column.
-    ``spec.group`` should be ``permno``.
+    Constructs ``g``, ``roe``, ``bm``, and ``beta`` when those names
+    are in ``spec.names``. Other names are joined from ``macro`` by
+    column. ``spec.group`` should be ``permno``. When ``g`` is built,
+    trailing twelve-month dividends stay on the frame as ``div``.
     """
     df = filter_firms(
         panel,
@@ -139,6 +187,8 @@ def prepare_firm_state(
         exclude_utilities=exclude_utilities,
     )
     names = set(spec.names)
+    if "g" in names:
+        df = compute_firm_dividend_growth(df)
     if "roe" in names:
         df = compute_roe(df)
     if "bm" in names:
@@ -168,6 +218,8 @@ def prepare_firm_state(
         df = df.join(pl.concat(beta_frames), on=["permno", "date"], how="left")
 
     keep = ["permno", "date", *[c for c in spec.names if c in df.columns]]
+    if "div" in df.columns:
+        keep.append("div")
     frame = df.select(keep)
     extra = [c for c in spec.names if c not in frame.columns]
     if extra:

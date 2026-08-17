@@ -66,8 +66,8 @@ def risk_premium(macro: pl.DataFrame) -> dict:
     }
 
 
-def expected_roe(fit, X, n: int) -> np.ndarray:
-    """E_t[roe_{t+k}] for k = 1..n from the VAR companion."""
+def expected_cashflow_state(fit, X, n: int) -> np.ndarray:
+    """E_t[cash-flow name_{t+k}] for k = 1..n from the VAR companion."""
     e = fit.spec.e_vec(fit.spec.cashflow)
     out = np.zeros(n)
     mean = X.copy()
@@ -108,8 +108,8 @@ def main() -> int:
 
     _print("Step 2 — StateSpec and prepare_firm_state")
     spec = StateSpec(
-        names=("roe", "beta", "bm", "r", "cay", "pi"),
-        cashflow="roe",
+        names=("g", "beta", "bm", "r", "cay", "pi"),
+        cashflow="g",
         group="permno",
         horizon=12,
         nw_lags=12,
@@ -150,21 +150,20 @@ def main() -> int:
     )
     slim = state.filter(pl.col("permno").is_in(top))
     fit = estimate_var_panel(slim, spec)
-    roe_i = spec.cashflow_index()
+    g_i = spec.cashflow_index()
     print(
         f"nobs={fit.nobs}  spectral_radius={fit.spectral_radius:.3f}  "
-        f"Phi[roe,roe]={fit.Phi[roe_i, roe_i]:+.3f}"
+        f"Phi[g,g]={fit.Phi[g_i, g_i]:+.3f}"
     )
     print(
-        "Phi[roe, ·]  "
-        + "  ".join(f"{n}={fit.Phi[roe_i, spec.index(n)]:+.3f}" for n in spec.names)
+        "Phi[g, ·]  "
+        + "  ".join(f"{n}={fit.Phi[g_i, spec.index(n)]:+.3f}" for n in spec.names)
     )
 
     _print("Step 5 — ValuationModel at three firms")
     model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.02)
     last_date = slim["date"].max()
     last = slim.filter(pl.col("date") == last_date).sort("permno")
-    # three names spread across the roe distribution
     picks = [
         last.row(0, named=True),
         last.row(last.height // 2, named=True),
@@ -172,13 +171,14 @@ def main() -> int:
     ]
     for row in picks:
         X = np.array([row[n] for n in spec.names], dtype=float)
-        roe = float(row["roe"])
+        g = float(row["g"])
+        C = float(row["div"])
         rates = model.spot_rates(X, n=10)
         perp = model.perpetuity(X, n=40)
-        eroe = expected_roe(fit, X, 10)
+        eg = expected_cashflow_state(fit, X, 10)
         print(
             f"permno={row['permno']}  {last_date}  "
-            f"log_roe={roe:+.3f}  implied_NI/BE={np.exp(roe):.3f}  "
+            f"g={g:+.3f}  TTM_div={C:.2f}  "
             f"beta={row['beta']:+.2f}  bm={row['bm']:+.3f}"
         )
         print(
@@ -186,16 +186,18 @@ def main() -> int:
             + ", ".join(f"{100 * rates[k]:.2f}" for k in (0, 4, 9))
         )
         print(
-            "  E[log_roe]     n=1, 5, 10: "
-            + ", ".join(f"{eroe[k]:+.3f}" for k in (0, 4, 9))
-            + "   (implied NI/BE "
-            + ", ".join(f"{np.exp(eroe[k]):.3f}" for k in (0, 4, 9))
-            + ")"
+            "  E[g]           n=1, 5, 10: "
+            + ", ".join(f"{eg[k]:+.3f}" for k in (0, 4, 9))
         )
         print(
             f"  unit_curve_pv={perp.pv:.2f}  "
             f"terminal_spot={100 * perp.tail_rate:.2f}%"
         )
+        try:
+            val = model.value(X, C=C, n=40)
+            print(f"  pv={val.pv:.2f}  (C=TTM dividends, CRSP thousands)")
+        except PerpetuityDivergesError as exc:
+            print(f"  value  {exc}")
 
     X0 = np.array([picks[0][n] for n in spec.names], dtype=float)
     decomp, total_var = model.variance_decomposition(10)

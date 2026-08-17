@@ -163,12 +163,14 @@ literature has produced a short, agreed list of variables that
 move *today’s price* once both sides are estimated together, on
 information that was available at the time.
 
-A next paper on the cash-flow side would replace a profitability
-*ratio* with a growth rate, or with earnings above a charge on
-book, and report a present value of the equity — not only a
-discount curve. It would also say whether book-to-market forecasts
-that growth, or does not, and therefore must forecast returns
-([Cochrane, 2008](../references.md#cochrane-2008)).
+The illustration now puts dividend growth in the cash-flow slot
+and reports a present value on a short window of payers
+([Three curves](walkthrough.md)). A next paper would do that on a
+long sample, and say whether book-to-market forecasts that growth
+or must forecast returns
+([Cochrane, 2008](../references.md#cochrane-2008)). Residual income
+— earnings above a charge on book — is the other cash-flow writing
+still not computed here.
 
 A next paper on the required-return side would rebuild the
 consumption–wealth gap, or the premium regression, stopping at the

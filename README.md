@@ -99,16 +99,18 @@ from varvaluation.wrds import load_firm_panel, prepare_firm_state
 
 panel = load_firm_panel(start="1965-07")
 spec = StateSpec(
-    names=("roe", "beta", "bm", "r", "cay", "pi"),
-    cashflow="roe",
+    names=("g", "beta", "bm", "r", "cay", "pi"),
+    cashflow="g",
     group="permno",
 )
 state = prepare_firm_state(panel, macro, spec, start="1965-07")
 fit = estimate_var_panel(state, spec)
 ```
 
-`prepare_firm_state` also accepts a local panel (no live WRDS). `roe`,
-`bm`, and `beta` are built when those names are in the spec.
+`prepare_firm_state` also accepts a local panel (no live WRDS). `g`
+(dividend growth), `roe`, `bm`, and `beta` are built when those names
+are in the spec. With `cashflow="g"`, `value(X, C=div)` is a present
+value. `div` is trailing twelve-month dividends in CRSP thousands.
 
 ## What is in 0.1
 

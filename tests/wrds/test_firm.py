@@ -126,3 +126,62 @@ def test_prepare_firm_state_named_columns():
     )  # finite
     assert np.isfinite(state["roe"].to_numpy()).all()
     assert np.isfinite(state["bm"].to_numpy()).all()
+
+
+def _dividend_panel(n_months: int = 48) -> pl.DataFrame:
+    """Two payers: constant price and constant monthly yield, so g is near zero after burn-in."""
+    panel = _synthetic_panel(n_months)
+    return panel.with_columns(retx=pl.col("ret") - 0.002, prc=pl.lit(20.0))
+
+
+def test_firm_dividend_growth_constant_yield_is_flat():
+    from varvaluation.wrds.firm import compute_firm_dividend_growth
+
+    panel = _dividend_panel(48)
+    out = compute_firm_dividend_growth(panel)
+    assert "g" in out.columns
+    assert "div" in out.columns
+    g = out["g"].to_numpy()
+    g = g[np.isfinite(g)]
+    assert g.size > 0
+    assert np.abs(g).max() < 0.05
+    div = out["div"].to_numpy()
+    div = div[np.isfinite(div)]
+    assert div.size > 0
+    assert div.min() > 0
+
+
+def test_prepare_firm_state_builds_g_and_div():
+    panel = _dividend_panel(48)
+    dates = panel["date"].unique().sort()
+    n = dates.len()
+    rng = np.random.default_rng(1)
+    macro = pl.DataFrame(
+        {
+            "date": dates,
+            "rf": np.full(n, 0.003),
+            "mkt": 0.008 + rng.normal(scale=0.03, size=n),
+            "r": np.full(n, 0.04),
+            "cay": rng.normal(scale=0.01, size=n),
+            "pi": rng.normal(scale=0.002, size=n),
+        }
+    )
+    spec = StateSpec(
+        names=("g", "beta", "bm", "r", "cay", "pi"),
+        cashflow="g",
+        group="permno",
+    )
+    state = prepare_firm_state(panel, macro, spec, beta_window=12)
+    assert "g" in state.columns
+    assert "div" in state.columns
+    assert spec.cashflow == "g"
+    assert state.height > 0
+    assert np.isfinite(state["g"].to_numpy()).all()
+    assert (state["div"].to_numpy() > 0).all()
+
+
+def test_compute_g_requires_retx():
+    from varvaluation.wrds.firm import compute_firm_dividend_growth
+
+    with pytest.raises(ValueError, match="retx"):
+        compute_firm_dividend_growth(_synthetic_panel(24))

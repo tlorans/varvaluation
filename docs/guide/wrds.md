@@ -19,22 +19,28 @@ from varvaluation.wrds import load_firm_panel, prepare_firm_state
 
 panel = load_firm_panel(start="1965-07")
 spec = StateSpec(
-    names=("roe", "beta", "bm", "r", "cay", "pi"),
-    cashflow="roe",
+    names=("g", "beta", "bm", "r", "cay", "pi"),
+    cashflow="g",
     group="permno",
 )
 state = prepare_firm_state(panel, macro, spec, start="1965-07")
 fit = estimate_var_panel(state, spec)
 ```
 
-`prepare_firm_state` also accepts a local panel — no live WRDS required. It builds `roe` (log NI over lagged book equity), `bm`, and `beta` when those names are in the spec. Financials and utilities are dropped. `roe` is built only when $\mathrm{NI}>0$. It is a profitability *level*, not log dividend growth and not Vuolteenaho’s $e_t=\log(1+X_t/B_{t-1})$.
+`prepare_firm_state` also accepts a local panel — no live WRDS required.
+It builds `g`, `roe`, `bm`, and `beta` when those names are in the
+spec. Financials and utilities are dropped.
 
-Firm-level `roe` mean-reverts ($\Phi_{\mathit{roe},\mathit{roe}}=0.46$
-on the 80-firm companion in Section 5). Inspect
-`fit.Phi[spec.cashflow_index(), spec.cashflow_index()]` before calling
-`value`. Do not feed `roe` into `value` as if it were log
-dividend growth. Discount a cash-flow path you already have at
-`spot_rates`, or report `perpetuity`.
+`g` is log growth of trailing twelve-month dividends implied by CRSP
+returns with and without dividends (`ret` and `retx`). The trailing
+level stays on the frame as `div` (CRSP thousands of dollars). Firms
+that do not pay stay out of the state: there is no growth of zero.
+That `g` is the cash-flow path. `value(X, C=div)` is a present value
+of the equity.
+
+`roe` is still available as a *level* — log NI over lagged book —
+if you put it in `spec.names`. It is not growth of cash. Do not set
+`cashflow="roe"` and call `value`.
 
 ## Sample overlap
 
@@ -42,13 +48,10 @@ Cay (published or reconstructed) must overlap the CRSP window *after* the beta b
 
 `estimate_var_panel` forms lag pairs only within `permno`. You need more months per firm than `spec.horizon`.
 
-On a cached 2014–2019 CRSP / Compustat pull the state after the beta
-burn-in is 2,673 firms and 67,884 firm-months (2015-03 → 2019-09). A
-pooled VAR on the 80 longest firms gives
-$\Phi_{\mathit{roe},\mathit{roe}}=0.46$ and a spectral radius of 0.995.
-`roe` is $\log(\mathrm{NI}/\mathrm{BE}_{\mathrm{lag}})$: a reading of
-$-2.08$ is an ROE of about 12.5%, not a −208% growth rate. The full
-terminal is in [Section 5](walkthrough.md).
+The illustration in [Three curves](walkthrough.md) uses `cashflow="g"`
+on a short window of dividend payers and reports `value`. The sample
+is still short; the object is now a present value, not a
+profitability path.
 
 Live queries are not run in CI. With credentials:
 
