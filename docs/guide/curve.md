@@ -20,7 +20,7 @@ $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t,
 $$
 
-Ang and Liu (2004) evaluate the product in closed form. Two recursions; the spot curve $\mu_t(n)$ is built from their ratio. The covariance estimated in $\Phi$ and $\Sigma$ enters **both**.
+the product is evaluated in closed form. Two recursions; the spot curve $\mu_t(n)$ is built from their ratio. The covariance estimated in $\Phi$ and $\Sigma$ enters **both**.
 
 ```mermaid
 flowchart LR
@@ -152,7 +152,7 @@ Compared with the cash-flow recursion, the new pieces are $-\alpha$, $-\xi$, and
 
 ### Further steps
 
-The update from $n$ to $n+1$ is a recursive matrix formula (Ang and Liu, Proposition I.1). You do not need to expand it by hand: the package evaluates it inside `spot_rates` and `value`. What matters for intuition is that $\Phi$ and $\Sigma$ enter the update, so the $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ term from the mental map is **already folded into** $(a,b,H)$. You never compute the covariance separately; the recursion carries it automatically.
+The update from $n$ to $n+1$ is a recursive matrix formula (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1). You do not need to expand it by hand: the package evaluates it inside `spot_rates` and `value`. What matters for intuition is that $\Phi$ and $\Sigma$ enter the update, so the $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ term from the mental map is **already folded into** $(a,b,H)$. You never compute the covariance separately; the recursion carries it automatically.
 
 ---
 
@@ -173,7 +173,7 @@ $$
 \mu_t(n) = A(n) + B(n)'X_t + X_t'G(n)X_t,
 $$
 
-where $A,B,G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (Ang and Liu, Definition II.1). Under stationarity (spectral radius of $\Phi$ less than 1), $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
+where $A,B,G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1). Under stationarity (spectral radius of $\Phi$ less than 1), $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
 
 ### Follow along
 
@@ -266,13 +266,13 @@ $$
   \;\approx\; \frac{1+g}{\mu-g}.
 $$
 
-That is Ang and Liu’s special case 1 — zero contribution from the covariance term, because there is no variation left to covary. The general case requires eigenvalues of $\Phi$ inside the unit circle and a declining priced strip.
+That is the constant-rate special case — zero contribution from the covariance term, because there is no variation left to covary. The general case requires eigenvalues of $\Phi$ inside the unit circle and a declining priced strip.
 
 ---
 
 ## Side by side
 
-| | Flat CAPM / WACC | Ang–Liu |
+| | Flat CAPM / WACC | Joint VAR |
 |---|---|---|
 | Identity | ratio of expectations | $E[\text{product}]$ |
 | Covariance | set to zero | inside $\Phi,\Sigma$, in both recursions |
