@@ -48,7 +48,7 @@ A single VAR closes the gap by construction.
 
 ## The VAR
 
-A **state vector** $X_t$ is a list of variables observed at date $t$. Ang and Liu summarise cash flows and expected returns by such a list. In the leading case
+A **state vector** $X_t$ is a list of variables observed at date $t$. A natural leading case is
 
 $$
 X_t = (g_t,\; \beta_t,\; z_t')',
