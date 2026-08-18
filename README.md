@@ -2,7 +2,7 @@
 
 Cash-flow expectations and discount rates from one VAR.
 
-A present value is the expectation of a **product**: each future cash flow multiplied by the path of one-period required returns. Those two paths have to be estimated together. The package implements the closed-form recursions of Ang and Liu (2004) — a cash-flow recursion, a priced recursion, and the term structure of spot discount rates $\mu_t(n)$ — with an optional residual-income map for the numerator.
+A present value is the expectation of a **product**: each future cash flow multiplied by the path of one-period required returns. Those two paths have to be estimated together. The package implements closed-form cash-flow and priced recursions, and the term structure of spot discount rates $\mu_t(n)$, with an optional residual-income map for the numerator. The formulas follow [Ang and Liu (2004)](https://tlorans.github.io/varvaluation/references/#ang-liu-2004).
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 
@@ -27,23 +27,24 @@ Python 3.11+. Managed with `uv`. `[data]` caches under `~/.cache/varvaluation` (
 ## The core calls
 
 ```python
-from varvaluation import AngLiuModel, estimate_var, simulate_paper_state
+from varvaluation import ValuationModel, estimate_var
+from varvaluation.news import simulate_return_var
 
-state, spec = simulate_paper_state(nobs=160, seed=11)
+state, spec = simulate_return_var(nobs=400, seed=7)
 fit = estimate_var(state, spec)
-model = AngLiuModel.from_var(fit)   # set xi, Lambda, alpha for μ_t
+model = ValuationModel.from_var(fit, xi=..., Lambda=..., alpha=...)
 # spots = model.spot_rates(X, n=30)           # μ_t(n)
 # cf    = model.cashflow_expectation(X, n=30) # cash-flow recursion
-# V     = model.value(X, C0)                  # sum of strips + tail
+# V     = model.value(X, C=1.0)               # sum of strips + tail
 ```
 
-`uv run python examples/reproduce_glz2020.py` runs a synthetic state end to end. Add `--wrds` for a live Compustat / CRSP panel.
+`uv run python examples/quickstart.py` runs the synthetic laboratory end to end.
 
 ## What is in 0.1
 
 | Layer | Status |
 |---|---|
-| Ang–Liu cash-flow and priced recursions, $\mu_t(n)$ | shipped |
+| Cash-flow and priced recursions, $\mu_t(n)$ | shipped |
 | Quadratic $\mu_t = \alpha + \xi'X + X'\Lambda X$ (moving $\beta$ and premium) | shipped |
 | Newey–West VAR(1) / panel VAR, named `StateSpec` | shipped |
 | Optional residual-income numerator (clean surplus) | shipped |

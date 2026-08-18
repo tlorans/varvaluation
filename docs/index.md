@@ -1,6 +1,6 @@
 <div class="hero" markdown>
 
-<p class="hero-kicker">Ang &amp; Liu (2004) · one joint VAR</p>
+<p class="hero-kicker">One joint VAR · product identity · spot curve</p>
 
 # How to discount cash flows when expected returns move
 
@@ -9,8 +9,8 @@ Value is the expectation of a <strong>product</strong>.
 A product has a <strong>covariance</strong>.
 Cash flows and discount rates must therefore come from the
 <strong>same</strong> system — a VAR for the state $X_t$.
-This package implements the closed-form recursions of
-<a href="references.md#ang-liu-2004">Ang and Liu (2004)</a>.
+This package turns that system into cash-flow expectations,
+a term structure of spot rates $\mu_t(n)$, and a strip-sum present value.
 </p>
 
 [The problem](guide/problem.md){ .md-button .md-button--primary }
@@ -36,8 +36,7 @@ flowchart LR
 <a href="guide/system/"><span class="part">3</span><strong>One VAR</strong><span>Cash-flow growth and expected returns must share one law of motion, or the covariance is missing.</span></a>
 </div>
 
-From that joint system Ang and Liu give two recursions (expected cash,
-priced strip) and the **spot curve** $\mu_t(n)$ — one discount rate per maturity — that makes the usual two-step workflow exact inside the model.
+From that joint system come two recursions (expected cash, priced strip) and the **spot curve** $\mu_t(n)$ — one discount rate per maturity — that makes the usual two-step workflow exact inside the model.
 
 Code is spread through the course: each conceptual page shows the few lines that produce the figure or number next to it. The same synthetic state (seed 7) is reused from [The problem](guide/problem.md) through [The two recursions](guide/curve.md).
 
@@ -65,7 +64,7 @@ flowchart TB
   subgraph ratio ["Ratio of expectations (flat DCF)"]
     R["V = E[C] / (1+r)ⁿ"]
   end
-  subgraph product ["Expectation of a product (Ang–Liu)"]
+  subgraph product ["Expectation of a product"]
     P["V = E[ e<sup>−∑μ</sup> · C ]"]
   end
   ratio -.->|"valid only if r deterministic"| product
@@ -104,6 +103,6 @@ The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts t
 <a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State variables, VAR specifications, other asset classes.</span></a>
 </div>
 
-Formulas: [Ang and Liu (2004)](references.md#ang-liu-2004).
+Closed-form recursions follow [Ang and Liu (2004)](references.md#ang-liu-2004).
 Optional residual-income numerator: [Ang and Liu (2001)](references.md#ang-liu-2001),
 [Feltham and Ohlson (1995)](references.md#feltham-ohlson-1995).

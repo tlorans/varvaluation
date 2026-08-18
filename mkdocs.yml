@@ -1,5 +1,5 @@
 site_name: Cash flows and discount rates from one VAR
-site_description: Ang and Liu (2004) recursions — cash-flow expectations and spot discount rates μ_t(n) from one system.
+site_description: Cash-flow expectations and spot discount rates μ_t(n) from one joint VAR.
 site_url: https://tlorans.github.io/varvaluation/
 repo_url: https://github.com/tlorans/varvaluation
 repo_name: tlorans/varvaluation

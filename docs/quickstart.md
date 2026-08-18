@@ -1,6 +1,6 @@
 # Offline check
 
-No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$.
+No downloads. A synthetic state, one VAR, the two recursions, and the spot curve $\mu_t(n)$.
 
 ```text
 python examples/quickstart.py
