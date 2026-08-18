@@ -28,7 +28,7 @@ If both \(\beta_t\) and \(\lambda_t\) move, \(\mu_t=\alpha+\xi'X_t+X_t'\Lambda X
 | Consumption–wealth residual \(\mathit{cay}\) is strong *in sample* | [Lettau and Ludvigson (2001)](../references.md#lettau-ludvigson-2001) | Useful instrument; disputed out of sample and on look-ahead |
 | Long-run growth risk can drive both sides | [Bansal and Yaron (2004)](../references.md#bansal-yaron-2004) | Structural rationale for a shared state; not estimated here |
 
-Ang and Liu’s empirical system is six-dimensional (growth, beta, and instruments for the premium and the short rate). The package lets you name any subset and mark which row is cash-flow growth (`StateSpec.cashflow`).
+A standard empirical system is six-dimensional (growth, beta, and instruments for the premium and the short rate). The package lets you name any subset and mark which row is cash-flow growth (`StateSpec.cashflow`).
 
 ### Specification choices that matter
 
@@ -47,7 +47,7 @@ The product identity does not care whether \(C\) is a dividend, a coupon, a rent
 
 ### Bonds and the Treasury curve
 
-Affine term-structure models are the fixed-income sibling of the equity construction: a low-dimensional state drives the entire yield curve under no-arbitrage ([Duffie and Kan, 1996](../references.md#duffie-kan-1996); [Dai and Singleton, 2000](../references.md#dai-singleton-2000); [Ang and Piazzesi, 2003](../references.md#ang-piazzesi-2003)). Spot rates \(\mu_t(n)\) in Ang and Liu play the same practical role that yields play for bonds — one number per horizon, read from a joint state. The difference is institutional: bond cash flows are contractual; equity cash flows are discretionary. The map (product, covariance, one system) is the same.
+Affine term-structure models are the fixed-income sibling of the equity construction: a low-dimensional state drives the entire yield curve under no-arbitrage ([Duffie and Kan, 1996](../references.md#duffie-kan-1996); [Dai and Singleton, 2000](../references.md#dai-singleton-2000); [Ang and Piazzesi, 2003](../references.md#ang-piazzesi-2003)). Spot rates \(\mu_t(n)\) play the same practical role that yields play for bonds — one number per horizon, read from a joint state. The difference is institutional: bond cash flows are contractual; equity cash flows are discretionary. The map (product, covariance, one system) is the same.
 
 ### Sovereign bonds
 
@@ -70,7 +70,7 @@ The cash-and-carry identity links spot, futures, and the convenience yield. Conv
 | Joint law | VAR for \(X_t\) | affine state for yields | VAR for rents and returns | VAR for spot and convenience yield |
 | Practical output | equity spot curve \(\mu_t(n)\) | yield curve | property discount rates | futures term structure |
 
-The package implements the equity (and portfolio) case of Ang and Liu. Extending it to another asset class is a change of **state names and data**, not a change of the mental map or the two recursions.
+The package implements the equity (and portfolio) case. Extending it to another asset class is a change of **state names and data**, not a change of the mental map or the two recursions.
 
 ---
 
