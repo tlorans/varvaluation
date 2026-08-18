@@ -2,7 +2,7 @@
 
 ## Where this sits on the map
 
-The three-step map is already complete. This page is pure measurement: how the coordinates of $X_t$ are constructed so that the VAR (and therefore both recursions) can see them.
+The three-step map is already complete, and the synthetic laboratory (seed 7) has shown every object. This page is pure measurement: how the coordinates of $X_t$ are constructed on **real data** so that the VAR (and therefore both recursions) can see them.
 
 The VAR only sees the named coordinates of $X_t$. Everything else is how those coordinates are measured. Ang and Liu’s empirical system is six-dimensional; the package lets you name any subset and mark which row is cash-flow growth.
 
@@ -95,19 +95,19 @@ fit = estimate_var(state, spec)   # → Φ, c, Σ
 
 ## Portfolio or industry averages
 
-Value-weight firm-level growth, beta, and profitability inside a filter; attach a common premium series. That is the series the VAR sees.
+Value-weight firm-level growth, beta, and profitability inside a filter; attach a common premium series. That is the series the VAR sees. Different portfolios produce different curves in the same month because they carry different average $\beta$ and different $\Phi$.
 
 ```python
 from varvaluation import prepare_industry_state
 
-state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))
+state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))  # banks
+state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836),))  # drugs
 ```
-
-Different portfolios produce different curves in the same month because they carry different average $\beta$ and different $\Phi$:
 
 ![Spot curves by book-to-market decile](../assets/figures/spot_curves.png)
 
-The next page runs estimate → recurse → curve on a worked example.
+!!! warning "The one rule"
+    Both recursions must always read from the **same** $(\Phi,c,\Sigma)$. If cash comes from one estimated system and rates from another, the covariance term is gone — which is the mistake the whole package exists to prevent.
 
 ---
 
@@ -118,3 +118,4 @@ You should be able to:
 1. Name the coordinates that typically enter $X_t$ and say which one feeds the cash-flow recursion.
 2. Distinguish the case in which the Treasury curve sits inside the VAR from the case in which it is supplied externally.
 3. Construct a `StateSpec` that tells the package which row is growth.
+4. Switch the universe that enters $X_t$ without touching the recursions or the mental map.

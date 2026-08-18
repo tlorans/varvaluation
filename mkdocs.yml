@@ -37,8 +37,6 @@ nav:
   - One system: guide/system.md
   - The two recursions: guide/curve.md
   - Building the state: guide/state.md
-  - Worked example: guide/reproduce.md
-  - Other portfolios: guide/industries.md
   - Going further: guide/literature.md
   - Software:
       - Install: install.md
@@ -60,6 +58,8 @@ exclude_docs: |
   guide/valuation.md
   guide/walkthrough.md
   guide/wrds.md
+  guide/reproduce.md
+  guide/industries.md
 
 markdown_extensions:
   - admonition

@@ -6,7 +6,7 @@
 2. The product carries a covariance term that moves the price level.
 3. **Cash-flow growth and expected returns must share one law of motion** — or that covariance has nowhere to come from.
 
-This page is step 3.
+This page is step 3. You will simulate a state, estimate one VAR, and read the matrices that carry the covariance.
 
 ```mermaid
 flowchart TB
@@ -96,31 +96,85 @@ The off-diagonal cells of $\Phi$ and of $\Sigma$ *are* the covariance structure 
 
 ---
 
-## Numerical illustration (same offline state)
+## Follow along — simulate the state and estimate the VAR
 
-From `examples/quickstart.py` (seed 7):
+Reuse the laboratory from [The problem](problem.md) (seed 7). First create the synthetic series and fit one joint system:
 
-```text
-spectral radius: 0.409
-Phi:
- [[0.295 0.124]
-  [0.006 0.402]]
-c: [0.0027 0.0015]
+```python
+import numpy as np
+from varvaluation import estimate_var
+from varvaluation.news import simulate_return_var
+
+df, spec = simulate_return_var(nobs=400, seed=7)
+fit = estimate_var(df, spec)
+
+print("names           :", spec.names)
+print("cash-flow row   :", spec.cashflow)
+print("spectral radius :", f"{fit.spectral_radius:.3f}")
+print("Φ:\n", np.round(fit.Phi, 3))
+print("c :", np.round(fit.c, 4))
+print("Σ diagonal:", np.round(np.diag(fit.Sigma), 6))
 ```
 
-Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero — they are exactly the cross-forecast channels that carry part of the covariance into the product.
+```text
+names           : ('ret', 'g')
+cash-flow row   : g
+spectral radius : 0.409
+Φ:
+ [[0.295 0.124]
+  [0.006 0.402]]
+c : [0.0027 0.0015]
+Σ diagonal: [0.00036 0.000089]
+```
 
-The data the VAR is estimated on:
+Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero — they are the cross-forecast channels that carry part of the covariance into the product.
+
+### What the VAR is estimated on
+
+```python
+# the two series in df are the state the VAR sees
+ret = df["ret"]   # return coordinate
+g   = df["g"]     # growth coordinate (cash-flow row)
+```
 
 ![Simulated paths of return and growth](../assets/figures/simulated_state.svg)
 
-The contemporaneous piece of $\Sigma$ is visible in the residual scatter. Separate models of growth and of returns would never produce this joint cloud:
+### Shock covariance $\Sigma$
+
+Residuals of the fitted system show the contemporaneous piece of $\Sigma$. Separate models of growth and of returns would never produce this joint cloud:
+
+```python
+u = fit.residuals          # shape (T, K)
+# columns align with spec.names — here u[:, 0] is ret, u[:, 1] is g
+```
 
 ![VAR residual scatter (shock covariance)](../assets/figures/var_residuals.svg)
 
-Because $\Phi$ is stable, multi-step forecasts glide back to the unconditional mean — the source of a non-flat spot curve:
+### Multi-step expectations
+
+Because $\Phi$ is stable, forecasts glide back to the unconditional mean. That mean reversion is the source of a non-flat spot curve:
+
+```python
+from numpy.linalg import matrix_power, solve
+
+X = fit.X_lag[-1]         # last observed lag
+K = fit.Phi.shape[0]
+eye = np.eye(K)
+mu_uncond = solve(eye - fit.Phi, fit.c)
+
+h = 12
+Phi_h = matrix_power(fit.Phi, h)
+E_X = (eye - Phi_h) @ mu_uncond + Phi_h @ X
+print("E_t[X_{t+12}] =", np.round(E_X, 4))
+```
 
 ![Multi-step conditional expectations](../assets/figures/var_expectations.svg)
+
+The five pedagogical figures (including those above) are rebuilt by:
+
+```text
+python examples/build_pedagogical_figures.py
+```
 
 ---
 
@@ -154,7 +208,24 @@ $$
 
 If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is **affine** (linear plus constant) in $X_t$. Letting **both** move is what the matrix $H(n)$ in the priced recursion is for.
 
-The short rate may sit inside $X_t$, or a Treasury curve may be kept outside the VAR and supplied as data. The package supports both.
+### Follow along — attach expected-return loadings
+
+On the synthetic laboratory the return coordinate plays the role of the rate, and a small loading on growth stands in for a beta-like channel:
+
+```python
+from varvaluation import ExpectedReturnSpec, ValuationModel
+
+xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
+    spec, {"b0": 0.01}
+)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
+X = fit.X_lag[-1]
+
+mu_1 = float(0.04 + xi @ X + X @ Lambda @ X)   # one-period μ_t
+print(f"μ_t = {100 * mu_1:.2f}%")
+```
+
+The next page turns this `model` into the cash-flow recursion, the priced recursion, and the spot curve $\mu_t(n)$.
 
 ---
 
@@ -170,23 +241,10 @@ Estimate cash in one model and the rate in another, and these cells are gone. Th
 
 ---
 
-## In code
-
-```python
-from varvaluation import StateSpec, estimate_var
-
-spec = StateSpec(names=("g", "beta", "mrp", ...), cashflow="g", horizon=1)
-fit = estimate_var(state, spec)   # → Φ, c, Σ  (one system)
-```
-
-The next page turns $(\Phi,c,\Sigma)$ and $(\alpha,\xi,\Lambda)$ into the cash-flow recursion, the priced recursion, and the spot curve $\mu_t(n)$ — all reading from the same matrices.
-
----
-
 ## After this page
 
 You should be able to:
 
-1. Explain why two separate forecasting equations cannot produce $\mathrm{Cov}(\sum g,\sum \mu)$.
-2. Point to the off-diagonal cells of $\Phi$ and $\Sigma$ as the carriers of that covariance.
-3. State why a single VAR(1) is the minimal object that makes the product identity operational.
+1. Simulate the synthetic state and estimate one VAR with `estimate_var`.
+2. Read $\Phi$, $c$, $\Sigma$, and the spectral radius from the fit.
+3. Explain why the off-diagonal cells of $\Phi$ and $\Sigma$ are the carriers of $\mathrm{Cov}(\sum g,\sum \mu)$.

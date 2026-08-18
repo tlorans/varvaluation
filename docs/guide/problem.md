@@ -6,7 +6,7 @@
 2. **Covariance.** $E[XY] = E[X]E[Y] + \mathrm{Cov}(X,Y)$. That covariance term is part of the *price*, not a diagnostic computed afterwards.
 3. **One system.** Cash-flow growth and expected returns must be modeled jointly — one VAR — or the covariance is missing by construction.
 
-This page writes out claims 1 and 2. Claim 3 is the next page.
+This page writes out claims 1 and 2, then shows the flat-versus-curve gap in numbers. Claim 3 is the next page.
 
 ```mermaid
 flowchart LR
@@ -177,13 +177,52 @@ Mean reversion in the expected return already produces a non-flat curve:
 
 ![Mean reversion in expected returns](../assets/figures/mean_reversion.png)
 
-On the same synthetic state used throughout this course (seed 7) the effect is concrete. The joint VAR produces a rising spot curve $\mu_t(n)$. Discounting a 15-year unit annuity at the short rate $\mu_t(1)$ instead of the curve over-states present value by **+12.8 %**:
+### Follow along — the flat-versus-curve gap
+
+The same synthetic state (seed 7) is used on every page of this course. Build a model, read the spot curve, and compare a 15-year unit annuity under the curve versus under the flat rate $\mu_t(1)$:
+
+```python
+import numpy as np
+from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
+from varvaluation.news import simulate_return_var
+
+df, spec = simulate_return_var(nobs=400, seed=7)
+fit = estimate_var(df, spec)
+xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
+    spec, {"b0": 0.01}
+)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
+X = fit.X_lag[-1]
+
+n = 15
+rates = model.spot_rates(X, n=n)          # μ_t(1), …, μ_t(15)
+mat = np.arange(1, n + 1)
+curve_pv = float(np.exp(-mat * rates).sum())
+flat_pv  = float(np.exp(-mat * rates[0]).sum())
+gap = (flat_pv - curve_pv) / curve_pv
+
+print(f"μ_t(1)   = {100 * rates[0]:.2f}%")
+print(f"μ_t(15)  = {100 * rates[-1]:.2f}%")
+print(f"flat vs curve = {100 * gap:+.1f}%")
+```
+
+```text
+μ_t(1)   = 2.37%
+μ_t(15)  = 4.19%
+flat vs curve = +12.8%
+```
 
 ![Flat versus curve discount factors](../assets/figures/flat_vs_curve_factors.svg)
 
-The shaded region is exactly the mispricing that appears when the product identity is replaced by a ratio of expectations.
+The shaded region is exactly the mispricing that appears when the product identity is replaced by a ratio of expectations. The next page estimates the VAR that produced these rates; the page after that builds the two recursions that produced the curve.
 
-## What we will compute
+You can also run the isolated script:
+
+```text
+python examples/flat_vs_curve.py
+```
+
+## What we will compute next
 
 Given a fitted VAR for $X_t$ and a map from the state into the one-period expected return
 
@@ -191,7 +230,7 @@ $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t,
 $$
 
-(where $\alpha$ is a constant, $\xi$ is a vector of linear loadings, and $\Lambda$ is a matrix of quadratic loadings) we will compute:
+(where $\alpha$ is a constant, $\xi$ is a vector of linear loadings, and $\Lambda$ is a matrix of quadratic loadings) the rest of the course computes:
 
 - the **cash-flow recursion** — $E_t[C_{t+n}]/C_t$,
 - the **priced recursion** — each strip of the price–cash-flow ratio,
@@ -208,4 +247,4 @@ You should be able to:
 
 1. State why value is an expectation of a product, not a ratio of expectations.
 2. Point to the $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ term and explain why it lowers value when growth and discount rates comove positively.
-3. Explain why forecasting cash and rates in separate models automatically sets that covariance to zero.
+3. Reproduce the **+12.8 %** flat-versus-curve gap on the synthetic state (seed 7).

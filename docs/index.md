@@ -39,6 +39,8 @@ flowchart LR
 From that joint system Ang and Liu give two recursions (expected cash,
 priced strip) and the **spot curve** $\mu_t(n)$ — one discount rate per maturity — that makes the usual two-step workflow exact inside the model.
 
+Code is spread through the course: each conceptual page shows the few lines that produce the figure or number next to it. The same synthetic state (seed 7) is reused from [The problem](guide/problem.md) through [The two recursions](guide/curve.md).
+
 ## From the flat DCF you know
 
 **Discounted cash flow (DCF)** is the standard valuation formula. In practice it is often written with one constant rate $r$ for every horizon:
@@ -90,32 +92,16 @@ strip-sum value : 24.07
 flat PV vs curve: +12.8%
 ```
 
-The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat 15-year present value is about **13 % higher** than the curve-consistent value. The full annotated sprint is on the [worked example](guide/reproduce.md) page.
-
-## Four calls
-
-```python
-from varvaluation import ValuationModel, estimate_var
-from varvaluation.news import simulate_return_var
-
-state, spec = simulate_return_var(nobs=400, seed=7)
-fit = estimate_var(state, spec)
-model = ValuationModel.from_var(fit, xi=..., Lambda=..., alpha=...)
-# spots = model.spot_rates(X, n=30)
-# cf    = model.cashflow_expectation(X, n=30)
-# V     = model.value(X, C=1.0)
-```
+The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat 15-year present value is about **13 % higher** than the curve-consistent value. You will build these numbers page by page in the course.
 
 ## Roadmap
 
 <div class="topic-cards">
-<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, why a flat rate fails.</span></a>
-<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Why the VAR is the minimum object that carries the covariance.</span></a>
-<a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, priced recursion, spot rates $\mu_t(n)$.</span></a>
-<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$.</span></a>
-<a href="guide/reproduce/"><span class="part">05</span><strong>Worked example</strong><span>Estimate, recurse, read the curve.</span></a>
-<a href="guide/industries/"><span class="part">06</span><strong>Other portfolios</strong><span>Same map, different universe.</span></a>
-<a href="guide/literature/"><span class="part">07</span><strong>Going further</strong><span>State variables, VAR specifications, and other asset classes.</span></a>
+<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, flat vs curve gap in code.</span></a>
+<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Simulate the state, estimate the VAR, read Φ and Σ.</span></a>
+<a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, spot curve, present value.</span></a>
+<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$ on real data.</span></a>
+<a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State variables, VAR specifications, other asset classes.</span></a>
 </div>
 
 Formulas: [Ang and Liu (2004)](references.md#ang-liu-2004).
