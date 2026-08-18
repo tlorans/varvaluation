@@ -62,6 +62,15 @@ Offline check:
 python examples/quickstart.py
 ```
 
+Ang and Liu (2004) reproduction (Ken French / FRED / cay):
+
+```text
+uv add "varvaluation[data]"
+uv run python examples/reproduce_angliu2004.py
+```
+
+Handbook page: [Ang and Liu (2004)](https://tlorans.github.io/varvaluation/guide/angliu/).
+
 ## License
 
 MIT

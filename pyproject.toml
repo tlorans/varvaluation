@@ -35,6 +35,18 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.6"]
 docs = ["mkdocs>=1.6", "mkdocs-material>=9.5", "matplotlib>=3.7"]
+data = [
+    "pandas-datareader>=0.10",
+    "pyarrow>=14",
+    "openpyxl>=3.1",
+    "python-dotenv>=1.0",
+]
+wrds = [
+    "wrds>=3.2",
+    "python-dotenv>=1.0",
+    "pandas>=2.0",
+    "pyarrow>=14",
+]
 
 [project.urls]
 Homepage = "https://tlorans.github.io/varvaluation/"
@@ -54,6 +66,9 @@ package = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "wrds: live WRDS queries (skipped without credentials)",
+]
 
 [tool.ruff]
 line-length = 100

@@ -38,6 +38,7 @@ nav:
   - The two recursions: guide/curve.md
   - Building the state: guide/state.md
   - Going further: guide/literature.md
+  - Ang and Liu (2004): guide/angliu.md
   - Software:
       - Install: install.md
       - API: api.md

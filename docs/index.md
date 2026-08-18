@@ -84,6 +84,7 @@ flat PV vs curve: +12.8%
 <a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>spot_curve and value as Polars frames.</span></a>
 <a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>Your columns; optional firm panel.</span></a>
 <a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State choices and other asset classes.</span></a>
+<a href="guide/angliu/"><span class="part">06</span><strong>Ang and Liu (2004)</strong><span>Paper-sample reproduction and the post-2000 extension.</span></a>
 </div>
 
-Closed-form recursions follow [Ang and Liu (2004)](references.md#ang-liu-2004).
+Closed-form recursions follow [Ang and Liu (2004)](references.md#ang-liu-2004). The empirical check — paper sample, December 2000 curve, post-2000 extension — is [Ang and Liu (2004)](guide/angliu.md).

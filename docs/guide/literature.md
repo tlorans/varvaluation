@@ -83,4 +83,6 @@ You should be able to:
 3. State, for bonds, real estate, and commodities, what plays the role of “cash flow” and what plays the role of “expected return.”
 4. Explain why the three-step map does not change when the claim changes — only the measurement of \(X_t\) does.
 
+The package’s own check of the 2004 tables is [Ang and Liu (2004)](angliu.md).
+
 Full bibliography: [References](../references.md).

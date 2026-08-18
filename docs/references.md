@@ -11,7 +11,7 @@ companion is [Ang and Liu (2001)](#ang-liu-2001). Clean surplus is
 
 ## Recursions and news
 
-- <span id="ang-liu-2004"></span>Ang, A. and J. Liu (2004), “How to Discount Cash Flows with Time-Varying Expected Returns,” *Journal of Finance* 59(6), 2745–2783. Equation (2) is the product form of value. Proposition I.1 is the priced recursion $a(n),b(n),H(n)$. Definition II.1 / Proposition II.1 are the spot curve $\mu_t(n)=A(n)+B(n)'X_t+X_t'G(n)X_t$. Special case 1 nests Gordon.
+- <span id="ang-liu-2004"></span>Ang, A. and J. Liu (2004), “How to Discount Cash Flows with Time-Varying Expected Returns,” *Journal of Finance* 59(6), 2745–2783. Equation (2) is the product form of value. Proposition I.1 is the priced recursion $a(n),b(n),H(n)$. Definition II.1 / Proposition II.1 are the spot curve $\mu_t(n)=A(n)+B(n)'X_t+X_t'G(n)X_t$. Special case 1 nests Gordon. Empirical check: [Ang and Liu (2004)](guide/angliu.md).
 - <span id="ang-liu-2001"></span>Ang, A. and J. Liu (2001), “A General Affine Earnings Valuation Model,” *Review of Accounting Studies* 6, 397–425. Residual-income companion. Corollary 2.2: a constant spread over the risk-free rate is not always available, even with constant interest rates.
 - <span id="brennan-1997"></span>Brennan, M. J. (1997), “The Term Structure of Discount Rates,” *Financial Management* 26(1), 81–90. Maturity-specific discount rates; the two-step workflow the 2004 curve keeps.
 - <span id="campbell-1991"></span>Campbell, J. Y. (1991), “A Variance Decomposition for Stock Returns,” *Economic Journal* 101, 157–179.

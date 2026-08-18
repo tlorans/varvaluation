@@ -2363,7 +2363,7 @@ wheels = [
 
 [[package]]
 name = "varvaluation"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
@@ -2380,6 +2380,7 @@ data = [
     { name = "openpyxl" },
     { name = "pandas-datareader" },
     { name = "pyarrow" },
+    { name = "python-dotenv" },
 ]
 dev = [
     { name = "pytest" },
@@ -2392,6 +2393,7 @@ docs = [
     { name = "mkdocs-material" },
 ]
 wrds = [
+    { name = "pandas" },
     { name = "pyarrow" },
     { name = "python-dotenv" },
     { name = "wrds" },
@@ -2404,20 +2406,22 @@ requires-dist = [
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "openpyxl", marker = "extra == 'data'", specifier = ">=3.1" },
-    { name = "pandas-datareader", marker = "extra == 'data'", specifier = ">=0.11" },
+    { name = "pandas", marker = "extra == 'wrds'", specifier = ">=2.0" },
+    { name = "pandas-datareader", marker = "extra == 'data'", specifier = ">=0.10" },
     { name = "pandera", specifier = ">=0.20" },
     { name = "polars", specifier = ">=1.0" },
-    { name = "pyarrow", marker = "extra == 'data'", specifier = ">=15.0" },
-    { name = "pyarrow", marker = "extra == 'wrds'", specifier = ">=15.0" },
+    { name = "pyarrow", marker = "extra == 'data'", specifier = ">=14" },
+    { name = "pyarrow", marker = "extra == 'wrds'", specifier = ">=14" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "python-dotenv", marker = "extra == 'data'", specifier = ">=1.0" },
     { name = "python-dotenv", marker = "extra == 'wrds'", specifier = ">=1.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "scipy", specifier = ">=1.11" },
     { name = "statsmodels", specifier = ">=0.14" },
     { name = "wrds", marker = "extra == 'wrds'", specifier = ">=3.2" },
 ]
-provides-extras = ["data", "wrds", "dev", "docs"]
+provides-extras = ["dev", "docs", "data", "wrds"]
 
 [[package]]
 name = "watchdog"

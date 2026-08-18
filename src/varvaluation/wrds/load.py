@@ -148,6 +148,13 @@ _CRSP_DSI_SQL = """
       AND date <= '{end}'
 """
 
+_CRSP_MSI_SQL = """
+    SELECT date, vwretd, vwretx
+    FROM crsp.msi
+    WHERE date >= '{start}'
+      AND date <= '{end}'
+"""
+
 
 def load_compustat_quarterly(
     start: str = "1971-01",
@@ -240,6 +247,26 @@ def merge_quarterly_panel(
     )
     drop = [c for c in ("linkdt", "linkenddt", "linktype", "linkprim") if c in merged.columns]
     return merged.drop(drop)
+
+
+def load_crsp_msi(
+    start: str = "1960-01",
+    end: str = "2026-12-31",
+    *,
+    use_cache: bool = True,
+) -> pl.DataFrame:
+    """CRSP monthly value-weighted market, with and without dividends."""
+    start_s, end_s = _bound(start, default="1960-01-01"), _bound(end, default="2026-12-31")
+
+    def _build():
+        df = _fetch(_CRSP_MSI_SQL.format(start=start_s, end=end_s))
+        return df.with_columns(
+            pl.col("date").cast(pl.Date),
+            pl.col("vwretd").cast(pl.Float64),
+            pl.col("vwretx").cast(pl.Float64),
+        )
+
+    return load_or_cache(f"crsp_msi_{start_s}_{end_s}", _build, use_cache=use_cache)
 
 
 def load_firm_panel(

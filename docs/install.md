@@ -25,6 +25,15 @@ uv run pytest -q
 
 Core dependencies: numpy, scipy, polars, pandera, statsmodels.
 
+Optional extras:
+
+```text
+uv add "varvaluation[data]"        # Ken French, FRED, cay
+uv add "varvaluation[data,wrds]"   # plus CRSP / Compustat
+```
+
+The [Ang and Liu (2004)](guide/angliu.md) reproduction runs on `[data]`. Compustat $\Delta p$ needs `[wrds]` and `WRDS_USER` / `WRDS_PASSWORD`.
+
 ## Publishing a release
 
 The workflow `.github/workflows/publish.yml` uploads to PyPI when you publish a GitHub release (or run it by hand). First-time setup:

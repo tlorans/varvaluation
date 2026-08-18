@@ -148,7 +148,8 @@ def parse_french_section(
         dates.append(date_val)
         rows.append(row)
 
-    df = pl.DataFrame(rows)
+    schema = {name: pl.Float64 for name in src_names}
+    df = pl.DataFrame(rows, schema=schema)
     df = df.with_columns(pl.Series("date", _yyyymm_to_date(dates)))
     rename = {src: out for src, out in zip(src_names, out_names, strict=False) if src != out}
     if rename:
