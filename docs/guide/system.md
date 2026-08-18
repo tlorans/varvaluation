@@ -124,11 +124,11 @@ $$
 
 $c$ is the intercept vector $(c_r,\,c_g)'$. $\Phi$ is the companion: row 1 is $(\phi_{rr},\phi_{rg})$, row 2 is $(\phi_{gr},\phi_{gg})$. $u_{t+1}$ is the innovation $(u^r,\,u^g)'$. $\Sigma$ puts variances on the diagonal and $\mathrm{Cov}(u^r,u^g)$ off it.
 
-That is why the VAR is the minimum object.
+Those four objects are the smallest set that can carry the product.
 
 One $\Sigma$ generates growth and discount-rate shocks together, so the covariance cannot be zeroed by accident.
 
-If every eigenvalue of $\Phi$ has absolute value less than one — the *spectral radius* of $\Phi$ is less than one — rates glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
+If every eigenvalue of $\Phi$ has absolute value less than one (the *spectral radius* of $\Phi$ is less than one), rates glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
 
 The off-diagonal cells of $\Phi$ are testable cross-forecasts. Does the premium forecast growth? Those are coefficients, with standard errors.
 
@@ -198,7 +198,7 @@ Residuals of the fitted system show the contemporaneous piece of $\Sigma$. Separ
 
 ```python
 u = fit.residuals          # shape (T, K)
-# columns align with spec.names — here u[:, 0] is ret, u[:, 1] is g
+# columns align with spec.names: here u[:, 0] is ret, u[:, 1] is g
 ```
 
 ![VAR residual scatter (shock covariance)](../assets/figures/var_residuals.svg)
@@ -231,7 +231,7 @@ python examples/build_pedagogical_figures.py
 
 ## Reading the state two ways
 
-Nothing in the VAR is labelled “numerator” or “denominator”. The two readings come from which coordinates you ask about.
+Nothing in the VAR is labelled "numerator" or "denominator". The two readings come from which coordinates you ask about.
 
 Cash-flow growth first. Write
 
@@ -253,7 +253,7 @@ $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t.
 $$
 
-Here $\alpha$ is a constant, $\xi$ collects the linear loadings on $X_t$, and $\Lambda$ collects the quadratic loadings. If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is *affine* — linear plus constant — in $X_t$. Letting *both* move is what the matrix $H(n)$ in the priced recursion is for.
+Here $\alpha$ is a constant, $\xi$ collects the linear loadings on $X_t$, and $\Lambda$ collects the quadratic loadings. If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is *affine* (linear plus constant) in $X_t$. Letting *both* move is what the matrix $H(n)$ in the priced recursion is for.
 
 On the synthetic laboratory the return coordinate plays the role of the rate, and a small loading on growth stands in for a beta-like channel.
 
@@ -278,4 +278,4 @@ The next page turns this `model` into the cash-flow recursion, the priced recurs
 
 Three cells carry the product. $\phi_{rg}$, the $(r,g)$ entry, says that growth today forecasts returns tomorrow. $\phi_{gr}$ says that returns today forecast growth tomorrow. $\Sigma_{rg}=\mathrm{Cov}(u^r,u^g)$ says that growth shocks and return shocks arrive together.
 
-Estimate cash in one model and the rate in another, and these cells are gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance — which was the whole point of keeping the product inside the expectation.
+Estimate cash in one model and the rate in another, and these cells are gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance, which was why the product stays inside the expectation.

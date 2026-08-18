@@ -1,16 +1,16 @@
 # varvaluation
 
-Discount curves and present values from **one VAR** on a **Polars** state frame.
+Discount curves and present values from one VAR on a Polars state frame.
 
 You bring the state variables. The package estimates a joint VAR, runs the two closed-form recursions, and returns the spot curve and present value as Polars frames. Optional firm panel via `estimate_var_panel`.
 
-**Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
+Handbook: [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 
 Three claims, in order:
 
-1. **Product** — value is $E[\text{discount path}\times\text{cash flow}]$.
-2. **Covariance** — that product expands to a covariance term that enters the price level.
-3. **One VAR** — cash-flow growth and expected returns must share one law of motion.
+1. Product: value is $E[\text{discount path}\times\text{cash flow}]$.
+2. Covariance: that product expands to a covariance term that enters the price level.
+3. One VAR: cash-flow growth and expected returns must share one law of motion.
 
 ## Install
 

@@ -8,7 +8,7 @@ The package does not download data or implement paper-specific loaders. You cons
 
 ## What the frame must contain
 
-Every frame needs an ordered time index, `date` or whatever you put in `spec.date`, so the estimator can form lag pairs. It needs one column per name in `spec.names`. Those columns *are* the state $X_t$. Mark which column is cash-flow growth with `spec.cashflow`. A panel of firms adds an optional `group` column — `firm`, say — and that column is used only by `estimate_var_panel`.
+Every frame needs an ordered time index, `date` or whatever you put in `spec.date`, so the estimator can form lag pairs. It needs one column per name in `spec.names`. Those columns *are* the state $X_t$. Mark which column is cash-flow growth with `spec.cashflow`. A panel of firms adds an optional `group` column (`firm`, say), and that column is used only by `estimate_var_panel`.
 
 ```python
 from varvaluation import StateSpec, estimate_var
@@ -22,13 +22,13 @@ spec = StateSpec(
 fit = estimate_var(state, spec)   # state: Polars DataFrame
 ```
 
-What typically enters $X_t$ is one cash-flow-growth coordinate — $\log(C_t/C_{t-1})$, or a growth rate derived from accounting — plus the variables that move expected returns: the short rate, conditional beta, the market premium, other predictors. If both beta and the premium move, $\mu_t$ is quadratic in $X_t$ and the priced recursion carries $H(n)$. If either is constant, set $\Lambda=0$.
+What typically enters $X_t$ is one cash-flow-growth coordinate ($\log(C_t/C_{t-1})$, or a growth rate derived from accounting) plus the variables that move expected returns: the short rate, conditional beta, the market premium, other predictors. If both beta and the premium move, $\mu_t$ is quadratic in $X_t$ and the priced recursion carries $H(n)$. If either is constant, set $\Lambda=0$.
 
 ---
 
 ## One series or a firm panel
 
-For a single series — a market, an industry average, a portfolio — call `estimate_var`.
+For a single series (a market, an industry average, a portfolio), call `estimate_var`.
 
 ```python
 fit = estimate_var(state, spec)

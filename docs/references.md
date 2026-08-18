@@ -1,6 +1,6 @@
 # References
 
-In-text citations use author–year and link here.
+In-text citations use author-year and link here.
 
 The closed-form cash-flow recursion, priced recursion, and spot curve
 $\mu_t(n)$ are [Ang and Liu (2004)](#ang-liu-2004). The residual-income
@@ -45,6 +45,6 @@ companion is [Ang and Liu (2001)](#ang-liu-2001). Clean surplus is
 - <span id="ang-piazzesi-2003"></span>Ang, A. and M. Piazzesi (2003), “A No-Arbitrage Vector Autoregression of Term Structure Dynamics with Macroeconomic and Latent Variables,” *Journal of Monetary Economics* 50(4), 745–787. Macro-finance affine term structure; the bond sibling of a joint state for yields.
 - <span id="dai-singleton-2000"></span>Dai, Q. and K. J. Singleton (2000), “Specification Analysis of Affine Term Structure Models,” *Journal of Finance* 55(5), 1943–1978.
 - <span id="duffie-kan-1996"></span>Duffie, D. and R. Kan (1996), “A Yield-Factor Model of Interest Rates,” *Mathematical Finance* 6(4), 379–406.
-- <span id="plazzi-2010"></span>Plazzi, A., W. Torous, and R. Valkanov (2010), “Expected Returns and Expected Growth in Rents of Commercial Real Estate,” *Review of Financial Studies* 23(9), 3469–3519. Rent–price ratio, expected rent growth, and expected returns for commercial property.
+- <span id="plazzi-2010"></span>Plazzi, A., W. Torous, and R. Valkanov (2010), “Expected Returns and Expected Growth in Rents of Commercial Real Estate,” *Review of Financial Studies* 23(9), 3469–3519. Rent-price ratio, expected rent growth, and expected returns for commercial property.
 
 </div>

@@ -21,7 +21,7 @@ $$
 
 $V_t$ is the value of the claim today. $C_{t+j}$ is the cash flow $j$ periods ahead. $E_t$ is the expectation given what you know at date $t$. And $r$ is one constant discount rate, used at every horizon.
 
-The factor $1/(1+r)^j$ has been taken *outside* the expectation. That step is legitimate only if the discount rate is known in advance — deterministic. Once expected returns move, it is an error.
+The factor $1/(1+r)^j$ has been taken *outside* the expectation. That step is legitimate only if the discount rate is known in advance (deterministic). Once expected returns move, it is an error.
 
 Start instead from the definition of the one-period expected return $\mu_t$. Let $P_t$ be the ex-dividend price. Then
 
@@ -40,7 +40,7 @@ V_t
     \right].
 $$
 
-The object inside the expectation is a *product*: a cash flow multiplied by a sequence of one-period discount factors $e^{-\mu}$. You cannot replace $E[\text{product}]$ by a ratio of two separate forecasts without an extra term. That is not a second-order approximation. It is the first-order mistake.
+The object inside the expectation is a *product*: a cash flow multiplied by a sequence of one-period discount factors $e^{-\mu}$. Replacing $E[\text{product}]$ by a ratio of two separate forecasts leaves an extra term. That replacement is a first-order error.
 
 ```mermaid
 flowchart TB
@@ -71,7 +71,7 @@ $$
 C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
 $$
 
-A *strip* is the contribution of a single horizon $n$ to the price–cash-flow ratio. Substitute the growth form into the product identity and that contribution is proportional to
+A *strip* is the contribution of a single horizon $n$ to the price-cash-flow ratio. Substitute the growth form into the product identity and that contribution is proportional to
 
 $$
 E_t\!\left[
@@ -107,14 +107,15 @@ $$
 
 Four pieces therefore enter the *level* of the price.
 
+
 | Term | Effect on value |
 |---|---|
 | $E_t[\sum g]$ | point-forecast growth (the usual DCF part) |
 | $\tfrac12\mathrm{Var}(\sum g)$ | growth uncertainty *raises* value (convexity of the exponential) |
 | $\tfrac12\mathrm{Var}(\sum \mu)$ | discount-rate uncertainty *raises* value |
-| $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ | **the economically important one** |
+| $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ | the economically important one |
 
-If good news about growth arrives together with *higher* expected returns — the usual aggregate pattern — then $\mathrm{Cov}>0$, the $-2\,\mathrm{Cov}$ term is negative, and value is *lower* than any DCF that ignores the interaction.
+If good news about growth arrives together with *higher* expected returns (the usual aggregate pattern), then $\mathrm{Cov}>0$, the $-2\,\mathrm{Cov}$ term is negative, and value is *lower* than any DCF that ignores the interaction.
 
 ```mermaid
 flowchart LR
@@ -123,7 +124,7 @@ flowchart LR
   Cov -->|"−2 Cov"| P["Price level ↓"]
 ```
 
-The covariance is not a variance-decomposition detail. It shifts the level of the price. A model that forecasts cash and discount rates in separate drawers has already set it to zero.
+The covariance shifts the level of the price. A model that forecasts cash and discount rates in separate drawers has already set it to zero.
 
 ---
 
@@ -185,7 +186,7 @@ flat vs curve = +12.8%
 
 ![Flat versus curve discount factors](../assets/figures/flat_vs_curve_factors.svg)
 
-The shaded region is exactly the mispricing that appears when the product identity is replaced by a ratio of expectations. Year one wants 2.37%. Year fifteen wants 4.19%. A single rate is a flat line through that gap, and on this state it overvalues the annuity by 12.8%. The next page estimates the VAR that produced these rates. The page after that builds the two recursions that produced the curve.
+The shaded region is the mispricing that appears when the product identity is replaced by a ratio of expectations. Year one wants 2.37%. Year fifteen wants 4.19%. A single rate is a flat line through that gap, and on this state it overvalues the annuity by 12.8%. The next page estimates the VAR that produced these rates. The page after that builds the two recursions that produced the curve.
 
 You can also run the isolated script:
 
@@ -195,7 +196,7 @@ python examples/flat_vs_curve.py
 
 ---
 
-## What comes next
+## Four objects from the same matrices
 
 Given a fitted VAR for $X_t$ and a map from the state into the one-period expected return
 
@@ -203,6 +204,6 @@ $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t,
 $$
 
-the rest of the course computes four objects from the same matrices. $\alpha$ is a constant, $\xi$ is a vector of linear loadings, and $\Lambda$ is a matrix of quadratic loadings. The cash-flow recursion produces $E_t[C_{t+n}]/C_t$. The priced recursion produces each strip of the price–cash-flow ratio. Their ratio is the spot curve $\mu_t(1),\ldots,\mu_t(N)$. The present value is the sum of those strips.
+the rest of the course computes four objects from the same matrices. $\alpha$ is a constant, $\xi$ is a vector of linear loadings, and $\Lambda$ is a matrix of quadratic loadings. The cash-flow recursion produces $E_t[C_{t+n}]/C_t$. The priced recursion produces each strip of the price-cash-flow ratio. Their ratio is the spot curve $\mu_t(1),\ldots,\mu_t(N)$. The present value is the sum of those strips.
 
-All four objects share the same $(\Phi,c,\Sigma)$. The covariance term is estimated once and enters both recursions. That is the point of putting both sides of the product in one system.
+All four objects share the same $(\Phi,c,\Sigma)$. The covariance term is estimated once and enters both recursions. That is why both sides of the product sit in one system.

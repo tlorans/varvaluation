@@ -63,7 +63,7 @@ $$
 \bar b(1) = \Phi'e_g.
 $$
 
-$e_g'c$ is the mean contribution of the intercept to next-period growth. $\tfrac12 e_g'\Sigma e_g$ is half the variance of the growth shock. It appears because $E[e^{u}] = e^{\tfrac12\mathrm{Var}(u)}$ for a normal shock $u$ — the same identity used on the previous pages. $\Phi'e_g$ maps today’s whole state into expected next-period growth.
+$e_g'c$ is the mean contribution of the intercept to next-period growth. $\tfrac12 e_g'\Sigma e_g$ is half the variance of the growth shock. It appears because $E[e^{u}] = e^{\tfrac12\mathrm{Var}(u)}$ for a normal shock $u$, the same identity used on the previous pages. $\Phi'e_g$ maps today’s whole state into expected next-period growth.
 
 The step from $n$ to $n+1$ is
 
@@ -98,7 +98,7 @@ n=15  E[C]/C = 1.034
 
 ## The priced recursion
 
-The second object is one strip of the price–cash-flow ratio: the contribution of horizon $n$ to $V_t/C_t$. That strip is
+The second object is one strip of the price-cash-flow ratio: the contribution of horizon $n$ to $V_t/C_t$. That strip is
 
 $$
 E_t\!\left[\exp\!\Bigl(\sum_{i=1}^{n}(g_{t+i}-\mu_{t+i})\Bigr)\right].
@@ -110,7 +110,7 @@ $$
 \exp\!\bigl(a(n) + b(n)'X_t + X_t'H(n)X_t\bigr).
 $$
 
-$a(n)$ is a scalar that depends only on maturity. $b(n)$ is the linear loading on today’s state. $H(n)$ is the quadratic loading. $H(n)$ appears because $\mu_t$ is quadratic whenever both beta and the premium move. When $\Lambda=0$, one has $H(n)\equiv 0$ and the strip is exponential-affine — the exponential of a linear function of $X_t$.
+$a(n)$ is a scalar that depends only on maturity. $b(n)$ is the linear loading on today’s state. $H(n)$ is the quadratic loading. $H(n)$ appears because $\mu_t$ is quadratic whenever both beta and the premium move. When $\Lambda=0$, one has $H(n)\equiv 0$ and the strip is exponential-affine (the exponential of a linear function of $X_t$).
 
 For the next period,
 
@@ -143,7 +143,7 @@ $$
 \mu_t(n) = A(n) + B(n)'X_t + X_t'G(n)X_t,
 $$
 
-where $A$, $B$, and $G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1). Under stationarity — spectral radius of $\Phi$ less than one — $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
+where $A$, $B$, and $G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1). Under stationarity (spectral radius of $\Phi$ less than one), $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
 
 ```python
 spots = model.spot_rates(X, n=15)
@@ -168,7 +168,7 @@ n=15  μ_t(n) = 4.19%
 
 The curve rises from 2.4% at $n=1$ toward roughly 4.2% at long horizons. Locking the discount rate at $\mu_t(1)$ would misprice every longer strip. On this state the 15-year unit annuity is *12.8% higher* under the flat rate (see [The problem](problem.md)).
 
-That is the practical bridge. Forecast cash however you like; discount at $\mu_t(n)$. Each spot already contains the covariance correction. The two-step workflow survives. Only the single constant rate is replaced by a curve.
+Forecast cash however you like; discount at $\mu_t(n)$. Each spot already contains the covariance correction. The two-step workflow survives. Only the single constant rate is replaced by a curve.
 
 ---
 
@@ -224,6 +224,6 @@ $$
   \;\approx\; \frac{1+g}{\mu-g}.
 $$
 
-That is the constant-rate special case — zero contribution from the covariance term, because there is no variation left to covary. The general case requires eigenvalues of $\Phi$ inside the unit circle and a declining priced strip.
+That is the constant-rate special case: the covariance term is zero because there is no variation left to covary. The general case requires eigenvalues of $\Phi$ inside the unit circle and a declining priced strip.
 
-A flat CAPM or WACC replaces the product by a ratio of expectations, sets the covariance to zero, uses one $r$ at every horizon, and finishes with a hand-set Gordon tail. The joint VAR keeps the product, carries the covariance inside $\Phi$ and $\Sigma$, discounts at $\mu_t(n)$, and finishes with the tail of the priced recursion. Those are not two implementations of the same formula. They are two different formulas.
+A flat CAPM or WACC replaces the product by a ratio of expectations, sets the covariance to zero, uses one $r$ at every horizon, and finishes with a hand-set Gordon tail. The joint VAR keeps the product, carries the covariance inside $\Phi$ and $\Sigma$, discounts at $\mu_t(n)$, and finishes with the tail of the priced recursion. Those are two different formulas.
