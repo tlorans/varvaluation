@@ -1,17 +1,49 @@
-"""Chen-aware cash-flow and discount-rate news."""
+"""Cash-flow / discount-rate news (optional diagnostic).
+
+The public estimator path does not require this module. It remains for
+tests and advanced diagnostics. Prefer ``varvaluation.simulate_state``
+for synthetic frames.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
 
 import numpy as np
 import polars as pl
 
-from varvaluation.estimate import VARFit, estimate_var
+from varvaluation.estimate import VARFit
 from varvaluation.exceptions import NonStationaryVARError, StateSpecError
 from varvaluation.schemas import validate_returns
-from varvaluation.spec import StateSpec
+from varvaluation.simulate import simulate_state
+
+# Back-compat for older tests / scripts
+def simulate_return_var(nobs: int = 600, *, seed: int = 0, cashflow_zero: bool = False):
+    if cashflow_zero:
+        # keep the old behaviour used by treasury_test
+        from datetime import date
+
+        rng = np.random.default_rng(seed)
+        from varvaluation.spec import StateSpec
+
+        spec = StateSpec(names=("ret", "g"), cashflow="g", horizon=1, nw_lags=2)
+        Phi = np.array([[0.3, 0.05], [0.0, 0.0]])
+        c = np.array([0.006, 0.0])
+        X = np.zeros((nobs, 2))
+        for t in range(1, nobs):
+            shock = np.array([rng.normal(scale=0.02), 0.0])
+            X[t] = c + Phi @ X[t - 1] + shock
+        y, m = 1960, 1
+        dates = []
+        for _ in range(nobs):
+            if m == 12:
+                nxt = date(y + 1, 1, 1)
+            else:
+                nxt = date(y, m + 1, 1)
+            dates.append(date.fromordinal(nxt.toordinal() - 1))
+            y, m = nxt.year, nxt.month
+        return pl.DataFrame({"date": dates, "ret": X[:, 0], "g": X[:, 1]}), spec
+    return simulate_state(nobs=nobs, seed=seed)
 
 
 DEFAULT_RHO = 0.96
@@ -41,8 +73,7 @@ def _news_mapping(
     xi: np.ndarray | None,
     Lambda: np.ndarray | None,
     rho: float,
-) -> np.ndarray:
-    """Return lambda such that N_DR = lambda' rho Phi (I - rho Phi)^{-1} u."""
+) -> tuple[np.ndarray, np.ndarray]:
     has_named = return_state is not None
     has_grad = xi is not None or Lambda is not None
     if has_named and has_grad:
@@ -85,11 +116,7 @@ def news_decomposition(
     rho: float | None = None,
     valuation_ratio: str | None = None,
 ) -> NewsResult:
-    """Direct cash-flow news and discount-rate news from a fitted VAR.
-
-    Cash-flow news is the cash-flow-equation revision, never the residual.
-    """
-    del alpha  # reserved for a future higher-order expansion of mu
+    del alpha
     date_col = fit.spec.date
     ret = validate_returns(returns, date=date_col, return_col=return_col)
 
@@ -158,50 +185,9 @@ def news_decomposition(
     return NewsResult(frame=frame, shares=shares, rho=rho, return_state=return_state)
 
 
-def _month_ends(n: int, start: date = date(1960, 1, 1)) -> list[date]:
-    dates: list[date] = []
-    y, m = start.year, start.month
-    for _ in range(n):
-        if m == 12:
-            nxt = date(y + 1, 1, 1)
-        else:
-            nxt = date(y, m + 1, 1)
-        dates.append(nxt.fromordinal(nxt.toordinal() - 1))
-        y, m = nxt.year, nxt.month
-    return dates
-
-
-def simulate_return_var(
-    nobs: int = 600,
-    *,
-    seed: int = 0,
-    cashflow_zero: bool = False,
-) -> tuple[pl.DataFrame, StateSpec]:
-    """Simulate a two-state (ret, g) VAR used by tests and treasury_test."""
-    rng = np.random.default_rng(seed)
-    spec = StateSpec(names=("ret", "g"), cashflow="g", horizon=1, nw_lags=2)
-    Phi = np.array([[0.3, 0.05], [0.0, 0.4]])
-    c = np.array([0.006, 0.002])
-    if cashflow_zero:
-        Phi[1, :] = 0.0
-        c[1] = 0.0
-    X = np.zeros((nobs, 2))
-    for t in range(1, nobs):
-        shock_g = 0.0 if cashflow_zero else rng.normal(scale=0.01)
-        shock = np.array([rng.normal(scale=0.02), shock_g])
-        X[t] = c + Phi @ X[t - 1] + shock
-    df = pl.DataFrame(
-        {
-            "date": _month_ends(nobs),
-            "ret": X[:, 0],
-            "g": X[:, 1],
-        }
-    )
-    return df, spec
-
-
 def treasury_test(nobs: int = 600, *, seed: int = 0) -> NewsResult:
-    """Chen Treasury check: known cash flows ⇒ direct CF news ≈ 0."""
+    from varvaluation.estimate import estimate_var
+
     df, spec = simulate_return_var(nobs, seed=seed, cashflow_zero=True)
     fit = estimate_var(df, spec)
     returns = df.select(["date", "ret"])

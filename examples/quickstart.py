@@ -50,12 +50,8 @@ def main() -> int:
     print("Step 3 — Polars spot curve")
     print("─" * 60)
     curve = model.spot_curve(X, n=15)
-    print(curve.filter(pl_col_in := None) if False else curve.filter(
-        curve["maturity"].is_in([1, 5, 10, 15])
-    ))
-    # simpler print without filter helper issues:
     for n in (1, 5, 10, 15):
-        row = curve.row(n - 1)
+        row = curve.row(n - 1)  # maturity, mu, cashflow_ratio, discount_factor
         print(f"  n={n:2d}  μ={100 * row[1]:.2f}%  E[C]/C={row[2]:.3f}")
     print()
 
