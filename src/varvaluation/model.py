@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import polars as pl
 from scipy.linalg import det, inv
 
 from varvaluation.estimate import VARFit, spectral_radius
@@ -10,12 +11,12 @@ from varvaluation.exceptions import NonStationaryVARError, RecursionDivergedErro
 from varvaluation.spec import StateSpec
 
 
-class AngLiuModel:
+class ValuationModel:
     """Valuation model with time-varying expected returns.
 
     Cash-flow expectations and the discount curve are both functions of the
-    same state ``X``. ``value`` multiplies them; ``perpetuity`` freezes the
-    numerator at 1 so only the curve can move.
+    same state ``X``. Inputs and curve/value outputs are designed around
+    Polars frames (see ``spot_curve``, ``curve_frame``, ``value_frame``).
 
     Parameters
     ----------
@@ -56,8 +57,11 @@ class AngLiuModel:
         self.e1 = spec.e_vec(spec.cashflow)
 
     @classmethod
-    def from_var(cls, fit: VARFit, xi, Lambda, alpha) -> AngLiuModel:
+    def from_var(cls, fit: VARFit, xi, Lambda, alpha) -> ValuationModel:
         return cls(fit.spec, fit.Phi, fit.c, fit.Sigma, xi, Lambda, alpha)
+
+    # back-compat alias used in older call sites / tests
+    from_var_ang_liu = from_var
 
     def is_stationary(self, tol: float = 1.0 - 1e-10) -> bool:
         return spectral_radius(self.Phi) < tol
@@ -164,6 +168,92 @@ class AngLiuModel:
             ratios[k - 1] = np.exp(bar_a[k] + bar_b[k] @ X)
         return ratios
 
+    def spot_curve(self, X, n: int = 30) -> pl.DataFrame:
+        """Discount curve and cash-flow ratios as a Polars frame.
+
+        Columns: ``maturity``, ``mu``, ``cashflow_ratio``, ``discount_factor``.
+        """
+        rates = self.spot_rates(X, n)
+        cf = self.cashflow_expectation(X, n)
+        mat = np.arange(1, n + 1)
+        return pl.DataFrame(
+            {
+                "maturity": mat,
+                "mu": rates,
+                "cashflow_ratio": cf,
+                "discount_factor": np.exp(-mat * rates),
+            }
+        )
+
+    def curve_frame(
+        self,
+        states: pl.DataFrame,
+        *,
+        n: int = 30,
+        id_cols: tuple[str, ...] | None = None,
+    ) -> pl.DataFrame:
+        """Long Polars frame of curves for one or many state rows.
+
+        ``states`` must contain the columns named in ``spec.names``.
+        Optional ``id_cols`` (e.g. ``("firm", "date")``) are repeated on
+        every maturity row so a firm panel stays tidy.
+        """
+        names = list(self.spec.names)
+        missing = [c for c in names if c not in states.columns]
+        if missing:
+            raise ValueError(f"states frame missing columns {missing}")
+
+        id_cols = tuple(id_cols or ())
+        for c in id_cols:
+            if c not in states.columns:
+                raise ValueError(f"id column {c!r} not in states frame")
+
+        pieces: list[pl.DataFrame] = []
+        for row in states.iter_rows(named=True):
+            X = np.array([row[name] for name in names], dtype=float)
+            curve = self.spot_curve(X, n=n)
+            if id_cols:
+                meta = {c: [row[c]] * n for c in id_cols}
+                curve = pl.DataFrame(meta).hstack(curve)
+            pieces.append(curve)
+        return pl.concat(pieces) if pieces else pl.DataFrame()
+
+    def value_frame(
+        self,
+        states: pl.DataFrame,
+        *,
+        C: float = 1.0,
+        n: int = 100,
+        id_cols: tuple[str, ...] | None = None,
+        min_tail_rate: float = 1e-4,
+    ) -> pl.DataFrame:
+        """Present value for each state row as a Polars frame.
+
+        Columns: optional ``id_cols``, then ``pv``, ``n_used``, ``tail_rate``.
+        """
+        from varvaluation.valuation import full_value
+
+        names = list(self.spec.names)
+        missing = [c for c in names if c not in states.columns]
+        if missing:
+            raise ValueError(f"states frame missing columns {missing}")
+
+        id_cols = tuple(id_cols or ())
+        records: list[dict] = []
+        for row in states.iter_rows(named=True):
+            X = np.array([row[name] for name in names], dtype=float)
+            result = full_value(self, X, C=C, n=n, min_tail_rate=min_tail_rate)
+            rec = {c: row[c] for c in id_cols}
+            rec.update(
+                {
+                    "pv": result.pv,
+                    "n_used": result.n_used,
+                    "tail_rate": result.tail_rate,
+                }
+            )
+            records.append(rec)
+        return pl.DataFrame(records)
+
     def unconditional_mean(self) -> np.ndarray:
         return np.linalg.solve(np.eye(self.K) - self.Phi, self.c)
 
@@ -212,19 +302,17 @@ class AngLiuModel:
         return (bar_a[n_max] - a[n_max]) / n_max
 
     def value(self, X, C: float = 1.0, n: int = 100, min_tail_rate: float = 1e-4):
-        """Present value: expected cash flows and the discount curve from ``X``.
-
-        Both sides of every strip come from the same fitted system.
-        """
+        """Present value: expected cash flows and the discount curve from ``X``."""
         from varvaluation.valuation import full_value
 
         return full_value(self, X, C=C, n=n, min_tail_rate=min_tail_rate)
 
     def perpetuity(self, X, n: int = 100, min_tail_rate: float = 1e-4):
-        """Unit-cash-flow present value: freeze the numerator at 1.
-
-        Isolates the discount curve; expected cash flows do not enter.
-        """
+        """Unit-cash-flow present value: freeze the numerator at 1."""
         from varvaluation.valuation import perpetuity_value
 
         return perpetuity_value(self, X, n=n, min_tail_rate=min_tail_rate)
+
+
+# Back-compat for older imports
+AngLiuModel = ValuationModel

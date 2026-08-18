@@ -1,14 +1,13 @@
-"""Present value and named-state channel isolation."""
+"""Present value helpers."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
 import numpy as np
 
-from varvaluation.exceptions import PerpetuityDivergesError, StateSpecError
-from varvaluation.model import AngLiuModel
+from varvaluation.exceptions import PerpetuityDivergesError
+from varvaluation.model import ValuationModel
 
 
 @dataclass(frozen=True)
@@ -31,7 +30,7 @@ def _finite_prefix(*arrays: np.ndarray) -> int:
 
 
 def perpetuity_value(
-    model: AngLiuModel,
+    model: ValuationModel,
     X,
     n: int = 100,
     min_tail_rate: float = 1e-4,
@@ -52,7 +51,7 @@ def perpetuity_value(
 
 
 def full_value(
-    model: AngLiuModel,
+    model: ValuationModel,
     X,
     C: float = 1.0,
     n: int = 100,
@@ -76,48 +75,3 @@ def full_value(
         cf_tail * np.exp(-(n_used + 1) * mu_tail) / (1 - np.exp(-mu_tail))
     )
     return ValuationResult(pv=pv, n_used=n_used, tail_rate=mu_tail)
-
-
-def isolate_channels(
-    model: AngLiuModel,
-    X,
-    *,
-    shut: tuple[str, ...],
-    on: Literal["cashflow", "discount", "both"],
-    C: float = 1.0,
-    n: int = 100,
-    min_tail_rate: float = 1e-4,
-) -> ValuationResult:
-    """Counterfactual value after zeroing named loadings.
-
-    ``on="both"`` is the unmodified model (control).
-    """
-    spec = model.spec
-    shut_idx = [spec.index(name) for name in shut]
-    cf = spec.cashflow_index()
-
-    if on == "both":
-        return full_value(model, X, C=C, n=n, min_tail_rate=min_tail_rate)
-
-    Phi = model.Phi.copy()
-    Lambda = model.Lambda.copy()
-
-    if on == "cashflow":
-        for s in shut_idx:
-            Phi[cf, s] = 0.0
-    elif on == "discount":
-        for s in shut_idx:
-            for i in range(spec.K):
-                if i != cf:
-                    Phi[i, s] = 0.0
-                Lambda[i, s] = 0.0
-                Lambda[s, i] = 0.0
-    else:
-        raise StateSpecError(
-            f"on must be 'cashflow', 'discount', or 'both'; got {on!r}"
-        )
-
-    counter = AngLiuModel(
-        spec, Phi, model.c, model.Sigma, model.xi, Lambda, model.alpha
-    )
-    return full_value(counter, X, C=C, n=n, min_tail_rate=min_tail_rate)
