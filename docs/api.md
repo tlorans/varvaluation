@@ -2,22 +2,22 @@
 
 The public surface. Top-level imports (`import varvaluation as v`).
 
-## Ang–Liu path
+## Core path
 
 | Name | Role |
 |---|---|
 | `StateSpec` | Named state layout; `cashflow` marks the growth row |
 | `ExpectedReturnSpec` | Builds $(\xi,\Lambda)$ for $\mu_t=\alpha+\xi'X+X'\Lambda X$ |
-| `AngLiuModel` / `ValuationModel` | Cash-flow recursion, priced recursion, $\mu_t(n)$, `value` |
+| `ValuationModel` / `AngLiuModel` | Cash-flow recursion, priced recursion, $\mu_t(n)$, `value` |
 | `estimate_var` / `estimate_var_panel` | Newey–West VAR(1) |
 | `isolate_channels` | Counterfactual value after zeroing named loadings |
 | `news_decomposition` / `treasury_test` | CF / DR news |
 | `pricing_errors` / `calibrate_alpha` | Model PV against market equity |
 | `simulate_paper_state` | Offline synthetic state for smoke tests |
 
-### AngLiuModel (alias `ValuationModel`)
+### ValuationModel (alias `AngLiuModel`)
 
-Construct with `AngLiuModel.from_var(fit, xi=..., Lambda=..., alpha=...)`.
+Construct with `ValuationModel.from_var(fit, xi=..., Lambda=..., alpha=...)`.
 Refuses a spectral radius $\ge 1$.
 
 | Method | Returns |
