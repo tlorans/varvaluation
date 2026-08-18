@@ -48,45 +48,98 @@ A single VAR closes the gap by construction.
 
 ## The VAR
 
-A **state vector** $X_t$ is a list of variables observed at date $t$. A natural leading case is
+A **state vector** $X_t$ is a list of variables observed at date $t$. On the synthetic laboratory used throughout this course the state is two-dimensional:
 
 $$
-X_t = (g_t,\; \beta_t,\; z_t')',
+X_t = \begin{pmatrix} r_t \\ g_t \end{pmatrix},
 $$
 
-where
+with $r_t$ a return coordinate and $g_t$ cash-flow growth. (A richer system just adds more rows: beta, premium, short rate, …)
 
-- $g_t$ is cash-flow growth,
-- $\beta_t$ is the **conditional beta** (sensitivity of the asset’s return to the market),
-- $z_t$ holds **instruments** — predictors of growth, betas, or the market premium.
+### From a list of equations
 
-The **law of motion** is a VAR of order 1, written VAR(1):
+Write one ordinary regression for each coordinate:
+
+$$
+\begin{aligned}
+r_{t+1}
+  &= c_r
+   + \phi_{rr}\, r_t
+   + \phi_{rg}\, g_t
+   + u^r_{t+1}, \\
+[0.5em]
+g_{t+1}
+  &= c_g
+   + \phi_{gr}\, r_t
+   + \phi_{gg}\, g_t
+   + u^g_{t+1}.
+\end{aligned}
+$$
+
+- $c_r,\,c_g$ are intercepts.
+- $\phi_{rr},\,\phi_{gg}$ (the **diagonal**) are own-persistence: how much of today’s value carries into tomorrow.
+- $\phi_{rg},\,\phi_{gr}$ (the **off-diagonal**) are cross-forecasts: does growth today help predict returns tomorrow, and vice versa?
+- $u^r_{t+1},\,u^g_{t+1}$ are the surprises (innovations).
+
+Nothing here is exotic — two regressions estimated at the same time.
+
+### Stack into matrices
+
+Put the left-hand sides on top of each other, then do the same for every column of coefficients:
+
+$$
+\underbrace{
+  \begin{pmatrix} r_{t+1} \\ g_{t+1} \end{pmatrix}
+}_{X_{t+1}}
+=
+\underbrace{
+  \begin{pmatrix} c_r \\ c_g \end{pmatrix}
+}_{c}
++
+\underbrace{
+  \begin{pmatrix}
+    \phi_{rr} & \phi_{rg} \\
+    \phi_{gr} & \phi_{gg}
+  \end{pmatrix}
+}_{\Phi}
+\underbrace{
+  \begin{pmatrix} r_t \\ g_t \end{pmatrix}
+}_{X_t}
++
+\underbrace{
+  \begin{pmatrix} u^r_{t+1} \\ u^g_{t+1} \end{pmatrix}
+}_{u_{t+1}}.
+$$
+
+Read a row of $\Phi$ as “the coefficients of one equation.” Read a column as “how one lag enters every equation.” The matrix form is **only** the list of equations written once.
+
+The same stacking for the shocks:
+
+$$
+\Sigma
+  = \mathrm{Var}(u_{t+1})
+  = \begin{pmatrix}
+      \mathrm{Var}(u^r) & \mathrm{Cov}(u^r,u^g) \\
+      \mathrm{Cov}(u^g,u^r) & \mathrm{Var}(u^g)
+    \end{pmatrix}.
+$$
+
+The off-diagonal of $\Sigma$ is the contemporaneous covariance: growth surprises and return surprises arriving in the same period. Together, the off-diagonals of $\Phi$ and of $\Sigma$ are exactly the covariance structure the product identity requires.
+
+### Compact form
 
 $$
 X_{t+1} = c + \Phi X_t + u_{t+1},
 \qquad
-u_{t+1} \sim N(0,\Sigma).
+u_{t+1}\sim N(0,\Sigma).
 $$
 
-Each symbol has a job:
-
-| Symbol | Name | Job |
+| Symbol | Name | Where the equation parameters sit |
 |---|---|---|
-| $c$ | intercept vector | Pulls the system toward long-run averages |
-| $\Phi$ | companion matrix | Persistence (diagonal) and cross-forecasts (off-diagonal) |
-| $u_{t+1}$ | shock (innovation) | Unexpected move at $t+1$ |
-| $\Sigma$ | shock covariance matrix | Which variables are hit together |
-
-**In plain English:** with two variables this is simply two ordinary regressions run at the same time:
-
-$$
-\begin{aligned}
-x_{t+1} &= a_1 + b_{11}x_t + b_{12}y_t + u_{t+1}, \\
-y_{t+1} &= a_2 + b_{21}x_t + b_{22}y_t + v_{t+1}.
-\end{aligned}
-$$
-
-The off-diagonal cells of $\Phi$ and of $\Sigma$ *are* the covariance structure the product identity requires. Estimate the system once; both recursions on the next page read from the same matrices.
+| $c$ | intercept vector | $(c_r,\,c_g)'$ |
+| $\Phi$ | companion matrix | row 1 $=(\phi_{rr},\phi_{rg})$, row 2 $=(\phi_{gr},\phi_{gg})$ |
+| $u_{t+1}$ | innovation | $(u^r,\,u^g)'$ |
+| $\Sigma$ | shock covariance | variances on the diagonal, $\mathrm{Cov}(u^r,u^g)$ off it |
 
 !!! note "Four reasons the VAR is the minimum object"
     1. **Jointness.** One $\Sigma$ generates growth and discount-rate shocks together. The covariance cannot be zeroed by accident.
@@ -102,10 +155,9 @@ Reuse the laboratory from [The problem](problem.md) (seed 7). First create the s
 
 ```python
 import numpy as np
-from varvaluation import estimate_var
-from varvaluation.news import simulate_return_var
+from varvaluation import estimate_var, simulate_state
 
-df, spec = simulate_return_var(nobs=400, seed=7)
+df, spec = simulate_state(nobs=400, seed=7)
 fit = estimate_var(df, spec)
 
 print("names           :", spec.names)
@@ -126,6 +178,23 @@ spectral radius : 0.409
 c : [0.0027 0.0015]
 Σ diagonal: [0.00036 0.000089]
 ```
+
+Match the numbers to the equation list:
+
+$$
+\begin{aligned}
+r_{t+1}
+  &= 0.0027 + 0.295\, r_t + 0.124\, g_t + u^r_{t+1}, \\
+g_{t+1}
+  &= 0.0015 + 0.006\, r_t + 0.402\, g_t + u^g_{t+1}.
+\end{aligned}
+$$
+
+$$
+\Phi = \begin{pmatrix} 0.295 & 0.124 \\ 0.006 & 0.402 \end{pmatrix},
+\qquad
+c = \begin{pmatrix} 0.0027 \\ 0.0015 \end{pmatrix}.
+$$
 
 Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero — they are the cross-forecast channels that carry part of the covariance into the product.
 
@@ -233,9 +302,9 @@ The next page turns this `model` into the cash-flow recursion, the priced recurs
 
 | Cell | What it carries into the product |
 |---|---|
-| $\Phi[g,\lambda]$ | premium today forecasts growth tomorrow |
-| $\Phi[\beta,g]$ | growth today forecasts beta tomorrow |
-| $\Sigma_{g,\mu}$ | growth shocks and discount-rate shocks arrive together |
+| $\phi_{rg}$ (row $r$, column $g$) | growth today forecasts returns tomorrow |
+| $\phi_{gr}$ (row $g$, column $r$) | returns today forecast growth tomorrow |
+| $\Sigma_{r g}=\mathrm{Cov}(u^r,u^g)$ | growth shocks and return shocks arrive together |
 
 Estimate cash in one model and the rate in another, and these cells are gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance — which was the whole point of keeping the product inside the expectation.
 
@@ -245,6 +314,6 @@ Estimate cash in one model and the rate in another, and these cells are gone. Th
 
 You should be able to:
 
-1. Simulate the synthetic state and estimate one VAR with `estimate_var`.
-2. Read $\Phi$, $c$, $\Sigma$, and the spectral radius from the fit.
-3. Explain why the off-diagonal cells of $\Phi$ and $\Sigma$ are the carriers of $\mathrm{Cov}(\sum g,\sum \mu)$.
+1. Write the two scalar regressions and rebuild $\Phi$ and $c$ by stacking their coefficients.
+2. Simulate the synthetic state and estimate one VAR with `estimate_var`.
+3. Read $\Phi$, $c$, $\Sigma$, and the spectral radius from the fit, and point to the off-diagonal cells as the carriers of $\mathrm{Cov}(\sum g,\sum \mu)$.
