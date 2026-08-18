@@ -6,11 +6,11 @@
 
 <p class="hero-lead">
 Value is the expectation of a <strong>product</strong>.
-A product has a <strong>covariance</strong>.
-Cash flows and discount rates must therefore come from the
-<strong>same</strong> system — a VAR for the state $X_t$.
-Bring a Polars state frame; the package returns the spot curve
-and present value as Polars frames.
+A product has a <strong>covariance</strong>, and that covariance
+sits in the price. Cash flows and discount rates must therefore
+come from the <strong>same</strong> system — a VAR for the state
+$X_t$. Bring a Polars state frame; the package returns the spot
+curve and present value as Polars frames.
 </p>
 
 [The problem](guide/problem.md){ .md-button .md-button--primary }
@@ -20,7 +20,12 @@ and present value as Polars frames.
 
 ## The mental map
 
-Three claims, in order. Everything else is bookkeeping.
+Three claims, in order. Everything else is bookkeeping. Value is
+the expectation of a product, not a ratio of separate forecasts.
+That product expands to a covariance, and the covariance enters
+the *price level*. Forecast cash in one model and the rate in
+another and the covariance has nowhere to live — so both sides
+have to come from one VAR.
 
 ```mermaid
 flowchart LR
@@ -36,7 +41,9 @@ flowchart LR
 <a href="guide/system/"><span class="part">3</span><strong>One VAR</strong><span>Cash-flow growth and expected returns must share one law of motion, or the covariance is missing.</span></a>
 </div>
 
-From that joint system come two recursions and the **spot curve** $\mu_t(n)$. Code is spread through the course on a shared synthetic Polars state (seed 7).
+From that joint system come two recursions and the **spot curve**
+$\mu_t(n)$. Code is spread through the course on a shared synthetic
+Polars state (seed 7).
 
 ## Estimator path
 

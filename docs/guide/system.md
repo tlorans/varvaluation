@@ -1,12 +1,8 @@
 # One system
 
-## Where this sits on the map
+Value is $E[\text{product}]$. The product carries a covariance term that moves the price level. Cash-flow growth and expected returns must therefore share one law of motion, or that covariance has nowhere to come from.
 
-1. Value is $E[\text{product}]$.
-2. The product carries a covariance term that moves the price level.
-3. **Cash-flow growth and expected returns must share one law of motion** — or that covariance has nowhere to come from.
-
-This page is step 3. You will simulate a state, estimate one VAR, and read the matrices that carry the covariance.
+This page is that third step. You will simulate a state, estimate one VAR, and read the matrices that carry the covariance.
 
 ```mermaid
 flowchart TB
@@ -33,7 +29,7 @@ $$
 \mathrm{Cov}_t\Bigl[\sum g,\;\sum \mu\Bigr]
 $$
 
-from those two objects alone. The covariance is a property of the **joint** distribution of growth and expected returns. Without it, the formula from the previous page
+from those two objects alone. The covariance is a property of the *joint* distribution of growth and expected returns. Without it, the formula from the previous page
 
 $$
 E_t[e^{S_n}]
@@ -48,15 +44,13 @@ A single VAR closes the gap by construction.
 
 ## The VAR
 
-A **state vector** $X_t$ is a list of variables observed at date $t$. On the synthetic laboratory used throughout this course the state is two-dimensional:
+A *state vector* $X_t$ is a list of variables observed at date $t$. On the synthetic laboratory used throughout this course the state is two-dimensional,
 
 $$
 X_t = \begin{pmatrix} r_t \\ g_t \end{pmatrix},
 $$
 
-with $r_t$ a return coordinate and $g_t$ cash-flow growth. (A richer system just adds more rows: beta, premium, short rate, …)
-
-### From a list of equations
+with $r_t$ a return coordinate and $g_t$ cash-flow growth. A richer system just adds more rows: beta, premium, short rate, and so on.
 
 Write one ordinary regression for each coordinate:
 
@@ -66,8 +60,7 @@ r_{t+1}
   &= c_r
    + \phi_{rr}\, r_t
    + \phi_{rg}\, g_t
-   + u^r_{t+1}, \\
-[0.5em]
+   + u^r_{t+1}, \\[0.5em]
 g_{t+1}
   &= c_g
    + \phi_{gr}\, r_t
@@ -76,16 +69,11 @@ g_{t+1}
 \end{aligned}
 $$
 
-- $c_r,\,c_g$ are intercepts.
-- $\phi_{rr},\,\phi_{gg}$ (the **diagonal**) are own-persistence: how much of today’s value carries into tomorrow.
-- $\phi_{rg},\,\phi_{gr}$ (the **off-diagonal**) are cross-forecasts: does growth today help predict returns tomorrow, and vice versa?
-- $u^r_{t+1},\,u^g_{t+1}$ are the surprises (innovations).
+The intercepts are $c_r$ and $c_g$. The diagonal of the slope matrix, $\phi_{rr}$ and $\phi_{gg}$, is own-persistence: how much of today’s value carries into tomorrow. The off-diagonal, $\phi_{rg}$ and $\phi_{gr}$, is the cross-forecast: does growth today help predict returns tomorrow, and vice versa? The surprises are $u^r_{t+1}$ and $u^g_{t+1}$.
 
-Nothing here is exotic — two regressions estimated at the same time.
+Nothing here is exotic. It is two regressions estimated at the same time.
 
-### Stack into matrices
-
-Put the left-hand sides on top of each other, then do the same for every column of coefficients:
+Stack the left-hand sides on top of each other, then do the same for every column of coefficients:
 
 $$
 \underbrace{
@@ -111,7 +99,7 @@ $$
 }_{u_{t+1}}.
 $$
 
-Read a row of $\Phi$ as “the coefficients of one equation.” Read a column as “how one lag enters every equation.” The matrix form is **only** the list of equations written once.
+Read a row of $\Phi$ as the coefficients of one equation. Read a column as how one lag enters every equation. The matrix form is *only* the list of equations written once.
 
 The same stacking for the shocks:
 
@@ -126,7 +114,7 @@ $$
 
 The off-diagonal of $\Sigma$ is the contemporaneous covariance: growth surprises and return surprises arriving in the same period. Together, the off-diagonals of $\Phi$ and of $\Sigma$ are exactly the covariance structure the product identity requires.
 
-### Compact form
+Compactly,
 
 $$
 X_{t+1} = c + \Phi X_t + u_{t+1},
@@ -134,24 +122,23 @@ X_{t+1} = c + \Phi X_t + u_{t+1},
 u_{t+1}\sim N(0,\Sigma).
 $$
 
-| Symbol | Name | Where the equation parameters sit |
-|---|---|---|
-| $c$ | intercept vector | $(c_r,\,c_g)'$ |
-| $\Phi$ | companion matrix | row 1 $=(\phi_{rr},\phi_{rg})$, row 2 $=(\phi_{gr},\phi_{gg})$ |
-| $u_{t+1}$ | innovation | $(u^r,\,u^g)'$ |
-| $\Sigma$ | shock covariance | variances on the diagonal, $\mathrm{Cov}(u^r,u^g)$ off it |
+$c$ is the intercept vector $(c_r,\,c_g)'$. $\Phi$ is the companion: row 1 is $(\phi_{rr},\phi_{rg})$, row 2 is $(\phi_{gr},\phi_{gg})$. $u_{t+1}$ is the innovation $(u^r,\,u^g)'$. $\Sigma$ puts variances on the diagonal and $\mathrm{Cov}(u^r,u^g)$ off it.
 
-!!! note "Four reasons the VAR is the minimum object"
-    1. **Jointness.** One $\Sigma$ generates growth and discount-rate shocks together. The covariance cannot be zeroed by accident.
-    2. **Mean reversion.** If all eigenvalues of $\Phi$ have absolute value less than 1 (the **spectral radius** of $\Phi$ is $<1$), rates glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
-    3. **Testable cross-forecasts.** Does the premium forecast growth? Those are coefficients of $\Phi$, with standard errors.
-    4. **Closed form.** Linear dynamics plus normal shocks imply that every cumulated sum is conditionally normal, so $E[e^{\cdot}]$ has an analytic formula.
+That is why the VAR is the minimum object.
+
+One $\Sigma$ generates growth and discount-rate shocks together, so the covariance cannot be zeroed by accident.
+
+If every eigenvalue of $\Phi$ has absolute value less than one — the *spectral radius* of $\Phi$ is less than one — rates glide back to their long-run mean. Flat-forever is the corner $\Phi=0$.
+
+The off-diagonal cells of $\Phi$ are testable cross-forecasts. Does the premium forecast growth? Those are coefficients, with standard errors.
+
+And linear dynamics plus normal shocks imply that every cumulated sum is conditionally normal, so $E[e^{\cdot}]$ has an analytic formula.
 
 ---
 
-## Follow along — simulate the state and estimate the VAR
+## Simulate the state and estimate the VAR
 
-Reuse the laboratory from [The problem](problem.md) (seed 7). First create the synthetic series and fit one joint system:
+Reuse the laboratory from [The problem](problem.md) (seed 7). First create the synthetic series and fit one joint system.
 
 ```python
 import numpy as np
@@ -196,21 +183,18 @@ $$
 c = \begin{pmatrix} 0.0027 \\ 0.0015 \end{pmatrix}.
 $$
 
-Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero — they are the cross-forecast channels that carry part of the covariance into the product.
+Both eigenvalues of $\Phi$ sit well inside the unit circle (spectral radius $0.409<1$). The off-diagonal entries are small but non-zero. They are the cross-forecast channels that carry part of the covariance into the product.
 
-### What the VAR is estimated on
+The two series in `df` are the state the VAR sees: `ret` is the return coordinate and `g` is the growth coordinate, which is also the cash-flow row.
 
 ```python
-# the two series in df are the state the VAR sees
-ret = df["ret"]   # return coordinate
-g   = df["g"]     # growth coordinate (cash-flow row)
+ret = df["ret"]
+g   = df["g"]
 ```
 
 ![Simulated paths of return and growth](../assets/figures/simulated_state.svg)
 
-### Shock covariance $\Sigma$
-
-Residuals of the fitted system show the contemporaneous piece of $\Sigma$. Separate models of growth and of returns would never produce this joint cloud:
+Residuals of the fitted system show the contemporaneous piece of $\Sigma$. Separate models of growth and of returns would never produce this joint cloud.
 
 ```python
 u = fit.residuals          # shape (T, K)
@@ -219,9 +203,7 @@ u = fit.residuals          # shape (T, K)
 
 ![VAR residual scatter (shock covariance)](../assets/figures/var_residuals.svg)
 
-### Multi-step expectations
-
-Because $\Phi$ is stable, forecasts glide back to the unconditional mean. That mean reversion is the source of a non-flat spot curve:
+Because $\Phi$ is stable, forecasts glide back to the unconditional mean. That mean reversion is the source of a non-flat spot curve.
 
 ```python
 from numpy.linalg import matrix_power, solve
@@ -239,7 +221,7 @@ print("E_t[X_{t+12}] =", np.round(E_X, 4))
 
 ![Multi-step conditional expectations](../assets/figures/var_expectations.svg)
 
-The five pedagogical figures (including those above) are rebuilt by:
+The five pedagogical figures (including those above) are rebuilt by
 
 ```text
 python examples/build_pedagogical_figures.py
@@ -251,35 +233,29 @@ python examples/build_pedagogical_figures.py
 
 Nothing in the VAR is labelled “numerator” or “denominator”. The two readings come from which coordinates you ask about.
 
-**Cash-flow growth.** Write
+Cash-flow growth first. Write
 
 $$
 C_{t+n} = C_t\,\exp\!\Bigl(\sum_{i=1}^{n} g_{t+i}\Bigr).
 $$
 
-$g_t$ is one coordinate of $X_t$ (or an affine function of $X_t$). Every other coordinate can forecast it through $\Phi$. The cash-flow recursion on the next page turns that row into $E_t[C_{t+n}]/C_t$.
+$g_t$ is one coordinate of $X_t$, or an affine function of $X_t$. Every other coordinate can forecast it through $\Phi$. The cash-flow recursion on the next page turns that row into $E_t[C_{t+n}]/C_t$.
 
-**Expected returns.** A conditional CAPM writes the one-period expected return as
+Expected returns next. A conditional CAPM writes the one-period expected return as
 
 $$
 \mu_t = \alpha + r_t + \beta_t\,\lambda_t,
 $$
 
-where $r_t$ is the risk-free rate, $\beta_t$ is conditional beta, and $\lambda_t$ is the **market risk premium**. When both $\beta_t$ and $\lambda_t$ move with $X_t$, the product $\beta_t\lambda_t$ is quadratic in the state:
+where $r_t$ is the risk-free rate, $\beta_t$ is conditional beta, and $\lambda_t$ is the *market risk premium*. When both $\beta_t$ and $\lambda_t$ move with $X_t$, the product $\beta_t\lambda_t$ is quadratic in the state:
 
 $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t.
 $$
 
-- $\alpha$ = constant
-- $\xi$ = linear loadings on $X_t$
-- $\Lambda$ = quadratic loadings
+Here $\alpha$ is a constant, $\xi$ collects the linear loadings on $X_t$, and $\Lambda$ collects the quadratic loadings. If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is *affine* — linear plus constant — in $X_t$. Letting *both* move is what the matrix $H(n)$ in the priced recursion is for.
 
-If either $\beta$ or $\lambda$ is constant, $\Lambda=0$ and $\mu_t$ is **affine** (linear plus constant) in $X_t$. Letting **both** move is what the matrix $H(n)$ in the priced recursion is for.
-
-### Follow along — attach expected-return loadings
-
-On the synthetic laboratory the return coordinate plays the role of the rate, and a small loading on growth stands in for a beta-like channel:
+On the synthetic laboratory the return coordinate plays the role of the rate, and a small loading on growth stands in for a beta-like channel.
 
 ```python
 from varvaluation import ExpectedReturnSpec, ValuationModel
@@ -300,20 +276,6 @@ The next page turns this `model` into the cash-flow recursion, the priced recurs
 
 ## The covariance lives in $\Phi$ and $\Sigma$
 
-| Cell | What it carries into the product |
-|---|---|
-| $\phi_{rg}$ (row $r$, column $g$) | growth today forecasts returns tomorrow |
-| $\phi_{gr}$ (row $g$, column $r$) | returns today forecast growth tomorrow |
-| $\Sigma_{r g}=\mathrm{Cov}(u^r,u^g)$ | growth shocks and return shocks arrive together |
+Three cells carry the product. $\phi_{rg}$, the $(r,g)$ entry, says that growth today forecasts returns tomorrow. $\phi_{gr}$ says that returns today forecast growth tomorrow. $\Sigma_{rg}=\mathrm{Cov}(u^r,u^g)$ says that growth shocks and return shocks arrive together.
 
 Estimate cash in one model and the rate in another, and these cells are gone. The product $E[e^{-\sum\mu}C]$ is then missing its covariance — which was the whole point of keeping the product inside the expectation.
-
----
-
-## After this page
-
-You should be able to:
-
-1. Write the two scalar regressions and rebuild $\Phi$ and $c$ by stacking their coefficients.
-2. Simulate the synthetic state and estimate one VAR with `estimate_var`.
-3. Read $\Phi$, $c$, $\Sigma$, and the spectral radius from the fit, and point to the off-diagonal cells as the carriers of $\mathrm{Cov}(\sum g,\sum \mu)$.

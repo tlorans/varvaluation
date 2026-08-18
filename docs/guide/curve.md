@@ -1,12 +1,6 @@
 # The two recursions
 
-## Where this sits on the map
-
-1. Value is $E[\text{product}]$.
-2. The product carries a covariance term.
-3. One VAR supplies the joint law.
-
-Given that VAR
+Value is $E[\text{product}]$. The product carries a covariance term. One VAR supplies the joint law. Given that VAR
 
 $$
 X_{t+1} = c + \Phi X_t + u_{t+1},
@@ -20,7 +14,7 @@ $$
 \mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t,
 $$
 
-the product is evaluated in closed form. Two recursions; the spot curve $\mu_t(n)$ is built from their ratio. The covariance estimated in $\Phi$ and $\Sigma$ enters **both**.
+the product is evaluated in closed form. Two recursions do the work. The spot curve $\mu_t(n)$ is built from their ratio. The covariance estimated in $\Phi$ and $\Sigma$ enters *both*.
 
 ```mermaid
 flowchart LR
@@ -31,9 +25,7 @@ flowchart LR
   Spot --> Val["Value = ∑ strips"]
 ```
 
-### Shared setup (seed 7)
-
-Everything below continues from [One system](system.md):
+Everything below continues from [One system](system.md), on the same synthetic state (seed 7).
 
 ```python
 from varvaluation import ExpectedReturnSpec, ValuationModel, estimate_var
@@ -50,24 +42,18 @@ X = fit.X_lag[-1]
 
 ---
 
-## 1. Cash-flow recursion
+## The cash-flow recursion
 
-### Goal
+The first object is the expected cash-flow ratio $E_t[C_{t+n}]/C_t$, as a function of today’s state $X_t$.
 
-Compute the expected cash-flow ratio $E_t[C_{t+n}]/C_t$ as a function of today’s state $X_t$.
-
-### Setup
-
-Let $e_g$ be the **selector vector** that picks the growth coordinate: $g_t = e_g'X_t$ (a vector of zeros with a one in the growth position). Cumulated growth is a sum of future $g$’s. Under the VAR, that sum is conditionally normal, so
+Let $e_g$ be the *selector vector* that picks the growth coordinate: $g_t = e_g'X_t$, a vector of zeros with a one in the growth position. Cumulated growth is a sum of future $g$’s. Under the VAR that sum is conditionally normal, so
 
 $$
 \frac{E_t[C_{t+n}]}{C_t}
   = \exp\!\bigl(\bar a(n) + \bar b(n)'X_t\bigr).
 $$
 
-Here $\bar a(n)$ is a scalar that depends only on maturity, and $\bar b(n)$ is a vector of the same length as $X_t$.
-
-### First step ($n=1$)
+$\bar a(n)$ is a scalar that depends only on maturity. $\bar b(n)$ is a vector of the same length as $X_t$.
 
 For the next period,
 
@@ -77,11 +63,9 @@ $$
 \bar b(1) = \Phi'e_g.
 $$
 
-- $e_g'c$ is the mean contribution of the intercept to next-period growth.
-- $\tfrac12 e_g'\Sigma e_g$ is half the variance of the growth shock. It appears because $E[e^{u}] = e^{\tfrac12\mathrm{Var}(u)}$ for a normal shock $u$ (the same identity used on the previous pages).
-- $\Phi'e_g$ maps today’s whole state into expected next-period growth.
+$e_g'c$ is the mean contribution of the intercept to next-period growth. $\tfrac12 e_g'\Sigma e_g$ is half the variance of the growth shock. It appears because $E[e^{u}] = e^{\tfrac12\mathrm{Var}(u)}$ for a normal shock $u$ — the same identity used on the previous pages. $\Phi'e_g$ maps today’s whole state into expected next-period growth.
 
-### Step from $n$ to $n+1$
+The step from $n$ to $n+1$ is
 
 $$
 \begin{aligned}
@@ -93,9 +77,7 @@ $$
 \end{aligned}
 $$
 
-**In plain English:** $\bar a$ accumulates mean growth plus the variance adjustment from shocks; $\bar b$ accumulates how today’s state maps into future growth through $\Phi$. No discounting enters here, so there is no quadratic matrix yet.
-
-### Follow along
+In words: $\bar a$ accumulates mean growth plus the variance adjustment from shocks; $\bar b$ accumulates how today’s state maps into future growth through $\Phi$. No discounting enters here, so there is no quadratic matrix yet.
 
 ```python
 cf = model.cashflow_expectation(X, n=15)
@@ -114,17 +96,13 @@ n=15  E[C]/C = 1.034
 
 ---
 
-## 2. Priced recursion
+## The priced recursion
 
-### Goal
-
-Compute one strip of the price–cash-flow ratio: the contribution of horizon $n$ to $V_t/C_t$. That strip is
+The second object is one strip of the price–cash-flow ratio: the contribution of horizon $n$ to $V_t/C_t$. That strip is
 
 $$
 E_t\!\left[\exp\!\Bigl(\sum_{i=1}^{n}(g_{t+i}-\mu_{t+i})\Bigr)\right].
 $$
-
-### Functional form
 
 Under the VAR and the quadratic map $\mu_t = \alpha + \xi'X_t + X_t'\Lambda X_t$, the strip takes the form
 
@@ -132,13 +110,9 @@ $$
 \exp\!\bigl(a(n) + b(n)'X_t + X_t'H(n)X_t\bigr).
 $$
 
-- $a(n)$ = scalar (maturity-only)
-- $b(n)$ = vector (linear loading on today’s state)
-- $H(n)$ = matrix (quadratic loading on today’s state)
+$a(n)$ is a scalar that depends only on maturity. $b(n)$ is the linear loading on today’s state. $H(n)$ is the quadratic loading. $H(n)$ appears because $\mu_t$ is quadratic whenever both beta and the premium move. When $\Lambda=0$, one has $H(n)\equiv 0$ and the strip is exponential-affine — the exponential of a linear function of $X_t$.
 
-$H(n)$ appears because $\mu_t$ is quadratic whenever both beta and the premium move. When $\Lambda=0$, one has $H(n)\equiv 0$ and the strip is exponential-affine (exponential of a linear function of $X_t$).
-
-### First step ($n=1$)
+For the next period,
 
 $$
 a(1) = -\alpha + e_g'c + \tfrac12 e_g'\Sigma e_g,
@@ -148,19 +122,15 @@ b(1) = -\xi + \Phi'e_g,
 H(1) = -\Lambda.
 $$
 
-Compared with the cash-flow recursion, the new pieces are $-\alpha$, $-\xi$, and $-\Lambda$: they subtract the expected-return side of the product.
+Compared with the cash-flow recursion, the new pieces are $-\alpha$, $-\xi$, and $-\Lambda$. They subtract the expected-return side of the product.
 
-### Further steps
-
-The update from $n$ to $n+1$ is a recursive matrix formula (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1). You do not need to expand it by hand: the package evaluates it inside `spot_rates` and `value`. What matters for intuition is that $\Phi$ and $\Sigma$ enter the update, so the $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ term from the mental map is **already folded into** $(a,b,H)$. You never compute the covariance separately; the recursion carries it automatically.
+The update from $n$ to $n+1$ is a recursive matrix formula (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1). You do not need to expand it by hand: the package evaluates it inside `spot_rates` and `value`. What matters for intuition is that $\Phi$ and $\Sigma$ enter the update, so the $-2\,\mathrm{Cov}(\sum g,\sum \mu)$ term from the first page is *already folded into* $(a,b,H)$. You never compute the covariance separately. The recursion carries it automatically.
 
 ---
 
-## 3. Spot discount rates $\mu_t(n)$
+## Spot discount rates $\mu_t(n)$
 
-### Definition
-
-Define the **spot rate** $\mu_t(n)$ so that dividing expected cash by $\exp(n\,\mu_t(n))$ recovers the priced strip:
+Define the *spot rate* $\mu_t(n)$ so that dividing expected cash by $\exp(n\,\mu_t(n))$ recovers the priced strip:
 
 $$
 \frac{E_t[C_{t+n}]/C_t}{\exp\!\bigl(n\,\mu_t(n)\bigr)}
@@ -173,9 +143,7 @@ $$
 \mu_t(n) = A(n) + B(n)'X_t + X_t'G(n)X_t,
 $$
 
-where $A,B,G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1). Under stationarity (spectral radius of $\Phi$ less than 1), $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
-
-### Follow along
+where $A$, $B$, and $G$ are the cash-flow coefficients minus the priced coefficients, scaled by $1/n$ (see [Ang and Liu, 2004](../references.md#ang-liu-2004), Definition II.1). Under stationarity — spectral radius of $\Phi$ less than one — $\mu_t(n)$ converges to a constant long-run rate as $n\to\infty$.
 
 ```python
 spots = model.spot_rates(X, n=15)
@@ -198,14 +166,13 @@ n=10  μ_t(n) = 4.09%
 n=15  μ_t(n) = 4.19%
 ```
 
-The curve rises from 2.4 % at $n=1$ toward roughly 4.2 % at long horizons. Locking the discount rate at $\mu_t(1)$ would misprice every longer strip — on this state the 15-year unit annuity is **+12.8 %** higher under the flat rate (see [The problem](problem.md)).
+The curve rises from 2.4% at $n=1$ toward roughly 4.2% at long horizons. Locking the discount rate at $\mu_t(1)$ would misprice every longer strip. On this state the 15-year unit annuity is *12.8% higher* under the flat rate (see [The problem](problem.md)).
 
-!!! note "The practical bridge"
-    Forecast cash however you like; discount at $\mu_t(n)$. Each spot already contains the covariance correction. The two-step workflow survives; only the single constant rate is replaced by a curve.
+That is the practical bridge. Forecast cash however you like; discount at $\mu_t(n)$. Each spot already contains the covariance correction. The two-step workflow survives. Only the single constant rate is replaced by a curve.
 
 ---
 
-## 4. Present value = sum of strips
+## Present value is the sum of strips
 
 $$
 \frac{V_t}{C_t}
@@ -214,9 +181,7 @@ $$
   + \text{tail at }\mu_t(N).
 $$
 
-Numerator and denominator share $(\Phi,c,\Sigma)$. The covariance is estimated once and enters both sides. The **tail** is a geometric remainder at the terminal spot $\mu_t(N)$, not a hand-set Gordon pair $(r,g)$.
-
-### Follow along
+Numerator and denominator share $(\Phi,c,\Sigma)$. The covariance is estimated once and enters both sides. The *tail* is a geometric remainder at the terminal spot $\mu_t(N)$, not a hand-set Gordon pair $(r,g)$.
 
 ```python
 import numpy as np
@@ -241,14 +206,7 @@ strip-sum value = 24.07
 flat vs curve           = +12.8%
 ```
 
-| Call | Numerator | Denominator |
-|---|---|---|
-| `cashflow_expectation(X, n)` | cash-flow recursion | — |
-| `spot_rates(X, n)` | — | $\mu_t(1),\ldots,\mu_t(n)$ |
-| **`value(X, C)`** | both | both |
-| external cash path | your forecast | `spot_rates` |
-
-The end-to-end offline script that prints the same path is:
+`cashflow_expectation(X, n)` returns the numerator. `spot_rates(X, n)` returns the curve $\mu_t(1),\ldots,\mu_t(n)$. `value(X, C)` uses both. If you bring your own cash path, discount it at `spot_rates`. The end-to-end offline script that prints the same path is
 
 ```text
 python examples/quickstart.py
@@ -256,7 +214,7 @@ python examples/quickstart.py
 
 ---
 
-## 5. Gordon is a special case
+## Gordon is a special case
 
 If expected return and expected growth are both constant, then $b(n)=0$, $H(n)=0$, $a(n)=n(g-\mu)$, and
 
@@ -268,23 +226,4 @@ $$
 
 That is the constant-rate special case — zero contribution from the covariance term, because there is no variation left to covary. The general case requires eigenvalues of $\Phi$ inside the unit circle and a declining priced strip.
 
----
-
-## Side by side
-
-| | Flat CAPM / WACC | Joint VAR |
-|---|---|---|
-| Identity | ratio of expectations | $E[\text{product}]$ |
-| Covariance | set to zero | inside $\Phi,\Sigma$, in both recursions |
-| Discount rate | one $r$, all horizons | $\mu_t(n)$ from the joint system |
-| Terminal value | hand-set Gordon | tail of the priced recursion |
-
----
-
-## After this page
-
-You should be able to:
-
-1. Call `cashflow_expectation` and read $E_t[C_{t+n}]/C_t$ from the synthetic state.
-2. Call `spot_rates`, check $\mu_t(1)=\alpha+\xi'X+X'\Lambda X$, and see the rising curve.
-3. Call `value` and recover the **+12.8 %** flat-versus-curve gap from the same matrices.
+A flat CAPM or WACC replaces the product by a ratio of expectations, sets the covariance to zero, uses one $r$ at every horizon, and finishes with a hand-set Gordon tail. The joint VAR keeps the product, carries the covariance inside $\Phi$ and $\Sigma$, discounts at $\mu_t(n)$, and finishes with the tail of the priced recursion. Those are not two implementations of the same formula. They are two different formulas.
