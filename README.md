@@ -1,56 +1,66 @@
 # varvaluation
 
-Cash-flow expectations and discount rates from one VAR.
+Discount curves and present values from **one VAR** on a **Polars** state frame.
 
-A present value is the expectation of a **product**: each future cash flow multiplied by the path of one-period required returns. Those two paths have to be estimated together. The package implements closed-form cash-flow and priced recursions, and the term structure of spot discount rates $\mu_t(n)$, with an optional residual-income map for the numerator. The formulas follow [Ang and Liu (2004)](https://tlorans.github.io/varvaluation/references/#ang-liu-2004).
+You bring the state variables. The package estimates a joint VAR, runs the two closed-form recursions, and returns the spot curve and present value as Polars frames. Optional firm panel via `estimate_var_panel`.
 
 **Handbook:** [tlorans.github.io/varvaluation](https://tlorans.github.io/varvaluation/).
 
-The handbook is written as a short course. Three claims, in order:
+Three claims, in order:
 
 1. **Product** — value is $E[\text{discount path}\times\text{cash flow}]$.
 2. **Covariance** — that product expands to a covariance term that enters the price level.
-3. **One VAR** — cash-flow growth and expected returns must share one law of motion, or the covariance is missing.
-
-Everything else (the two recursions, the spot curve, the strip-sum present value) follows from those three claims.
+3. **One VAR** — cash-flow growth and expected returns must share one law of motion.
 
 ## Install
 
 ```text
 uv add varvaluation
-uv add "varvaluation[data]"   # Ken French / FRED Treasuries / DEF / TERM
-uv add "varvaluation[wrds]"   # Compustat quarterly + CRSP daily
 ```
 
-Python 3.11+. Managed with `uv`. `[data]` caches under `~/.cache/varvaluation` (override with `VARVALUATION_CACHE`). WRDS credentials: `WRDS_USERNAME` or `WRDS_USER`, and `WRDS_PASSWORD`.
+Python 3.11+. Core dependencies: numpy, scipy, polars, statsmodels.
 
-## The core calls
+## Core path
 
 ```python
-from varvaluation import ValuationModel, estimate_var
-from varvaluation.news import simulate_return_var
+from varvaluation import (
+    ExpectedReturnSpec,
+    StateSpec,
+    ValuationModel,
+    estimate_var,
+    simulate_state,
+)
 
-state, spec = simulate_return_var(nobs=400, seed=7)
+state, spec = simulate_state(nobs=400, seed=7)   # or your own Polars frame
 fit = estimate_var(state, spec)
-model = ValuationModel.from_var(fit, xi=..., Lambda=..., alpha=...)
-# spots = model.spot_rates(X, n=30)           # μ_t(n)
-# cf    = model.cashflow_expectation(X, n=30) # cash-flow recursion
-# V     = model.value(X, C=1.0)               # sum of strips + tail
+
+xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
+    spec, {"b0": 0.01}
+)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
+X = fit.X_lag[-1]
+
+curve = model.spot_curve(X, n=15)          # Polars: maturity, mu, cashflow_ratio, …
+value = model.value_frame(
+    state.tail(1).select(list(spec.names)), n=40
+)                                          # Polars: pv, n_used, tail_rate
 ```
 
-`uv run python examples/quickstart.py` runs the synthetic laboratory end to end.
+Firm panel (within-group lag pairs):
 
-## What is in 0.1
+```python
+state, spec = simulate_state(nobs=200, seed=7, group="firm", n_groups=5)
+fit = estimate_var_panel(state, spec)
+# last observation per firm → curves
+last = state.sort(["firm", "date"]).group_by("firm").tail(1)
+curves = model.curve_frame(last, n=15, id_cols=("firm",))
+```
 
-| Layer | Status |
-|---|---|
-| Cash-flow and priced recursions, $\mu_t(n)$ | shipped |
-| Quadratic $\mu_t = \alpha + \xi'X + X'\Lambda X$ (moving $\beta$ and premium) | shipped |
-| Newey–West VAR(1) / panel VAR, named `StateSpec` | shipped |
-| Optional residual-income numerator (clean surplus) | shipped |
-| `[data]` FF3, FRED yields / DEF / TERM, MRP regression | shipped |
-| `[wrds]` quarterly Compustat, rolling / Cosemans beta | shipped (live query skipped in CI) |
-| News decomposition, pricing-to-market | in the library |
+Offline check:
+
+```text
+python examples/quickstart.py
+```
 
 ## License
 

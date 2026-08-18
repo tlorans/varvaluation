@@ -2,81 +2,21 @@
 
 ## Where this sits on the map
 
-The three-step map is already complete, and the synthetic laboratory (seed 7) has shown every object. This page is pure measurement: how the coordinates of $X_t$ are constructed on **real data** so that the VAR (and therefore both recursions) can see them.
+The three-step map is complete. This page is only about the **input frame**: a Polars DataFrame of state variables that `estimate_var` (or `estimate_var_panel`) can see.
 
-The VAR only sees the named coordinates of $X_t$. Everything else is how those coordinates are measured. A standard empirical system is six-dimensional ([Ang and Liu, 2004](../references.md#ang-liu-2004)); the package lets you name any subset and mark which row is cash-flow growth.
-
----
-
-## Cash-flow growth $g_t$
-
-For a dividend claim, $g_t = \log(C_t/C_{t-1})$ from returns with and without dividends, summed to the estimation horizon to remove seasonality.
-
-For an accounting claim, clean surplus supplies the map from profitability and book growth:
-
-$$
-\mathrm{ROE}_{t} = \ln\bigl(1 + \mathrm{NI}_{t}/B_{t-1}\bigr),
-\qquad
-g^{B}_{t} = \ln(B_t/B_{t-1}),
-$$
-
-with $C_t = B_{t-1}(e^{\mathrm{ROE}_t} - e^{g^{B}_t})$. The package stores identity-consistent logs so the residual-income reading stays exact.
-
-```python
-from varvaluation.industry import compute_book_growth, compute_quarterly_roe
-
-panel = compute_quarterly_roe(panel)   # needs ibq, ceqq
-panel = compute_book_growth(panel)
-```
+The package does **not** download data or implement paper-specific loaders. You construct $X_t$ however you like; the estimator only needs named columns and a date.
 
 ---
 
-## Conditional beta $\beta_t$
+## Minimum columns
 
-Rolling-window OLS of excess returns on the market, or a precision-weighted combination with a characteristics-based prior (Cosemans et al., 2016).
+| Column | Role |
+|---|---|
+| `date` (or `spec.date`) | ordered time index for lag pairs |
+| one column per name in `spec.names` | the state $X_t$ |
+| optional `group` (e.g. `firm`) | for `estimate_var_panel` only |
 
-```python
-from varvaluation.wrds import attach_posterior_beta, quarter_end_betas
-
-qe = quarter_end_betas(daily, daily_market)
-panel = attach_posterior_beta(panel, qe, method="cosemans")
-```
-
----
-
-## Market risk premium $\lambda_t$
-
-A predictive regression of market excess returns on instruments (short rate, dividend yield, default and term spreads, …). The fitted value is $\lambda_t$. In the conditional CAPM,
-
-$$
-\mu_t = \alpha + r_t + \beta_t\,\lambda_t,
-$$
-
-so both $\beta_t$ and $\lambda_t$ can sit in $X_t$ and make $\mu_t$ quadratic.
-
-```python
-from varvaluation.data import fit_mrp, load_paper_macro
-
-macro = load_paper_macro()
-macro = fit_mrp(macro).predict(macro)
-```
-
----
-
-## Risk-free rate / Treasury curve
-
-The short rate can be a coordinate of $X_t$. Alternatively a full Treasury curve $y(\tau)$ is kept **outside** the VAR and passed into the spot-rate calculation as data (FRED `GS1`…`GS30`, continuously compounded, interpolated to integer years).
-
-```python
-from varvaluation.data import interpolate_yields, load_treasury_curve
-
-curve = load_treasury_curve()
-y = interpolate_yields(curve.row(-1, named=True), n=30)
-```
-
----
-
-## Naming the state
+Mark which column is cash-flow growth with `spec.cashflow`.
 
 ```python
 from varvaluation import StateSpec, estimate_var
@@ -84,30 +24,76 @@ from varvaluation import StateSpec, estimate_var
 spec = StateSpec(
     names=("g", "beta", "mrp", "rf"),
     cashflow="g",
+    date="date",
     horizon=1,
 )
-fit = estimate_var(state, spec)   # → Φ, c, Σ
+fit = estimate_var(state, spec)   # state: Polars DataFrame
 ```
-
-`spec.cashflow` marks the row that feeds the cash-flow recursion. Everything else can still move $\mu_t$ through $\xi$ and $\Lambda$.
 
 ---
 
-## Portfolio or industry averages
+## What typically enters $X_t$
 
-Value-weight firm-level growth, beta, and profitability inside a filter; attach a common premium series. That is the series the VAR sees. Different portfolios produce different curves in the same month because they carry different average $\beta$ and different $\Phi$.
+| Coordinate | Examples |
+|---|---|
+| Cash-flow growth $g_t$ | $\log(C_t/C_{t-1})$, or a growth rate derived from accounting |
+| Expected-return drivers | short rate, conditional beta, market premium, other predictors |
+
+If both beta and the premium move, $\mu_t$ is quadratic in $X_t$ and the priced recursion carries $H(n)$. If either is constant, set $\Lambda=0$.
+
+---
+
+## Single series vs firm panel
+
+**One series** (market, industry average, portfolio):
 
 ```python
-from varvaluation import prepare_industry_state
-
-state = prepare_industry_state(panel, macro, spec, sic=((6000, 6199),))  # banks
-state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836),))  # drugs
+fit = estimate_var(state, spec)
 ```
 
-![Spot curves by book-to-market decile](../assets/figures/spot_curves.png)
+**Panel of firms** — lag pairs only within each firm:
+
+```python
+spec = StateSpec(
+    names=("g", "beta", "mrp"),
+    cashflow="g",
+    group="firm",
+    horizon=1,
+)
+fit = estimate_var_panel(state, spec)
+```
+
+Then read curves for the last observation of each firm:
+
+```python
+from varvaluation import ExpectedReturnSpec, ValuationModel
+
+xi, Lambda = ExpectedReturnSpec(rate="…", beta="…", premium=()).xi_lambda(spec, {…})
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=…)
+
+last = state.sort(["firm", "date"]).group_by("firm").tail(1)
+curves = model.curve_frame(last, n=30, id_cols=("firm",))
+values = model.value_frame(last, n=40, id_cols=("firm",))
+```
+
+Both returns are Polars DataFrames.
+
+---
+
+## Offline synthetic state
+
+For tests and the course figures:
+
+```python
+from varvaluation import simulate_state
+
+state, spec = simulate_state(nobs=400, seed=7)
+# panel demo:
+state, spec = simulate_state(nobs=200, seed=7, group="firm", n_groups=5)
+```
 
 !!! warning "The one rule"
-    Both recursions must always read from the **same** $(\Phi,c,\Sigma)$. If cash comes from one estimated system and rates from another, the covariance term is gone — which is the mistake the whole package exists to prevent.
+    Both recursions must read from the **same** $(\Phi,c,\Sigma)$. Never mix cash from one fit with rates from another.
 
 ---
 
@@ -115,7 +101,6 @@ state = prepare_industry_state(panel, macro, spec, sic=((2830, 2836),))  # drugs
 
 You should be able to:
 
-1. Name the coordinates that typically enter $X_t$ and say which one feeds the cash-flow recursion.
-2. Distinguish the case in which the Treasury curve sits inside the VAR from the case in which it is supplied externally.
-3. Construct a `StateSpec` that tells the package which row is growth.
-4. Switch the universe that enters $X_t$ without touching the recursions or the mental map.
+1. Build a `StateSpec` that names your columns and marks growth.
+2. Call `estimate_var` or `estimate_var_panel` on a Polars frame.
+3. Return curves and values with `spot_curve`, `curve_frame`, and `value_frame`.
