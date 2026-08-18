@@ -37,7 +37,7 @@ e^{\mu_t}
   = E_t\!\left[\frac{P_{t+1}+C_{t+1}}{P_t}\right].
 $$
 
-$\mu_t$ is known today; future $\mu_{t+1},\mu_{t+2},\ldots$ are random. Iterating this definition forward gives Ang and Liu (2004), equation (2):
+$\mu_t$ is known today; future $\mu_{t+1},\mu_{t+2},\ldots$ are random. Iterating this definition forward gives the multi-period product identity ([Ang and Liu, 2004](../references.md#ang-liu-2004), eq. 2):
 
 $$
 V_t
@@ -54,10 +54,10 @@ flowchart TB
   subgraph flat ["Flat DCF"]
     F["V = E[C] / (1+r)ⁿ<br/>discount factor outside"]
   end
-  subgraph ang ["Ang–Liu identity"]
+  subgraph prod ["Product identity"]
     A["V = E[ e<sup>−∑μ</sup> · C ]<br/>product stays inside"]
   end
-  flat -->|"r moves → error"| ang
+  flat -->|"r moves → error"| prod
 ```
 
 !!! note "Punchline"
@@ -171,7 +171,7 @@ V_t(n)
   = \frac{E_t[C_{t+n}]}{\exp\bigl(n\,\mu_t(n)\bigr)}.
 $$
 
-In words: $\mu_t(n)$ is the constant rate that, applied over $n$ periods, recovers the correct strip value from expected cash alone. A **flat** rule sets $\mu_t(n)=\mu_t(1)$ for all $n$. Ang and Liu show the curve is not flat: at short horizons the market risk premium dominates; at long horizons mean reversion in rates and betas matters. Using a constant rate produces large misvaluations.
+In words: $\mu_t(n)$ is the constant rate that, applied over $n$ periods, recovers the correct strip value from expected cash alone. A **flat** rule sets $\mu_t(n)=\mu_t(1)$ for all $n$. The curve is not flat: at short horizons the market risk premium dominates; at long horizons mean reversion in rates and betas matters. Using a constant rate produces large misvaluations.
 
 Mean reversion in the expected return already produces a non-flat curve:
 
