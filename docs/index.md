@@ -9,8 +9,8 @@ Value is the expectation of a <strong>product</strong>.
 A product has a <strong>covariance</strong>.
 Cash flows and discount rates must therefore come from the
 <strong>same</strong> system — a VAR for the state $X_t$.
-This package turns that system into cash-flow expectations,
-a term structure of spot rates $\mu_t(n)$, and a strip-sum present value.
+Bring a Polars state frame; the package returns the spot curve
+and present value as Polars frames.
 </p>
 
 [The problem](guide/problem.md){ .md-button .md-button--primary }
@@ -36,43 +36,28 @@ flowchart LR
 <a href="guide/system/"><span class="part">3</span><strong>One VAR</strong><span>Cash-flow growth and expected returns must share one law of motion, or the covariance is missing.</span></a>
 </div>
 
-From that joint system come two recursions (expected cash, priced strip) and the **spot curve** $\mu_t(n)$ — one discount rate per maturity — that makes the usual two-step workflow exact inside the model.
+From that joint system come two recursions and the **spot curve** $\mu_t(n)$. Code is spread through the course on a shared synthetic Polars state (seed 7).
 
-Code is spread through the course: each conceptual page shows the few lines that produce the figure or number next to it. The same synthetic state (seed 7) is reused from [The problem](guide/problem.md) through [The two recursions](guide/curve.md).
+## Estimator path
 
-## From the flat DCF you know
+```python
+from varvaluation import (
+    ExpectedReturnSpec, StateSpec, ValuationModel,
+    estimate_var, simulate_state,
+)
 
-**Discounted cash flow (DCF)** is the standard valuation formula. In practice it is often written with one constant rate $r$ for every horizon:
-
-$$
-V_t = \sum_{j=1}^{\infty} \frac{E_t[C_{t+j}]}{(1+r)^j}.
-$$
-
-Here $V_t$ is today's value, $C_{t+j}$ is the cash flow $j$ periods ahead, and $E_t[\cdot]$ means expectation given information at $t$. The discount factor $1/(1+r)^j$ has been pulled **outside** the expectation. That step is valid only if the discount rate does not move with the state of the economy.
-
-When the one-period expected return $\mu_t$ can change over time, the correct identity keeps the product **inside** the expectation:
-
-$$
-V_t = \sum_{s=1}^{\infty}
-  E_t\Bigl[
-    \exp\Bigl(-\sum_{k=0}^{s-1}\mu_{t+k}\Bigr)\,C_{t+s}
-  \Bigr].
-$$
-
-```mermaid
-flowchart TB
-  subgraph ratio ["Ratio of expectations (flat DCF)"]
-    R["V = E[C] / (1+r)ⁿ"]
-  end
-  subgraph product ["Expectation of a product"]
-    P["V = E[ e<sup>−∑μ</sup> · C ]"]
-  end
-  ratio -.->|"valid only if r deterministic"| product
+state, spec = simulate_state(nobs=400, seed=7)  # or your Polars frame
+fit = estimate_var(state, spec)
+xi, Lambda = ExpectedReturnSpec(rate="ret", beta="g", premium=()).xi_lambda(
+    spec, {"b0": 0.01}
+)
+model = ValuationModel.from_var(fit, xi=xi, Lambda=Lambda, alpha=0.04)
+curve = model.spot_curve(fit.X_lag[-1], n=15)   # Polars DataFrame
 ```
 
-Because the object inside is a product, the usual identity $E[XY]=E[X]E[Y]+\mathrm{Cov}(X,Y)$ applies. The covariance between cumulated cash-flow growth and cumulated expected returns enters the **price level**. When the two comove positively, value is lower than any formula that ignores the interaction. Separate models of “cash” and “rate” set that term to zero by construction. The next pages develop this step by step.
+Firm panel: set `spec.group`, call `estimate_var_panel`, then `model.curve_frame(..., id_cols=("firm",))`.
 
-## A numerical glimpse (offline, no data)
+## A numerical glimpse
 
 ```text
 $ python examples/quickstart.py
@@ -91,18 +76,14 @@ strip-sum value : 24.07
 flat PV vs curve: +12.8%
 ```
 
-The curve rises with maturity. A flat rate locked at $\mu_t(1)$ over-discounts the near term; on this synthetic state the flat 15-year present value is about **13 % higher** than the curve-consistent value. You will build these numbers page by page in the course.
-
 ## Roadmap
 
 <div class="topic-cards">
-<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance term, flat vs curve gap in code.</span></a>
-<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Simulate the state, estimate the VAR, read Φ and Σ.</span></a>
-<a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>Cash-flow recursion, spot curve, present value.</span></a>
-<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>What goes into $X_t$ on real data.</span></a>
-<a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State variables, VAR specifications, other asset classes.</span></a>
+<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance, flat vs curve gap.</span></a>
+<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Polars state → estimate_var → Φ, Σ.</span></a>
+<a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>spot_curve and value as Polars frames.</span></a>
+<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>Your columns; optional firm panel.</span></a>
+<a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State choices and other asset classes.</span></a>
 </div>
 
 Closed-form recursions follow [Ang and Liu (2004)](references.md#ang-liu-2004).
-Optional residual-income numerator: [Ang and Liu (2001)](references.md#ang-liu-2001),
-[Feltham and Ohlson (1995)](references.md#feltham-ohlson-1995).
