@@ -4,7 +4,7 @@
 
 The three-step map is already complete, and the synthetic laboratory (seed 7) has shown every object. This page is pure measurement: how the coordinates of $X_t$ are constructed on **real data** so that the VAR (and therefore both recursions) can see them.
 
-The VAR only sees the named coordinates of $X_t$. Everything else is how those coordinates are measured. Ang and Liu’s empirical system is six-dimensional; the package lets you name any subset and mark which row is cash-flow growth.
+The VAR only sees the named coordinates of $X_t$. Everything else is how those coordinates are measured. A standard empirical system is six-dimensional ([Ang and Liu, 2004](../references.md#ang-liu-2004)); the package lets you name any subset and mark which row is cash-flow growth.
 
 ---
 
