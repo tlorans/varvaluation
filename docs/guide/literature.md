@@ -1,6 +1,6 @@
 # Going further
 
-You now have the three-step map, the two recursions, and a full offline sprint. This page is optional orientation: where the literature stands on **state-variable choices** and on **applications beyond equity portfolios**.
+You now have the three-step map, the two recursions, and the follow-along numbers on the synthetic state. This page is optional orientation: where the literature stands on **state-variable choices** and on **applications beyond equity portfolios**.
 
 The map (product → covariance → one VAR) is asset-class agnostic. What changes across papers is **which coordinates enter \(X_t\)** and **which claim is being priced**.
 

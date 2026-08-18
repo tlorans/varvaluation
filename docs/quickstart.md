@@ -1,6 +1,6 @@
 # Offline check
 
-No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve \(\mu_t(n)\).
+No downloads. A synthetic state, one VAR, the two Ang–Liu recursions and the spot curve $\mu_t(n)$.
 
 ```text
 python examples/quickstart.py
@@ -40,6 +40,10 @@ Step 5 — Present value
   flat PV vs curve            : +12.8%
 ```
 
-Identity to watch: \(\mu_t(1)\) equals the one-period \(\mu_t\). That is the definition of the spot curve.
+Identity to watch: $\mu_t(1)$ equals the one-period $\mu_t$. That is the definition of the spot curve.
 
-The full annotated sprint — with figures for the simulated paths, residual covariance, multi-step expectations, and the flat-vs-curve gap — lives on the [worked example](guide/reproduce.md) page.
+The same path is built step by step in the course:
+
+- [The problem](guide/problem.md) — flat-versus-curve gap
+- [One system](guide/system.md) — simulate, estimate, read $\Phi$ and $\Sigma$
+- [The two recursions](guide/curve.md) — cash-flow recursion, spot curve, present value
