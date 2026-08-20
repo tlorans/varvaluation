@@ -33,11 +33,13 @@ theme:
 
 nav:
   - Home: index.md
-  - The problem: guide/problem.md
-  - One system: guide/system.md
-  - The two recursions: guide/curve.md
-  - Building the state: guide/state.md
-  - Going further: guide/literature.md
+  - Beginner guide:
+      - Core idea: guide/core.md
+      - The state variable: guide/state-variable.md
+      - The VAR dynamics: guide/var-dynamics.md
+      - Cash-flow dynamics: guide/cash-flow-dynamics.md
+      - Expected returns: guide/expected-returns.md
+      - Putting it together: guide/putting-together.md
   - Ang and Liu (2004): guide/angliu.md
   - Software:
       - Install: install.md
@@ -61,6 +63,11 @@ exclude_docs: |
   guide/wrds.md
   guide/reproduce.md
   guide/industries.md
+  guide/problem.md
+  guide/system.md
+  guide/curve.md
+  guide/state.md
+  guide/literature.md
 
 markdown_extensions:
   - admonition
