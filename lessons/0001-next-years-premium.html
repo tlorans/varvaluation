@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 1 · Next year’s premium</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/source-serif-4@4.5.0/index.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+</head>
+<body>
+  <p class="kicker">Lesson 1 of the numerical walkthrough</p>
+  <h1>Next year’s premium</h1>
+  <p class="why">You are valuing a claim. The return you require this year is 3% plus the equity premium. To say what you will require <em>next</em> year, you only need next year’s premium. That is the whole lesson.</p>
+
+  <h2>The rule</h2>
+  <p>Call this year’s equity premium \(\lambda\). Next year’s expected premium is</p>
+  $$
+  0.03 + 0.50 \times \lambda.
+  $$
+  <p>One number in. One number out. Nothing else (no growth, no cash, no curve).</p>
+
+  <h2>If the premium is already 6%</h2>
+  <p>Plug in \(0.06\):</p>
+  $$
+  0.03 + 0.50 \times 0.06 = 0.06.
+  $$
+  <p>Next year’s expected premium is still 6%. The premium does not move. That is all “typical year” means here: 6% is the number the rule leaves alone.</p>
+  <p class="source">Check: an AR(1) \(x_{t+1}=c+\phi x_t\) has rest point \(c/(1-\phi)\). Here \(0.03/(1-0.50)=0.06\). See Hamilton (1994), <em>Time Series Analysis</em>; and <a href="https://stats.stackexchange.com/questions/108391/mean-reversion-in-ar1-process">this derivation</a> of the rest point \(a/(1-b)\).</p>
+
+  <h2>If this year’s premium is 3%</h2>
+  <p>Plug in \(0.03\):</p>
+  $$
+  0.03 + 0.50 \times 0.03 = 0.045.
+  $$
+  <p>Next year’s expected premium is 4.5%. The 0.50 is the weight on <em>this year’s premium</em>, not “keep half of 6%.”</p>
+
+  <table>
+    <thead>
+      <tr><th>This year’s premium</th><th>Next year’s expected premium</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>6%</td><td>6%</td></tr>
+      <tr><td>3%</td><td>4.5%</td></tr>
+      <tr><td>4.5%</td><td>5.25%</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Do it</h2>
+  <div class="widget" data-next-premium>
+    <label>This year’s premium (%)
+      <input type="number" step="0.1" value="3">
+    </label>
+    <button type="button">Next year</button>
+    <p class="feedback"></p>
+  </div>
+
+  <h2>Check</h2>
+  <div class="quiz" data-quiz data-correct="a">
+    <p>This year’s premium is 6%. Next year’s expected premium:</p>
+    <button type="button" data-choice="a">stays at 6%</button>
+    <button type="button" data-choice="b">falls to 3%</button>
+    <button type="button" data-choice="c">jumps to 9%</button>
+    <p class="feedback"></p>
+  </div>
+  <div class="quiz" data-quiz data-correct="b">
+    <p>This year’s premium is 3%. Next year’s expected premium:</p>
+    <button type="button" data-choice="a">3.0 percent</button>
+    <button type="button" data-choice="b">4.5 percent</button>
+    <button type="button" data-choice="c">6.0 percent</button>
+    <p class="feedback"></p>
+  </div>
+
+  <h2>Repeat, then plot</h2>
+  <p>Start at 3%. Apply the same rule to the answer, then again. That list is the path.</p>
+<pre><code>lam = 0.03
+path = [lam]
+for _ in range(10):
+    path.append(0.03 + 0.50 * path[-1])
+# 3.00, 4.50, 5.25, …, 6.00
+</code></pre>
+  <p>Plot <code>path</code>. Draw a dashed line at 6%. You should see the premium walk from 3% toward 6%.</p>
+<pre><code>import matplotlib.pyplot as plt
+import numpy as np
+years = np.arange(len(path))
+plt.plot(years, 100 * np.array(path), "o-")
+plt.axhline(6.0, ls="--")
+</code></pre>
+
+  <h2>Stop</h2>
+  <p>This lesson is only the premium. Growth is a different number. It is not in the rule above. Ask before we add it.</p>
+
+  <p class="source">Primary source: Hamilton, J. D. (1994). <em>Time Series Analysis</em>. Princeton University Press. AR(1) with intercept.</p>
+  <p class="ask">If any line is unclear, ask. The next lesson is the pair \((g,\lambda)\), and only after this one holds.</p>
+
+  <script src="../assets/quiz.js"></script>
+  <script src="../assets/next-premium.js"></script>
+</body>
+</html>

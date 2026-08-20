@@ -1,0 +1,137 @@
+:root {
+  --ink: #1c1917;
+  --muted: #57534e;
+  --paper: #f7f3ee;
+  --rule: #d6d0c8;
+  --accent: #9a3412;
+  --ok: #166534;
+  --bad: #9f1239;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-size: 20px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  margin: 0 auto;
+  max-width: 38rem;
+  padding: 2.5rem 1.25rem 4rem;
+  font-family: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
+  line-height: 1.55;
+}
+
+h1 {
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+  line-height: 1.2;
+}
+
+.kicker {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.why {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0 0 1.75rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 1.8rem 0 0.6rem;
+}
+
+p { margin: 0 0 0.9rem; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th, td {
+  text-align: right;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+th:first-child, td:first-child { text-align: left; }
+
+code, pre {
+  font-family: "Source Code Pro", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+
+pre {
+  background: #efeae3;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  margin: 0 0 1.1rem;
+}
+
+.widget, .quiz {
+  background: #efeae3;
+  padding: 1rem 1.1rem;
+  margin: 1rem 0 1.4rem;
+}
+
+label { display: block; margin-bottom: 0.4rem; }
+
+input[type="number"] {
+  font: inherit;
+  width: 6rem;
+  padding: 0.2rem 0.4rem;
+}
+
+button {
+  font: inherit;
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.quiz button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  margin: 0.35rem 0;
+  padding: 0.5rem 0.7rem;
+}
+
+.quiz button[data-state="right"] { border-color: var(--ok); color: var(--ok); }
+.quiz button[data-state="wrong"] { border-color: var(--bad); color: var(--bad); }
+
+.feedback { min-height: 1.4em; margin: 0.4rem 0 0; font-size: 0.95rem; }
+.ok { color: var(--ok); }
+.bad { color: var(--bad); }
+
+.ask {
+  margin-top: 2.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.source {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+a { color: var(--accent); }
