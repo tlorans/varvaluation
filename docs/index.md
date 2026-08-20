@@ -13,37 +13,23 @@ $X_t$. Bring a Polars state frame; the package returns the spot
 curve and present value as Polars frames.
 </p>
 
-[The problem](guide/problem.md){ .md-button .md-button--primary }
+[Core idea](guide/core.md){ .md-button .md-button--primary }
 [Install](install.md){ .md-button }
 
 </div>
 
-## The mental map
+## Beginner guide
 
-Three claims, in order. Everything else is bookkeeping. Value is
-the expectation of a product, not a ratio of separate forecasts.
-That product expands to a covariance, and the covariance enters
-the *price level*. Forecast cash in one model and the rate in
-another and the covariance has nowhere to live, so both sides
-have to come from one VAR.
-
-```mermaid
-flowchart LR
-  A["1 · Product<br/>Value = E[discount × cash flow]"]
-  B["2 · Covariance<br/>Cov enters the price level"]
-  C["3 · One VAR<br/>Cash flows & rates share Xₜ"]
-  A --> B --> C
-```
+The six short pages below explain, from first principles, how cash-flow dynamics and expected returns are modelled and how both are linked to the state variable \(X_t\).
 
 <div class="topic-cards">
-<a href="guide/problem/"><span class="part">1</span><strong>Product</strong><span>Value is $E[\text{discount path}\times\text{cash flow}]$, not a ratio of separate forecasts.</span></a>
-<a href="guide/problem/#the-covariance-term"><span class="part">2</span><strong>Covariance</strong><span>$E[XY]=E[X]E[Y]+\mathrm{Cov}(X,Y)$. That covariance enters the <em>price level</em>.</span></a>
-<a href="guide/system/"><span class="part">3</span><strong>One VAR</strong><span>Cash-flow growth and expected returns must share one law of motion, or the covariance is missing.</span></a>
+<a href="guide/core/"><span class="part">1</span><strong>Core idea</strong><span>Value is the expectation of a product. Separate forecasts miss the covariance.</span></a>
+<a href="guide/state-variable/"><span class="part">2</span><strong>The state variable</strong><span>What sits in \(X_t\) and why both cash-flow growth and return predictors must be there.</span></a>
+<a href="guide/var-dynamics/"><span class="part">3</span><strong>The VAR dynamics</strong><span>\(X_{t+1}=c+\Phi X_t+u_{t+1}\). One law of motion for everything.</span></a>
+<a href="guide/cash-flow-dynamics/"><span class="part">4</span><strong>Cash-flow dynamics</strong><span>How expected future cash flows are obtained from the same \(X_t\).</span></a>
+<a href="guide/expected-returns/"><span class="part">5</span><strong>Expected returns</strong><span>\(\mu_t\) as an (affine or quadratic) function of \(X_t\) and the resulting spot curve.</span></a>
+<a href="guide/putting-together/"><span class="part">6</span><strong>Putting it together</strong><span>Why the joint system is required and how the package evaluates the product.</span></a>
 </div>
-
-From that joint system come two recursions and the spot curve
-$\mu_t(n)$. Code is spread through the course on a shared synthetic
-Polars state (seed 7).
 
 ## Estimator path
 
@@ -82,16 +68,5 @@ spectral radius : 0.409
 strip-sum value : 24.07
 flat PV vs curve: +12.8%
 ```
-
-## Pages
-
-<div class="topic-cards">
-<a href="guide/problem/"><span class="part">01</span><strong>The problem</strong><span>Product identity, covariance, flat vs curve gap.</span></a>
-<a href="guide/system/"><span class="part">02</span><strong>One system</strong><span>Polars state → estimate_var → Φ, Σ.</span></a>
-<a href="guide/curve/"><span class="part">03</span><strong>The two recursions</strong><span>spot_curve and value as Polars frames.</span></a>
-<a href="guide/state/"><span class="part">04</span><strong>Building the state</strong><span>Your columns; optional firm panel.</span></a>
-<a href="guide/literature/"><span class="part">05</span><strong>Going further</strong><span>State choices and other asset classes.</span></a>
-<a href="guide/angliu/"><span class="part">06</span><strong>Ang and Liu (2004)</strong><span>Paper-sample reproduction and the post-2000 extension.</span></a>
-</div>
 
 Closed-form recursions follow [Ang and Liu (2004)](references.md#ang-liu-2004). The empirical check (paper sample, December 2000 curve, post-2000 extension) is [Ang and Liu (2004)](guide/angliu.md).
