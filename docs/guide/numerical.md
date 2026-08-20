@@ -18,34 +18,79 @@ $$
 
 In a typical year growth is 2% and the premium is 6%. Today growth is still 2%, but the premium is 3%.
 
-Tomorrow’s pair is a linear function of today’s, plus a shock. The premium is sticky. Growth fades. A high premium this year goes with lower growth next year. Growth this year does not forecast the premium.
+---
+
+## One series: an AR
+
+Watch only the premium. Next year is a constant plus a fraction of this year, plus a shock:
+
+$$
+\lambda_{t+1} = 0.03 + 0.50\,\lambda_t + \text{shock}.
+$$
+
+That is an autoregression (AR). The 0.50 is stickiness: half of this year’s premium carries into next year. When \(\lambda=6\%\), next year is also 6% (before the shock). That 6% is the mean. Today you are at 3%, so next year is \(0.03 + 0.50\times 0.03 = 4.5\%\).
 
 ```python
 import numpy as np
 
+lam = 0.03
+path_lam = [lam]
+for _ in range(10):
+    path_lam.append(0.03 + 0.50 * path_lam[-1])
+# year 0: 3.00%   today
+# year 1: 4.50%
+# year 2: 5.25%
+# year 10: 6.00%   the mean
+```
+
+Plot it. The dashed line is the mean. The dots walk toward it. That is mean reversion for one series.
+
+```python
+import matplotlib.pyplot as plt
+
+years = np.arange(len(path_lam))
+plt.plot(years, 100 * np.array(path_lam), "o-")
+plt.axhline(6.0, ls="--")
+plt.xlabel("years from today")
+```
+
+![Premium as an AR](../assets/figures/numerical_ar.svg)
+<p class="figure-caption">The premium alone. Each dot is <code>0.03 + 0.50 ×</code> last year’s premium.</p>
+
+---
+
+## The world: a VAR
+
+Growth has a next year too, and it depends on the premium. The state of the world is the pair
+
+$$
+X_t = \begin{pmatrix} g_t \\ \lambda_t \end{pmatrix}.
+$$
+
+Two ARs that share each other’s lag are a vector autoregression (VAR). The second row is the AR you just ran. The first row is new: next year’s growth also sees this year’s premium.
+
+```python
 Phi = np.array([
     [ 0.40, -0.50],
     [ 0.00,  0.50],
 ])
 X_bar = np.array([0.02, 0.06])          # typical year: g=2%, λ=6%
-c     = (np.eye(2) - Phi) @ X_bar       # intercept consistent with that mean
+c     = (np.eye(2) - Phi) @ X_bar       # so a typical year stays typical
 Sigma = np.array([
     [ 0.0040, -0.0010],
     [-0.0010,  0.0025],
 ])
 alpha = 0.03
-xi    = np.array([0.0, 1.0])            # μ = 0.03 + λ
-Lambda = np.zeros((2, 2))               # no βλ product
-e_g   = np.array([1.0, 0.0])            # picks growth out of the pair
-X     = np.array([0.02, 0.03])          # today: growth typical, premium cheap
+xi    = np.array([0.0, 1.0])
+Lambda = np.zeros((2, 2))
+e_g   = np.array([1.0, 0.0])
+X     = np.array([0.02, 0.03])          # today
 ```
-
-\(\Phi\) is the map from today to tomorrow, \(c\) the intercept, \(\Sigma\) the shock covariance.
 
 ```mermaid
 flowchart LR
-  g["g this year"] -->|"0.40, fades"| g2["g next year"]
-  lam["λ this year"] -->|"0.50, sticky"| lam2["λ next year"]
+  g["g this year"] -->|"0.40"| g2["g next year"]
+  lam["λ this year"] -->|"0.50"| lam2["λ next year"]
   lam -->|"−0.50"| g2
 ```
 
@@ -54,20 +99,9 @@ flowchart LR
 | \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
 | \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
 
-The arrows say what happens **next year**, given this year.
+The 0.50 in the bottom right is the AR. The 0 in the bottom left: growth this year does not forecast the premium. The −0.50: a high premium this year goes with lower growth next year. Today the premium is cheap, so next year’s growth is *higher* than 2%.
 
-This year: growth 2%, premium 3%. Those are the large dots at year 0.
-
-A typical year is 6% premium. Today you are 3 points below that. The premium is sticky, so only half the gap closes in a year. Next year’s premium is 4.5% — still cheap, less cheap than today.
-
-A typical year is also 2% growth, which is where you already are. If the premium were 6%, growth would stay at 2%. It is not: a cheap premium goes with stronger growth (the −0.50 arrow). Three points cheap adds about 1.5 points of growth, so next year is 3.5%.
-
-```python
-c + Phi @ X
-# next year: growth 3.5%, premium 4.5%
-```
-
-To draw the path, do that again from the new pair, and again. No shock: this is what you expect, not one random draw.
+Same loop as the AR, now on the vector \(X\):
 
 ```python
 path = [X]
@@ -76,28 +110,25 @@ for _ in range(10):
 path = np.array(path)
 #          g %    λ %
 # year  0  2.00   3.00   today
-# year  1  3.50   4.50
+# year  1  3.50   4.50   λ matches the AR
 # year  2  3.35   5.25
-# year  5  2.32   5.91
-# year 10  2.01   6.00   typical year
+# year 10  2.01   6.00
 ```
 
-The premium climbs 3 → 4.5 → 5.25 → … → 6. Growth overshoots to 3.5% then fades back to 2%. That is mean reversion: the pair walks back to a typical year. The chart is those two columns.
+The premium column is the AR you already have. The growth column is the extra: it overshoots to 3.5% then fades back to 2%, because the cheap premium pulls it up and then the premium itself mean-reverts.
 
 ```python
-import matplotlib.pyplot as plt
-
 years = np.arange(len(path))
 fig, axes = plt.subplots(2, 1, sharex=True)
 axes[0].plot(years, 100 * path[:, 0], "o-")
-axes[0].axhline(100 * X_bar[0], ls="--")   # typical growth 2%
+axes[0].axhline(100 * X_bar[0], ls="--")
 axes[1].plot(years, 100 * path[:, 1], "o-")
-axes[1].axhline(100 * X_bar[1], ls="--")   # typical premium 6%
+axes[1].axhline(100 * X_bar[1], ls="--")
 axes[1].set_xlabel("years from today")
 ```
 
 ![Expected growth and premium](../assets/figures/numerical_paths.svg)
-<p class="figure-caption">The dots are <code>path</code>. Year 0 is today. The dashed line is <code>X_bar</code>.</p>
+<p class="figure-caption">The world \(X_t\). Bottom panel is the AR. Top panel is growth, which moves because \(\lambda\) does.</p>
 
 ---
 

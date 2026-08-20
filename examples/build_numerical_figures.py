@@ -55,6 +55,24 @@ def _model():
     return model, Phi, c, Sigma, alpha, xi, X, X_bar
 
 
+def ar_premium() -> None:
+    path_lam = [0.03]
+    for _ in range(10):
+        path_lam.append(0.03 + 0.50 * path_lam[-1])
+    path_lam = np.array(path_lam)
+    years = np.arange(len(path_lam))
+    fig, ax = plt.subplots(figsize=(6.2, 2.8))
+    ax.plot(years, 100 * path_lam, "o-", color=RED, ms=4, lw=1.4, label="from today")
+    ax.axhline(6.0, color=GREY, ls="--", lw=0.9, label="mean 6%")
+    ax.plot(0, 3.0, "o", color=RED, ms=8, zorder=3)
+    ax.set_ylabel("premium (%)")
+    ax.set_xlabel("years from today")
+    ax.set_xticks(years)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout()
+    _save(fig, "numerical_ar.svg")
+
+
 def mean_reversion(Phi, c, X, X_bar) -> None:
     path = [X.copy()]
     for _ in range(10):
@@ -137,6 +155,7 @@ def shocks(Phi, c, Sigma, alpha, X) -> None:
 
 def main() -> None:
     model, Phi, c, Sigma, alpha, _, X, X_bar = _model()
+    ar_premium()
     mean_reversion(Phi, c, X, X_bar)
     rates = curve_and_cash(model, X)
     annuity(rates)
