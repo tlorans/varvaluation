@@ -22,13 +22,25 @@ In a typical year growth is 2% and the premium is 6%. Today growth is still 2%, 
 
 ## One series: an AR
 
-Watch only the premium. Next year is a constant plus a fraction of this year, plus a shock:
+Watch only the equity premium. Next year’s premium is a constant plus half of this year’s premium (ignore the shock for now):
 
 $$
-\lambda_{t+1} = 0.03 + 0.50\,\lambda_t + \text{shock}.
+\lambda_{t+1} = 0.03 + 0.50\,\lambda_t.
 $$
 
-That is an autoregression (AR). The 0.50 is stickiness: half of this year’s premium carries into next year. When \(\lambda=6\%\), next year is also 6% (before the shock). That 6% is the mean. Today you are at 3%, so next year is \(0.03 + 0.50\times 0.03 = 4.5\%\).
+Plug in 6%: \(0.03 + 0.50\times 0.06 = 0.06\). If the premium is already 6%, it stays 6%. That is the typical year: a number that does not move on its own.
+
+The 0.50 does **not** mean “next year is half of this year.” Half of 6% would be 3%, and the premium would collapse. What is halved is the *gap to 6%*.
+
+Today the **premium** is 3%. The gap to 6% is 3 points. Half of that gap closes, half remains, so next year you are still 1.5 points below 6%: the premium is 4.5%. Same arithmetic: \(0.03 + 0.50\times 0.03 = 0.045\).
+
+| this year’s premium | next year’s premium |
+|---:|---:|
+| 6% | 6% |
+| 3% | 4.5% |
+| 4.5% | 5.25% |
+
+Start at today’s 3% and repeat:
 
 ```python
 import numpy as np
@@ -37,13 +49,8 @@ lam = 0.03
 path_lam = [lam]
 for _ in range(10):
     path_lam.append(0.03 + 0.50 * path_lam[-1])
-# year 0: 3.00%   today
-# year 1: 4.50%
-# year 2: 5.25%
-# year 10: 6.00%   the mean
+# 3.00, 4.50, 5.25, …, 6.00
 ```
-
-Plot it. The dashed line is the mean. The dots walk toward it. That is mean reversion for one series.
 
 ```python
 import matplotlib.pyplot as plt
@@ -55,7 +62,7 @@ plt.xlabel("years from today")
 ```
 
 ![Premium as an AR](../assets/figures/numerical_ar.svg)
-<p class="figure-caption">The premium alone. Each dot is <code>0.03 + 0.50 ×</code> last year’s premium.</p>
+<p class="figure-caption">Today’s premium is 3%. Each year the gap to 6% is cut in half.</p>
 
 ---
 
