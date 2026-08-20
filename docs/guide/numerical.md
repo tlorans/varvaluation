@@ -61,30 +61,18 @@ plt.xlabel("years from today")
 
 ## The world: a VAR
 
-Growth has a next year too, and it depends on the premium. The state of the world is the pair
+Growth has a next year too, and it depends on the premium. The state of the world is the pair \(X_t = (g_t,\lambda_t)\). Two ARs that share lags: a VAR.
 
-$$
-X_t = \begin{pmatrix} g_t \\ \lambda_t \end{pmatrix}.
-$$
-
-Two ARs that share each other’s lag are a vector autoregression (VAR). The second row is the AR you just ran. The first row is new: next year’s growth also sees this year’s premium.
+The second equation is the AR you just ran. The first is new: next year’s growth also sees this year’s premium.
 
 ```python
 Phi = np.array([
-    [ 0.40, -0.50],
-    [ 0.00,  0.50],
+    [ 0.40, -0.50],   # g next year
+    [ 0.00,  0.50],   # λ next year  (the AR)
 ])
-X_bar = np.array([0.02, 0.06])          # typical year: g=2%, λ=6%
-c     = (np.eye(2) - Phi) @ X_bar       # so a typical year stays typical
-Sigma = np.array([
-    [ 0.0040, -0.0010],
-    [-0.0010,  0.0025],
-])
-alpha = 0.03
-xi    = np.array([0.0, 1.0])
-Lambda = np.zeros((2, 2))
-e_g   = np.array([1.0, 0.0])
-X     = np.array([0.02, 0.03])          # today
+X_bar = np.array([0.02, 0.06])
+c     = (np.eye(2) - Phi) @ X_bar
+X     = np.array([0.02, 0.03])
 ```
 
 ```mermaid
@@ -94,45 +82,45 @@ flowchart LR
   lam -->|"−0.50"| g2
 ```
 
-| | \(g_t\) | \(\lambda_t\) |
-|---|---:|---:|
-| \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
-| \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
-
-The 0.50 in the bottom right is the AR. The 0 in the bottom left: growth this year does not forecast the premium. The −0.50: a high premium this year goes with lower growth next year. Today the premium is cheap, so next year’s growth is *higher* than 2%.
-
-Same loop as the AR, now on the vector \(X\):
+Same loop, now on the vector:
 
 ```python
 path = [X]
 for _ in range(10):
     path.append(c + Phi @ path[-1])
 path = np.array(path)
-#          g %    λ %
-# year  0  2.00   3.00   today
-# year  1  3.50   4.50   λ matches the AR
-# year  2  3.35   5.25
-# year 10  2.01   6.00
 ```
 
-The premium column is the AR you already have. The growth column is the extra: it overshoots to 3.5% then fades back to 2%, because the cheap premium pulls it up and then the premium itself mean-reverts.
+`path[:, 1]` is the AR (3, 4.5, …, 6). `path[:, 0]` is growth: it rises to 3.5% because the premium is cheap (−0.50), then fades back to 2% as \(\lambda\) returns to 6%.
 
 ```python
 years = np.arange(len(path))
 fig, axes = plt.subplots(2, 1, sharex=True)
 axes[0].plot(years, 100 * path[:, 0], "o-")
-axes[0].axhline(100 * X_bar[0], ls="--")
+axes[0].axhline(2.0, ls="--")
 axes[1].plot(years, 100 * path[:, 1], "o-")
-axes[1].axhline(100 * X_bar[1], ls="--")
-axes[1].set_xlabel("years from today")
+axes[1].axhline(6.0, ls="--")
 ```
 
 ![Expected growth and premium](../assets/figures/numerical_paths.svg)
-<p class="figure-caption">The world \(X_t\). Bottom panel is the AR. Top panel is growth, which moves because \(\lambda\) does.</p>
+<p class="figure-caption">Bottom: the AR. Top: growth, which moves because \(\lambda\) does.</p>
 
 ---
 
 ## Next year's cash
+
+The shocks and the rest of the arrays, used from here on:
+
+```python
+Sigma = np.array([
+    [ 0.0040, -0.0010],
+    [-0.0010,  0.0025],
+])
+alpha = 0.03
+xi    = np.array([0.0, 1.0])
+Lambda = np.zeros((2, 2))
+e_g   = np.array([1.0, 0.0])
+```
 
 Next year’s cash is this year’s cash, grown by \(g_{t+1}\). You do not know \(g_{t+1}\) yet, but today’s pair gives you its expectation. Because growth is a log and the shock is normal, the expectation of the exponential also picks up a variance term.
 
