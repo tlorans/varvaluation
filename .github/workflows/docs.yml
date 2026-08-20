@@ -25,6 +25,8 @@ jobs:
       - run: uv sync --extra docs
       - name: Generate pedagogical figures
         run: uv run python examples/build_pedagogical_figures.py
+      - name: Generate numerical-walkthrough figures
+        run: uv run python examples/build_numerical_figures.py
       - run: uv run mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:

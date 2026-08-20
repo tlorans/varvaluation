@@ -42,10 +42,22 @@ X     = np.array([0.02, 0.03])          # today: growth typical, premium cheap
 
 \(\Phi\) is the map from today to tomorrow, \(c\) the intercept, \(\Sigma\) the shock covariance.
 
+```mermaid
+flowchart LR
+  g["g this year"] -->|"0.40, fades"| g2["g next year"]
+  lam["λ this year"] -->|"0.50, sticky"| lam2["λ next year"]
+  lam -->|"−0.50"| g2
+```
+
 | | \(g_t\) | \(\lambda_t\) |
 |---|---:|---:|
 | \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
 | \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
+
+Expected paths from today, dashed lines at the typical year:
+
+![Expected growth and premium](../assets/figures/numerical_paths.svg)
+<p class="figure-caption">Growth rises next year, then fades back to 2%. The premium starts at 3% and climbs toward 6%.</p>
 
 ---
 
@@ -108,6 +120,18 @@ It is 6%, which is just \(\mu_t\). If this failed, the two steps were started in
 
 Year 2 is different. You discount through this year *and* next year. Next year’s required return depends on next year’s premium, which you do not know today. Cash and the discount both move.
 
+```mermaid
+flowchart TB
+  subgraph y1 ["Year 1"]
+    C1["Expected cash"] --> P1["Price piece"]
+    M1["Required return known today"] --> P1
+  end
+  subgraph y2 ["Year 2"]
+    C2["Cash over two years"] --> P2["Price piece"]
+    M2["This year's return and next year's"] --> P2
+  end
+```
+
 ```python
 eb = e_g + bar_b1
 bar_a2 = bar_a1 + e_g @ c + bar_b1 @ c + 0.5 * eb @ Sigma @ eb
@@ -138,7 +162,13 @@ Keep walking the same two steps.
 
 The curve slopes up. Today’s premium is 3%, and it will not stay there. A long cash flow is not priced at this year’s 6%.
 
+![Expected cash and the spot curve](../assets/figures/numerical_curve.svg)
+<p class="figure-caption">Left: expected cash relative to today. Right: the rate that prices each year, against a flat 6%.</p>
+
 A 15-year unit annuity on this curve is 8.89. The same annuity locked at 6% is 9.60. Using this year’s rate for every year overvalues the claim.
+
+![Discount factors on the curve versus flat 6%](../assets/figures/numerical_annuity.svg)
+<p class="figure-caption">Each year’s contribution to a unit annuity. The shaded gap is the overvaluation from locking this year’s rate.</p>
 
 ---
 
@@ -164,11 +194,22 @@ disc_path = np.exp(-(alpha + X[1]) - (alpha + X1[1]))
 
 The draws are a check. Once the shocks are Gaussian, the closed form *is* the joint expectation.
 
+![Two-year growth against two-year required return](../assets/figures/numerical_shocks.svg)
+<p class="figure-caption">Draws of the two-year paths. High required return comes with low growth.</p>
+
 ---
 
 ## When beta moves too
 
-So far beta is 1. Now let it be 1.2, and let it move. The return you require is \(0.03 + \beta_t\lambda_t\): a product of two moving pieces.
+So far beta is 1. Now let it be 1.2, and let it move. The return you require is a product of two moving pieces.
+
+```mermaid
+flowchart LR
+  beta["β"] --> prod["β × λ"]
+  lam["λ"] --> prod
+  rf["0.03"] --> mu["required return"]
+  prod --> mu
+```
 
 ```python
 # X = (g, β, λ)
