@@ -6,10 +6,8 @@ $$
 \mu_t = \alpha + \xi' X_t + X_t' \Lambda X_t.
 $$
 
-- **Affine.** \(\Lambda = 0\): \(\mu_t\) is a constant plus a linear function of \(X_t\). No products of two coordinates. Example: \(\mu_t=\alpha+\lambda_t\) with beta held fixed.
-- **Quadratic.** Both beta and the market premium move, so \(\mu_t\) contains the product \(\beta_t\lambda_t\). That product is stored as \(X_t'\Lambda X_t\). The priced strip then carries a matrix \(H(n)\) with \(H(1)=-\Lambda\).
-
-[A numerical walkthrough](numerical.md) computes both cases in numpy.
+- If \(\Lambda = 0\) the formula is linear (affine) in \(X_t\).
+- If both beta and the market premium move with the state, \(\Lambda\) is non-zero and \(\mu_t\) becomes quadratic in \(X_t\).
 
 Because \(\mu_t\) is a function of \(X_t\), and \(X\) itself follows the VAR, the whole future path of expected returns is also completely determined by today’s \(X_t\).
 

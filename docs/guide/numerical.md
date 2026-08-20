@@ -1,17 +1,6 @@
 # A numerical walkthrough
 
-The six-variable state in [Ang and Liu (2004)](angliu.md) is the right object for a market curve. It is the wrong object to compute by hand. This page is the same two recursions on a two-state example small enough to multiply by hand.
-
-Three words on this page are easy to skip and then get lost.
-
-!!! note "In words — affine, βλ product, H(n)"
-    **Affine** means the one-period expected return is a constant plus a linear function of today’s state: \(\mu_t=\alpha+\xi'X_t\). No products of two coordinates. In the toy, \(\mu_t=0.03+\lambda_t\).
-
-    **2×2** means the state has two entries, so the VAR matrix \(\Phi\) is two-by-two. Here those entries are cash-flow growth \(g\) and the premium \(\lambda\).
-
-    The **βλ product** is the CAPM piece \(\beta_t\times\lambda_t\). If *both* the firm’s beta and the market premium sit in \(X_t\) and both move, that multiplication is quadratic in the state, not linear. The matrix \(\Lambda\) is how the formula stores that product: \(X_t'\Lambda X_t=\beta_t\lambda_t\).
-
-    **\(H(n)\)** is the \(K\times K\) matrix in the priced strip \(\exp\bigl(a(n)+b(n)'X_t+X_t'H(n)X_t\bigr)\). It is the coefficient of that product at horizon \(n\). At one year, \(H(1)=-\Lambda\). If there is no product (\(\Lambda=0\)), \(H(n)\) is the zero matrix at every horizon, which is the first toy.
+The six-variable state in [Ang and Liu (2004)](angliu.md) is the right object for a market curve. It is the wrong object to compute by hand. This page is the same two recursions on two numbers — cash-flow growth and the premium — with every \(n=1\) and \(n=2\) term written out in numpy. A later section adds a moving beta.
 
 Run the numbers:
 
@@ -31,13 +20,13 @@ $$
 X_t = \begin{pmatrix} g_t \\ \lambda_t \end{pmatrix}.
 $$
 
-\(g_t\) is log cash-flow growth. \(\lambda_t\) is the equity premium. The one-period expected return does **not** multiply two moving pieces. Beta is absorbed into the constant (think \(\beta\equiv 1\)), so
+\(g_t\) is log cash-flow growth. \(\lambda_t\) is the equity premium. Beta is held at 1, so the one-period expected return is just a constant plus the premium:
 
 $$
 \mu_t = \alpha + \lambda_t = 0.03 + \lambda_t.
 $$
 
-That is affine: \(\alpha=0.03\), \(\xi=(0,1)\), \(\Lambda=0\). The matrix \(H(n)\) will be zero at every horizon until we put a moving \(\beta_t\) back in. The VAR is
+In the general formula \(\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t\), that is \(\xi=(0,1)\) and \(\Lambda=0\): a constant plus a linear function of \(X_t\), which is called **affine**. There is no \(\beta_t\times\lambda_t\) term yet. The VAR is
 
 ```python
 import numpy as np
