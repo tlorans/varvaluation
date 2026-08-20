@@ -62,6 +62,12 @@ Offline check:
 python examples/quickstart.py
 ```
 
+Two-state numerical walkthrough (every n=1 and n=2 term in numpy):
+
+```text
+python examples/numerical_toy.py
+```
+
 Ang and Liu (2004) reproduction (Ken French / FRED / cay):
 
 ```text

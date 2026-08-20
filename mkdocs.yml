@@ -40,6 +40,7 @@ nav:
       - Cash-flow dynamics: guide/cash-flow-dynamics.md
       - Expected returns: guide/expected-returns.md
       - Putting it together: guide/putting-together.md
+      - A numerical walkthrough: guide/numerical.md
   - Ang and Liu (2004): guide/angliu.md
   - Software:
       - Install: install.md

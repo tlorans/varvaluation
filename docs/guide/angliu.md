@@ -8,6 +8,8 @@ $$
 
 If only $\beta$ or only $\lambda$ moves, an affine present-value model is enough. When both move, $\mu_t$ is *quadratic* in the state and the priced strip carries an $H(n)$ matrix (their Proposition I.1). A Gordon formula takes a single $r$ outside the expectation. That is legitimate only if tomorrow’s $\mu$ is known today. It is not. The object that remains is equation (2): value is $E[\text{discount path}\times\text{cash flow}]$. The practical output is Brennan’s term structure of discount rates $\mu_t(n)$, made analytic.
 
+If the six-variable state is too large to follow, [A numerical walkthrough](numerical.md) is the same two recursions on a 2×2 toy, with every \(n=1\) and \(n=2\) term in numpy.
+
 December 2000 is not an arbitrary end date. It is the end of the boom. Fama and French (2002) and Jagannathan, McGrattan, and Scherbina (2001) had just argued that the equity premium had compressed, from the 7-8% of the previous decades toward something like 2%. Consumption was low relative to wealth, so $\mathit{cay}$ was low, so $\lambda_t$ was low. A curve that mean-reverts toward a higher long-run rate must then *slope up*, and a constant historical CAPM must sit *above* that curve. That is the picture §IV asks you to see. This page rebuilds it.
 
 The earlier course pages used a synthetic state (seed 7). This page uses *their* state, *their* window, and *their* valuation date. A single command runs the whole path. The sections below are that command, unpacked.

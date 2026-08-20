@@ -15,4 +15,4 @@ The rest of this beginner guide walks through the pieces one by one:
 4. How expected returns are modelled and linked to \(X_t\).
 5. Why the joint system is required for a correct present value.
 
-Everything is exact inside the Gaussian VAR class used by [Ang and Liu (2004)](../references.md#ang-liu-2004). The package simply evaluates the closed-form recursions that paper derived.
+Everything is exact inside the Gaussian VAR class used by [Ang and Liu (2004)](../references.md#ang-liu-2004). The package simply evaluates the closed-form recursions that paper derived. [A numerical walkthrough](numerical.md) does both recursions on a 2×2 toy, term by term, in numpy.

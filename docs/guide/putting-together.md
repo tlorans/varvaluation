@@ -35,3 +35,5 @@ value = model.value(X, C=1.0, n=40)        # present value of a unit claim
 You can also bring your own cash-flow path and discount it at the model’s spot rates, or freeze the numerator at 1 and look only at the pure discount curve (`perpetuity`).
 
 The key modelling discipline is never to mix a cash-flow forecast from one system with a discount curve from another. Both sides must read from the same \((\Phi, c, \Sigma)\).
+
+[A numerical walkthrough](numerical.md) computes every \(n=1\) and \(n=2\) term of both recursions on a 2×2 toy, in numpy, including the Monte Carlo check that \(E[\text{product}]\ne E[\text{discount}]\,E[\text{cash flow}]\).

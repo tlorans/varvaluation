@@ -25,6 +25,8 @@ flowchart LR
   Spot --> Val["Value = ∑ strips"]
 ```
 
+If the matrices below are hard to follow, [A numerical walkthrough](numerical.md) computes every \(n=1\) and \(n=2\) term on a 2×2 toy, in numpy.
+
 Everything below continues from [One system](system.md), on the same synthetic state (seed 7).
 
 ```python
