@@ -54,10 +54,17 @@ flowchart LR
 | \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
 | \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
 
-Expected paths from today, dashed lines at the typical year:
+That table is one step. Apply it to today (\(g=2\%\), \(\lambda=3\%\)):
+
+```python
+c + Phi @ X
+# array([0.035, 0.045])   next year: growth 3.5%, premium 4.5%
+```
+
+Growth is not still 2%. The −0.50 cell pulls it up because the premium is cheap. The premium is not still 3%: half of it carries over (0.50), so it is already on its way back to 6%. Do the same step again from (3.5%, 4.5%), and again. The figure is those steps. Year 0 is today. The dashed line is the typical year the pair is walking toward.
 
 ![Expected growth and premium](../assets/figures/numerical_paths.svg)
-<p class="figure-caption">Growth rises next year, then fades back to 2%. The premium starts at 3% and climbs toward 6%.</p>
+<p class="figure-caption">Each dot is one application of \(\Phi\). The first move is the numpy line above.</p>
 
 ---
 
