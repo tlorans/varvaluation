@@ -8,7 +8,7 @@ Run the numbers:
 uv run python examples/numerical_toy.py
 ```
 
-Nothing is estimated. \(\Phi\), \(c\), \(\Sigma\) are chosen so that each cell has a reading, the system is stationary, and \(n=1\) and \(n=2\) fit on a page.
+The numbers are made up. Nothing is estimated from returns.
 
 ---
 
@@ -26,7 +26,7 @@ $$
 \mu_t = \alpha + \lambda_t = 0.03 + \lambda_t.
 $$
 
-In the general formula \(\mu_t=\alpha+\xi'X_t+X_t'\Lambda X_t\), that is \(\xi=(0,1)\) and \(\Lambda=0\): a constant plus a linear function of \(X_t\), which is called **affine**. There is no \(\beta_t\times\lambda_t\) term yet. The VAR is
+A constant plus a linear function of the state is called **affine**. There is no \(\beta_t\times\lambda_t\) term yet. Tomorrow’s state is a linear function of today’s, plus a shock:
 
 ```python
 import numpy as np
@@ -47,7 +47,7 @@ Lambda = np.zeros((2, 2))
 e_g   = np.array([1.0, 0.0])            # picks the growth coordinate
 ```
 
-The spectral radius of \(\Phi\) is \(0.5<1\). Unconditional expected return is \(3\%+6\%=9\%\).
+\(\Phi\) maps today’s \((g,\lambda)\) into tomorrow’s expected \((g,\lambda)\). \(c\) is the intercept. \(\Sigma\) is how the two shocks covary. The largest eigenvalue of \(\Phi\) is \(0.5\), so the system glides back to its mean (\(E[g]=2\%\), \(E[\lambda]=6\%\), so \(E[\mu]=9\%\)). Each cell was chosen so it has a reading:
 
 | Cell | Value | Reading |
 |---|---:|---|
