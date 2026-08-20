@@ -55,21 +55,24 @@ def _model():
     return model, Phi, c, Sigma, alpha, xi, X, X_bar
 
 
-def mean_reversion(Phi, X, X_bar) -> None:
-    h = np.arange(0, 11)
-    EX = np.vstack([X_bar + np.linalg.matrix_power(Phi, k) @ (X - X_bar) for k in h])
+def mean_reversion(Phi, c, X, X_bar) -> None:
+    path = [X.copy()]
+    for _ in range(10):
+        path.append(c + Phi @ path[-1])
+    path = np.array(path)
+    years = np.arange(len(path))
     fig, axes = plt.subplots(2, 1, figsize=(6.2, 4.6), sharex=True)
-    axes[0].plot(h, 100 * EX[:, 0], "o-", color=BLUE, ms=4, lw=1.4, label="from today")
+    axes[0].plot(years, 100 * path[:, 0], "o-", color=BLUE, ms=4, lw=1.4, label="from today")
     axes[0].axhline(100 * X_bar[0], color=GREY, ls="--", lw=0.9, label="typical year")
     axes[0].plot(0, 100 * X[0], "o", color=BLUE, ms=8, zorder=3)
     axes[0].set_ylabel("growth (%)")
     axes[0].legend(frameon=False, fontsize=8, loc="upper right")
-    axes[1].plot(h, 100 * EX[:, 1], "o-", color=RED, ms=4, lw=1.4, label="from today")
+    axes[1].plot(years, 100 * path[:, 1], "o-", color=RED, ms=4, lw=1.4, label="from today")
     axes[1].axhline(100 * X_bar[1], color=GREY, ls="--", lw=0.9, label="typical year")
     axes[1].plot(0, 100 * X[1], "o", color=RED, ms=8, zorder=3)
     axes[1].set_ylabel("premium (%)")
     axes[1].set_xlabel("years from today")
-    axes[1].set_xticks(h)
+    axes[1].set_xticks(years)
     axes[1].legend(frameon=False, fontsize=8, loc="lower right")
     fig.tight_layout()
     _save(fig, "numerical_paths.svg")
@@ -134,7 +137,7 @@ def shocks(Phi, c, Sigma, alpha, X) -> None:
 
 def main() -> None:
     model, Phi, c, Sigma, alpha, _, X, X_bar = _model()
-    mean_reversion(Phi, X, X_bar)
+    mean_reversion(Phi, c, X, X_bar)
     rates = curve_and_cash(model, X)
     annuity(rates)
     shocks(Phi, c, Sigma, alpha, X)
