@@ -54,17 +54,23 @@ flowchart LR
 | \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
 | \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
 
-That table is one step. Apply it to today (\(g=2\%\), \(\lambda=3\%\)):
+The arrows say what happens **next year**, given this year.
+
+This year: growth 2%, premium 3%. Those are the large dots at year 0.
+
+A typical year is 6% premium. Today you are 3 points below that. The premium is sticky, so only half the gap closes in a year. Next year’s premium is 4.5% — still cheap, less cheap than today.
+
+A typical year is also 2% growth, which is where you already are. If the premium were 6%, growth would stay at 2%. It is not: a cheap premium goes with stronger growth (the −0.50 arrow). Three points cheap adds about 1.5 points of growth, so next year is 3.5%.
+
+The year after that, start from 3.5% and 4.5% and use the same arrows. Then again. The figure is just those years in a row. The dashed line is a typical year.
 
 ```python
 c + Phi @ X
-# array([0.035, 0.045])   next year: growth 3.5%, premium 4.5%
+# next year: growth 3.5%, premium 4.5%
 ```
 
-Growth is not still 2%. The −0.50 cell pulls it up because the premium is cheap. The premium is not still 3%: half of it carries over (0.50), so it is already on its way back to 6%. Do the same step again from (3.5%, 4.5%), and again. The figure is those steps. Year 0 is today. The dashed line is the typical year the pair is walking toward.
-
 ![Expected growth and premium](../assets/figures/numerical_paths.svg)
-<p class="figure-caption">Each dot is one application of \(\Phi\). The first move is the numpy line above.</p>
+<p class="figure-caption">Year 0 is this year. Year 1 is next year (3.5% and 4.5%). Each later year uses the same arrows from the year before.</p>
 
 ---
 
