@@ -14,21 +14,15 @@ The numbers are made up. Nothing is estimated from returns.
 
 ## A simple claim
 
-You are valuing a claim that pays cash once a year. Two numbers set the price: how fast that cash is growing, and what return you have to offer people to hold the claim.
-
-The risk-free rate is 3% and does not move. Beta is 1, so the extra you offer is just the equity premium. Write \(g_t\) for log growth and \(\lambda_t\) for the premium. The return you require this year is then a constant plus the premium,
+You are valuing a claim that pays cash once a year. Two numbers describe it: how fast the cash is growing, \(g_t\), and the equity premium, \(\lambda_t\). The risk-free rate is 3% and does not move. Beta is 1, so the return you require this year is just the risk-free rate plus the premium,
 
 $$
 \mu_t = 0.03 + \lambda_t.
 $$
 
-No moving beta times a moving premium. A constant plus a line in the state is called **affine**.
+In a typical year growth is 2% and the premium is 6%. Today growth is still 2%, but the premium is 3%.
 
-In a typical year the premium is 6%, so you require 9%, and cash grows at 2%. A Gordon formula at those two constants is the textbook answer. Today is not a typical year. The premium has been compressed to 3%. That is the end of a boom, December 2000 on two numbers. You require 6% this year, not 9%. Growth is still 2%. If you lock 6% in for every future year you overvalue the claim: the 3% premium is a cheap year, not a new permanent price of risk.
-
-Half of the remaining gap in the premium closes each year, so next year’s expected premium is 4.5%, on its way back to 6%. Growth fades too, but slower. And the two are not independent. A year that demands a high premium is a year that delivers lower growth next year. Today the premium is *low*, so expected growth next year is 3.5%, not 2%. A surprise that lifts the premium tends to cut growth in the same year. Growth this year does not forecast the premium next year.
-
-That is the whole economy. The bookkeeping is one linear system for the pair \((g_t,\lambda_t)\): tomorrow equals an intercept, plus a 2×2 map of today, plus a shock.
+Tomorrow’s pair is a linear function of today’s, plus a shock. The premium is sticky. Growth fades. A high premium this year goes with lower growth next year. Growth this year does not forecast the premium.
 
 ```python
 import numpy as np
@@ -50,15 +44,12 @@ e_g   = np.array([1.0, 0.0])            # picks growth out of the pair
 X     = np.array([0.02, 0.03])          # today: growth typical, premium cheap
 ```
 
-\(\Phi\) is the map, \(c\) the intercept, \(\Sigma\) the shock covariance. The 0.50 on the premium is why half the gap closes in a year. The −0.50 from premium to growth is why a cheap-premium year comes with stronger expected cash. The −0.001 in \(\Sigma\) is the same link as a surprise. Those two cells are why you cannot price the claim from a growth model in one place and a premium model in another.
+\(\Phi\) is the map from today to tomorrow, \(c\) the intercept, \(\Sigma\) the shock covariance.
 
-| What you said | Cell | Number |
-|---|---|---:|
-| Growth fades | \(\Phi_{g,g}\) | \(+0.40\) |
-| High premium, lower growth next year | \(\Phi_{g,\lambda}\) | \(-0.50\) |
-| Half the premium gap closes each year | \(\Phi_{\lambda,\lambda}\) | \(+0.50\) |
-| Growth does not forecast the premium | \(\Phi_{\lambda,g}\) | \(0\) |
-| A premium surprise cuts growth | \(\Sigma_{g,\lambda}\) | \(-0.001\) |
+| | \(g_t\) | \(\lambda_t\) |
+|---|---:|---:|
+| \(g_{t+1}\) | \(0.40\) | \(-0.50\) |
+| \(\lambda_{t+1}\) | \(0\) | \(0.50\) |
 
 ---
 
