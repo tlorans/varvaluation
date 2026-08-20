@@ -29,7 +29,7 @@ The six short pages below explain, from first principles, how cash-flow dynamics
 <a href="guide/cash-flow-dynamics/"><span class="part">4</span><strong>Cash-flow dynamics</strong><span>How expected future cash flows are obtained from the same \(X_t\).</span></a>
 <a href="guide/expected-returns/"><span class="part">5</span><strong>Expected returns</strong><span>\(\mu_t\) as an (affine or quadratic) function of \(X_t\) and the resulting spot curve.</span></a>
 <a href="guide/putting-together/"><span class="part">6</span><strong>Putting it together</strong><span>Why the joint system is required and how the package evaluates the product.</span></a>
-<a href="guide/numerical/"><span class="part">7</span><strong>A numerical walkthrough</strong><span>Two states, every n=1 and n=2 term in numpy, then the βλ product that produces H(n).</span></a>
+<a href="guide/numerical/"><span class="part">7</span><strong>A numerical walkthrough</strong><span>Two states in numpy: affine μ first, then moving beta times moving premium, which is what H(n) is for.</span></a>
 </div>
 
 ## Estimator path

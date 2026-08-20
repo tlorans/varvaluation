@@ -1,6 +1,17 @@
 # A numerical walkthrough
 
-The six-variable state in [Ang and Liu (2004)](angliu.md) is the right object for a market curve. It is the wrong object to compute by hand. This page is the same two recursions on a **2×2 affine toy**, with every term written out, then the **βλ product** that produces the quadratic matrix \(H(n)\).
+The six-variable state in [Ang and Liu (2004)](angliu.md) is the right object for a market curve. It is the wrong object to compute by hand. This page is the same two recursions on a two-state example small enough to multiply by hand.
+
+Three words on this page are easy to skip and then get lost.
+
+!!! note "In words — affine, βλ product, H(n)"
+    **Affine** means the one-period expected return is a constant plus a linear function of today’s state: \(\mu_t=\alpha+\xi'X_t\). No products of two coordinates. In the toy, \(\mu_t=0.03+\lambda_t\).
+
+    **2×2** means the state has two entries, so the VAR matrix \(\Phi\) is two-by-two. Here those entries are cash-flow growth \(g\) and the premium \(\lambda\).
+
+    The **βλ product** is the CAPM piece \(\beta_t\times\lambda_t\). If *both* the firm’s beta and the market premium sit in \(X_t\) and both move, that multiplication is quadratic in the state, not linear. The matrix \(\Lambda\) is how the formula stores that product: \(X_t'\Lambda X_t=\beta_t\lambda_t\).
+
+    **\(H(n)\)** is the \(K\times K\) matrix in the priced strip \(\exp\bigl(a(n)+b(n)'X_t+X_t'H(n)X_t\bigr)\). It is the coefficient of that product at horizon \(n\). At one year, \(H(1)=-\Lambda\). If there is no product (\(\Lambda=0\)), \(H(n)\) is the zero matrix at every horizon, which is the first toy.
 
 Run the numbers:
 
@@ -20,13 +31,13 @@ $$
 X_t = \begin{pmatrix} g_t \\ \lambda_t \end{pmatrix}.
 $$
 
-\(g_t\) is log cash-flow growth. \(\lambda_t\) is the equity premium. The one-period expected return is affine in the premium,
+\(g_t\) is log cash-flow growth. \(\lambda_t\) is the equity premium. The one-period expected return does **not** multiply two moving pieces. Beta is absorbed into the constant (think \(\beta\equiv 1\)), so
 
 $$
 \mu_t = \alpha + \lambda_t = 0.03 + \lambda_t.
 $$
 
-The risk-free piece \(\alpha=0.03\) is a constant. \(\xi=(0,1)\) and \(\Lambda=0\): no \(\beta_t\lambda_t\) product yet. The VAR is
+That is affine: \(\alpha=0.03\), \(\xi=(0,1)\), \(\Lambda=0\). The matrix \(H(n)\) will be zero at every horizon until we put a moving \(\beta_t\) back in. The VAR is
 
 ```python
 import numpy as np
@@ -227,7 +238,15 @@ The Monte Carlo is a check, not a method. Once the VAR is Gaussian, the closed f
 
 ## Why \(H(n)\) exists: \(\mu_t=\alpha+\beta_t\lambda_t\)
 
-The paper's one-period return is a *product* of two moving pieces, \(\beta_t\lambda_t\). That is quadratic in \(X_t\). Add a beta coordinate.
+A valuator’s CAPM is \(\mu_t=\alpha+r_t+\beta_t\lambda_t\). The last term is a *product* of two numbers. Three cases:
+
+| What moves | \(\mu_t\) as a function of \(X_t\) | \(H(n)\) |
+|---|---|---|
+| only \(\lambda\), \(\beta\) fixed | affine (the 2×2 toy: \(\beta=1\)) | \(0\) |
+| only \(\beta\), \(\lambda\) fixed | affine | \(0\) |
+| **both** \(\beta_t\) and \(\lambda_t\) | quadratic: \(X_t'\Lambda X_t=\beta_t\lambda_t\) | a real matrix |
+
+The third case is the paper. Add a beta coordinate so the state is three-dimensional.
 
 ```python
 # X = (g, β, λ),   μ = α + β λ
@@ -238,7 +257,13 @@ X  = np.array([0.02, 1.20, 0.03])      # high-ish beta, compressed premium
 # μ_t = 0.03 + 1.20 × 0.03 = 0.066
 ```
 
-At \(n=1\):
+The priced strip — one horizon’s contribution to \(V_t/C_t\) — is always of the form
+
+$$
+\exp\bigl(a(n)+b(n)'X_t+X_t'H(n)X_t\bigr).
+$$
+
+\(a(n)\) is a scalar. \(b(n)\) is a vector (the linear loading). \(H(n)\) is the \(K\times K\) **quadratic matrix**: it multiplies the products of today’s coordinates. At one year you just subtract today’s \(\beta\lambda\), so
 
 $$
 H(1)=-\Lambda,
@@ -246,7 +271,7 @@ H(1)=-\Lambda,
 X_t'H(1)X_t = -\beta_t\lambda_t = -0.036.
 $$
 
-The one-period identity still holds: \(\mu_t(1)=6.60\%=\alpha+\beta_t\lambda_t\). At \(n=2\), \(H(2)\) is **not** \(-\Lambda\). \(\Phi\) carries the quadratic term forward (the Riccati update in [Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1). That is the only algebraic reason the priced strip is exponential-quadratic rather than exponential-affine. When \(\Lambda=0\), \(H(n)\equiv 0\) and the first toy is the special case.
+The one-period identity still holds: \(\mu_t(1)=6.60\%=\alpha+\beta_t\lambda_t\). At \(n=2\), tomorrow’s \(\beta_{t+1}\lambda_{t+1}\) is random and a function of today’s \(X_t\) through \(\Phi\). Folding that future product back onto today updates the matrix: \(H(2)\ne-\Lambda\) (the Riccati step in [Ang and Liu, 2004](../references.md#ang-liu-2004), Proposition I.1). That is the only algebraic reason the strip is exponential-quadratic rather than exponential-affine. When \(\Lambda=0\), \(H(n)\equiv 0\) and the first toy is the special case.
 
 ---
 
